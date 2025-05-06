@@ -1,15 +1,15 @@
-import User from "../models/user.model.js";
-import { uploadCloudinary } from "../utils/cloudinary.js";
-import { filterObj } from "../utils/filterObj.js";
+import User from "../models/user.model";
+import { uploadCloudinary } from "../utils/cloudinary";
+import { filterObj } from "../utils/filterObj";
 import otpGenerator from "otp-generator";
 import crypto from "crypto";
-import { sendMail } from "../services/mailer.js";
-import { OTP } from "../Templates/Mail/otp.js";
-import { ResetPassord } from "../Templates/Mail/resetPassword.js";
+import { sendMail } from "../services/mailer";
+import { OTP } from "../Templates/Mail/otp";
+import { ResetPassord } from "../Templates/Mail/resetPassword";
 import passport from "passport";
 import { NextFunction, Request, Response } from "express";
 import { Error, Types } from "mongoose";
-import { User as UserType } from "../types/user.type.js";
+import { User as UserType } from "../types/user.type";
 
 interface RegisterUserProps {
   username: string;
@@ -20,12 +20,11 @@ interface RegisterUserProps {
   gender: string;
 }
 
-interface AuthenticateRequest extends Request {
-  userId?: Types.ObjectId | undefined | unknown;
-  sessionID?: string | undefined;
+export interface AuthenticateRequest extends Request {
+  userId?: string | undefined | unknown; // or a more specific type like ObjectId
 }
 
-const RegisterUser = async (
+const registerUser = async (
   req: AuthenticateRequest,
   res: Response,
   next: NextFunction
@@ -81,7 +80,7 @@ const RegisterUser = async (
 };
 
 // sendOtp
-const sendOTP = async (req: AuthenticateRequest, res: Response) => {
+const sendOtp = async (req: AuthenticateRequest, res: Response) => {
   try {
     const { userId } = req;
 
@@ -135,7 +134,7 @@ const sendOTP = async (req: AuthenticateRequest, res: Response) => {
 };
 
 // verifyOTP
-const verifyOTP = async (req: Request, res: Response) => {
+const verifyOtp = async (req: Request, res: Response) => {
   //otp needs to be a string
   const { email, otp } = req.body;
   const user = await User.findOne({
@@ -228,7 +227,7 @@ const loginSuccess = async (req: Request, res: Response) => {
 };
 
 // forgotpassword
-const forgotpassword = async (req: Request, res: Response) => {
+const forgotPassword = async (req: Request, res: Response) => {
   // get users email
   const { email } = req.body;
   const isvalidemailformat = email.match(
@@ -280,50 +279,68 @@ const forgotpassword = async (req: Request, res: Response) => {
 };
 
 // resetpassword
-const resetpassword = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  // Get the token from the url using query
-  const { token }: any = req.query;
-  const { NewPassword, confirmNewPassword } = req.body;
+const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.query;
+    const { newPassword, confirmNewPassword } = req.body;
 
-  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    if (!token || typeof token !== "string") {
+      res.status(400).json({
+        status: "error",
+        message: "Reset token is missing or invalid",
+      });
+      return;
+    }
 
-  // find the user who has this hashedToken
+    if (!newPassword || !confirmNewPassword) {
+      res.status(400).json({
+        status: "error",
+        message: "Please provide both new password and confirmation",
+      });
+      return;
+    }
 
-  const user = await User.findOne({
-    passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() },
-  });
+    if (newPassword !== confirmNewPassword) {
+      res.status(400).json({
+        status: "error",
+        message: "Passwords do not match",
+      });
+      return;
+    }
 
-  // If token expires or submission is out of Time
-  if (!user) {
-    // res Token is Invalid or Expired
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      res.status(400).json({
+        status: "error",
+        message: "Token is invalid or has expired",
+      });
+      return;
+    }
+
+    user.password = newPassword;
+    user.confirmPassword = confirmNewPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save(); // run validators & trigger pre-save middleware like hashing
+
+    res.status(200).json({
+      status: "success",
+      message: "Password has been reset successfully",
+    });
+    return;
+  } catch (error) {
     res.status(400).json({
       status: "error",
-      message: "Token is Invalid or Expired",
+      message: "Something went wrong while reseting the password",
     });
     return;
   }
-
-  // update users paswword and set resetToken & expiry to undefined
-
-  user.password = NewPassword;
-  user.confirmPassword = confirmNewPassword;
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
-
-  await user.save();
-
-  // res
-
-  res.status(200).json({
-    status: "success",
-    message: "Password Reseted Successfully",
-    token,
-  });
 };
 
 const logout = async (req: Request, res: Response, next: NextFunction) => {
@@ -363,12 +380,12 @@ const loginFailed = (_: Request, res: Response) => {
 };
 
 export {
-  RegisterUser,
+  registerUser,
   loginUser,
-  forgotpassword,
-  resetpassword,
-  sendOTP,
-  verifyOTP,
+  forgotPassword,
+  resetPassword,
+  sendOtp,
+  verifyOtp,
   logout,
   googleLogin,
   loginSuccess,

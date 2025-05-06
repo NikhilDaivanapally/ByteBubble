@@ -2,27 +2,28 @@ import { Router } from "express";
 import passport from "passport";
 import { upload } from "../middlewares/multer.middleware";
 import {
-  RegisterUser,
-  sendOTP,
-  verifyOTP,
+  registerUser,
   loginUser,
-  forgotpassword,
-  resetpassword,
+  forgotPassword,
+  resetPassword,
+  sendOtp,
+  verifyOtp,
+  logout,
   googleLogin,
   loginSuccess,
   loginFailed,
-  logout,
 } from "../controllers/auth.controller";
+
 import { ensureAuthenticated } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.post("/register", upload.single("avatar"), RegisterUser, sendOTP);
-router.post("/send-otp", sendOTP);
-router.post("/verifyotp", verifyOTP);
+router.post("/register", upload.single("avatar"), registerUser, sendOtp);
+router.post("/send-otp", sendOtp);
+router.post("/verifyotp", verifyOtp);
 router.post("/login", loginUser);
-router.post("/forgot-password", forgotpassword);
-router.post("/reset-password", resetpassword);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 router.get(
   "/google",

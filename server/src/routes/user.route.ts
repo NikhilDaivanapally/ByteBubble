@@ -1,7 +1,7 @@
 import { RequestHandler, Router } from "express";
-import Friendship from "../models/friendship.model.js";
-import { upload } from "../middlewares/multer.middleware.js";
-import { ensureAuthenticated } from "../middlewares/auth.middleware.js";
+import Friendship from "../models/friendship.model";
+import { upload } from "../middlewares/multer.middleware";
+import { ensureAuthenticated } from "../middlewares/auth.middleware";
 import {
   messagepost,
   createGroup,
@@ -12,7 +12,7 @@ import {
   getGroupConversations,
   getUsers,
   updateProfile,
-} from "../controllers/user.controller.js";
+} from "../controllers/user.controller";
 
 const router = Router();
 

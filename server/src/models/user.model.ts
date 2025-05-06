@@ -111,12 +111,12 @@ userSchema.pre("save", async function (next) {
 });
 
 // password verification
-userSchema.methods.isPasswordCorrect = async function (password: Buffer) {
+userSchema.methods.isPasswordCorrect = async function (password:string) {
   return await bcrypt.compare(password, this.password);
 };
 
 //otp verification
-userSchema.methods.isOtpCorrect = async function (otp: Buffer) {
+userSchema.methods.isOtpCorrect = async function (otp: string) {
   return await bcrypt.compare(otp, this.otp);
 };
 

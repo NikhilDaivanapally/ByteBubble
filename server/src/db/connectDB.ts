@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 // GridFS Bucket variable
-let gridFSBucket;
+let gridFSBucket:any;
 
 const connectDB = async () => {
   try {

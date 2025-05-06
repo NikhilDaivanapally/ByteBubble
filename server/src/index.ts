@@ -1,12 +1,13 @@
 import dotenv from "dotenv";
-import { connectDB } from "./db/connectDB";
-import { app } from "./app";
-
 dotenv.config();
+
+import { connectDB } from "./db/connectDB";
+import { server } from "./socket";
+
 
 connectDB()
   .then(() => {
-    app.listen(process.env.PORT || 8000, () => {
+    server.listen(process.env.PORT || 8000, () => {
       console.log(`server is Running on ${process.env.PORT}`);
     });
   })
