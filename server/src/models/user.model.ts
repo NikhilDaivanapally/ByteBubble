@@ -1,7 +1,9 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-const userSchema = new mongoose.Schema(
+import { User } from "../types/user.type";
+
+const userSchema = new Schema<User>(
   {
     userName: {
       type: String,
@@ -11,7 +13,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Email is required"],
       validate: {
-        validator: function (email: String) {
+        validator: function (email: string) {
           return String(email)
             .toLowerCase()
             .match(

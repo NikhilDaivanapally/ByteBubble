@@ -1,19 +1,8 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
-
-// Define the base Message interface
-interface IMessage extends Document {
-  sender: Types.ObjectId;
-  recipients: string[] | string;
-  messageType: "text" | "audio" | "photo" | "video" | "link" | "reply";
-  isRead: boolean;
-  conversationId: Types.ObjectId;
-  conversationType: "OneToOneMessage" | "OneToManyMessage";
-  createdAt: Date;
-  updatedAt: Date;
-}
+import mongoose, { Schema } from "mongoose";
+import { Message } from "../types/message.type";
 
 // Base message schema with discriminators for specific message types
-const messageSchema = new Schema<IMessage>(
+const messageSchema = new Schema<Message>(
   {
     _id: {
       type: String,
@@ -79,7 +68,7 @@ const messageSchema = new Schema<IMessage>(
 );
 
 // Create the base model
-const Message = mongoose.model<IMessage>("Message", messageSchema);
+const Message = mongoose.model<Message>("Message", messageSchema);
 
 // Discriminators for specific message types
 const TextMessage = Message.discriminator(

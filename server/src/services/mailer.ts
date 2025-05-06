@@ -3,9 +3,9 @@ import nodemailer from "nodemailer";
 interface sendMailProps {
   to: string;
   subject: string;
-  text: string;
+  text?: string;
   html: string;
-  attachments: any[];
+  attachments?: any[];
 }
 
 interface mailOptionsProps extends sendMailProps {
