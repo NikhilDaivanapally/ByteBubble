@@ -1,7 +1,41 @@
 @import "tailwindcss";
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@font-face {
+  font-family: "gilroy";
+  src: url("./assets/GILROY-MEDIUM.TTF");
+}
 
 @theme {
+  --font-gilroy: "gilroy";
+  --color-light: white;
+  --color-dark: black;
+  --color-btn-primary: #a294f9;
 }
 
 @layer utilities {
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
 }
+/* Customize Swiper pagination dots */
+.custom-swiper-pagination .swiper-pagination-bullet {
+  @apply bg-gray-300 w-2.5 h-2.5 rounded-full opacity-80 transition;
+}
+
+.custom-swiper-pagination .swiper-pagination-bullet-active {
+  @apply bg-btn-primary/80 opacity-100 scale-110;
+}
+
+/* :root {
+  --bg-color: white;
+}
+[data-theme="dark"] {
+  --bg-color: black;
+}
+
+body {
+  width: 100%;
+  height: 100dvh;
+  background-color: var(--bg-color);
+} */
