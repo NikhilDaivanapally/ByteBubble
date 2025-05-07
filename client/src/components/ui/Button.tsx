@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { Link } from "react-router";
 
 type ButtonProps = {
-  kind?: "primary" | "primary_outline" | "secondary";
+  kind?: "primary" | "primary_outline" | "secondary" | "secondary_outline";
   type?: "button" | "submit" | "reset"; // HTML button types
   className?: string;
   children: React.ReactNode;
@@ -26,6 +26,8 @@ const Button: React.FC<ButtonProps> = ({
       "px-4 py-2 rounded-full flex-center gap-2 border border-btn-primary hover:bg-btn-primary/20 text-sm font-semibold",
     secondary:
       "p-3 rounded-md flex-center gap-2 bg-btn-primary hover:bg-btn-primary/90 text-white",
+    secondary_outline:
+      "p-3 rounded-md flex-center gap-2 border border-btn-primary hover:bg-btn-primary/20",
   };
 
   const buttonClass = clsx(baseStyles, kindStyles[kind], className);

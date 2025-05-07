@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: "gilroy";
-  src: url("./assets/GILROY-MEDIUM.TTF");
+  src: url("../fonts/GILROY-MEDIUM.woff");
 }
 
 @theme {

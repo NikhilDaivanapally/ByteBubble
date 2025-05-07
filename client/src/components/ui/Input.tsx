@@ -1,24 +1,48 @@
+import { PencilIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 
-type InputProps = {
-  type?: "text" | "password" | "email"; // HTML Input types
-  name?: string;
+type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   className?: string;
-  children: React.ReactNode;
+  url?: string | null;
 };
 const Input: React.FC<InputProps> = ({
   type = "text",
-  name,
   className,
-  children,
+  url,
+  ...props
 }) => {
-  const baseStyles = "";
+  const baseStyles =
+    "w-full p-3 border rounded-md outline-none focus:ring-1 focus:ring-btn-primary transition";
+
   const InputClass = clsx(baseStyles, className);
-  return (
-    <input type={type} name={name} className={InputClass}>
-      {children}
-    </input>
-  );
+
+  if (type == "file") {
+    return (
+      <div className={className}>
+        <label>Avatar</label>
+        {!url ? (
+          <label
+            htmlFor="avatar"
+            className="p-1 px-2 cursor-pointer bg-gray-100 ring-1 ring-gray-200 rounded-md"
+          >
+            Choose File
+          </label>
+        ) : (
+          <>
+            <img
+              src={url}
+              className="w-14 aspect-square object-cover rounded-full z-5"
+            />
+            <label htmlFor="avatar" className="absolute top-2/3 right-0 z-1">
+              <PencilIcon className="w-6 h-6 cursor-pointer p-1 rounded-full" />
+            </label>
+          </>
+        )}
+        <input id="avatar" type={type} {...props} hidden />
+      </div>
+    );
+  }
+  return <input type={type} className={InputClass} {...props} />;
 };
 
 export default Input;
