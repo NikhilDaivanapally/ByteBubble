@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { Link } from "react-router";
+import Loader from "./Loader";
 
 type ButtonProps = {
   kind?: "primary" | "primary_outline" | "secondary" | "secondary_outline";
@@ -7,6 +8,7 @@ type ButtonProps = {
   className?: string;
   children: React.ReactNode;
   onClick?: () => void;
+  isLoading?: boolean;
   href?: string;
 };
 
@@ -16,6 +18,7 @@ const Button: React.FC<ButtonProps> = ({
   className,
   children,
   onClick,
+  isLoading = false,
   href,
 }) => {
   const baseStyles = "cursor-pointer";
@@ -25,7 +28,7 @@ const Button: React.FC<ButtonProps> = ({
     primary_outline:
       "px-4 py-2 rounded-full flex-center gap-2 border border-btn-primary hover:bg-btn-primary/20 text-sm font-semibold",
     secondary:
-      "p-3 rounded-md flex-center gap-2 bg-btn-primary hover:bg-btn-primary/90 text-white",
+      "h-[49.6px] rounded-md flex-center gap-2 bg-btn-primary hover:bg-btn-primary/90 text-white",
     secondary_outline:
       "p-3 rounded-md flex-center gap-2 border border-btn-primary hover:bg-btn-primary/20",
   };
@@ -44,7 +47,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button type={type} className={buttonClass} onClick={onClick}>
-      {children}
+      {isLoading ? <Loader /> : children}
     </button>
   );
 };

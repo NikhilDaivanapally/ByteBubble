@@ -10,6 +10,7 @@ import SignIn from "./pages/Auth/SignIn.page";
 import SignUp from "./pages/Auth/SignUp.page";
 import ForgotPassword from "./pages/Auth/ForgotPassword.page";
 import ResetPassword from "./pages/Auth/ResetPassword.page";
+import ToastConfig from "./toast/ToastConfig";
 const App = () => {
   const { theme } = useSelector((state: RootState) => state.theme);
 
@@ -45,6 +46,7 @@ const App = () => {
       >
         {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
       </button> */}
+      <ToastConfig/>
       <RouterProvider router={router} />
     </div>
   );

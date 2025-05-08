@@ -11,9 +11,33 @@
   --color-light: white;
   --color-dark: black;
   --color-btn-primary: #a294f9;
+  --animate-load: loader 1.5s ease-in-out infinite;
+  @keyframes loader {
+    0% {
+      stroke-dasharray: 1, 200;
+      stroke-dashoffset: 0;
+    }
+
+    50% {
+      stroke-dasharray: 90, 200;
+      stroke-dashoffset: -35px;
+    }
+
+    100% {
+      stroke-dashoffset: -125px;
+    }
+  }
 }
 
 @layer utilities {
+  .spin {
+    fill: none;
+    stroke: white;
+    stroke-width: 3;
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+    stroke-linecap: round;
+  }
   .flex-center {
     @apply flex items-center justify-center;
   }

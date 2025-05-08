@@ -1,5 +1,6 @@
-import { PencilIcon } from "@heroicons/react/16/solid";
+import { EyeIcon, EyeSlashIcon, PencilIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
+import { useState } from "react";
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   className?: string;
@@ -11,6 +12,9 @@ const Input: React.FC<InputProps> = ({
   url,
   ...props
 }) => {
+  // show hide password
+  const [showpassword, setShowpassword] = useState(false);
+
   const baseStyles =
     "w-full p-3 border rounded-md outline-none focus:ring-1 focus:ring-btn-primary transition";
 
@@ -39,6 +43,31 @@ const Input: React.FC<InputProps> = ({
           </>
         )}
         <input id="avatar" type={type} {...props} hidden />
+      </div>
+    );
+  } else if (type == "password") {
+    return (
+      <div className="relative">
+        {!showpassword ? (
+          <input
+            type={type}
+            className={InputClass + " " + "pr-12"}
+            {...props}
+          />
+        ) : (
+          <input
+            type={"text"}
+            className={InputClass + " " + "pr-12"}
+            {...props}
+          />
+        )}
+        <div onClick={() => setShowpassword((prev) => !prev)}>
+          {!showpassword ? (
+            <EyeIcon className="w-5 absolute top-1/2 right-2 -translate-1/2 cursor-pointer select-none" />
+          ) : (
+            <EyeSlashIcon className="w-5 absolute top-1/2 right-2 -translate-1/2 cursor-pointer select-none" />
+          )}
+        </div>
       </div>
     );
   }

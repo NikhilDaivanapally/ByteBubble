@@ -124,7 +124,12 @@ const OtpComponent: React.FC<OtpComponentProps> = ({ email, length }) => {
           })}
         </div>
 
-        <Button kind="secondary" className="w-full" type="submit">
+        <Button
+          kind="secondary"
+          className="w-full"
+          type="submit"
+          isLoading={isOtpSubmitLoading}
+        >
           Verify Otp
         </Button>
       </form>
