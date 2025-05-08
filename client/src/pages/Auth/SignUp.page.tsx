@@ -2,9 +2,10 @@ import { Link } from "react-router";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import { useSignupMutation } from "../../store/slices/apiSlice";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import OtpComponent from "../../components/OtpComponent";
 import GoogleAuth from "../../components/GoogleAuth";
+import toast from "react-hot-toast";
 type SignupProps = {
   avatar: File | null;
   userName: string;
@@ -14,13 +15,12 @@ type SignupProps = {
   about: string;
 };
 
-
 type inputTypesProps = {
   userName: string;
   email: string;
   password: string;
   confirmPassword: string;
-}
+};
 
 const SignUp = () => {
   const [signupFormData, setsignupFormData] = useState<SignupProps>({
@@ -32,16 +32,13 @@ const SignUp = () => {
     about: "",
   });
 
-  const inputTypes:inputTypesProps = {
+  const inputTypes: inputTypesProps = {
     userName: "text",
     email: "email",
     password: "password",
     confirmPassword: "password",
   };
-  const [
-    signup,
-    { isLoading: isSignupLoading, error: signupError, data: signupData },
-  ] = useSignupMutation();
+  const [signup, { isLoading, error, data }] = useSignupMutation();
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -60,6 +57,13 @@ const SignUp = () => {
     []
   );
 
+  useEffect(() => {
+    if (data) {
+      toast.success(data.message);
+    } else if (error) {
+      toast.error((error as any)?.data?.message);
+    }
+  }, [data, error]);
   // to preview the avatar uploaded by user by Generating the url
   const avatarUrl = useMemo(() => {
     if (signupFormData?.avatar) {
@@ -80,18 +84,18 @@ const SignUp = () => {
       ].some((val) => val == "");
 
       console.log(testCase, signupFormData);
-      // if (!testCase) {
-      //   const data = new FormData();
+      if (!testCase) {
+        const data = new FormData();
 
-      //   for (const key in signupFormData) {
-      //     const typedKey = key as keyof typeof signupFormData;
-      //     data.append(key, signupFormData[typedKey] as any); // You can cast as string or File depending on your data shape
-      //   }
+        for (const key in signupFormData) {
+          const typedKey = key as keyof typeof signupFormData;
+          data.append(key, signupFormData[typedKey] as any); // You can cast as string or File depending on your data shape
+        }
 
-      //   await signup(data);
-      // } else {
-      //   // toast.error("Star marked fields are required !");
-      // }
+        await signup(data);
+      } else {
+        // toast.error("Star marked fields are required !");
+      }
     },
     [signupFormData]
   );
@@ -134,7 +138,7 @@ const SignUp = () => {
 
   return (
     <div className="w-full h-full px-6 sm:px-10 md:px-16 lg:px-20 xl:px-24 ">
-      {!signupData ? (
+      {!data ? (
         <section className="w-full h-full flex-center flex-col gap-2">
           {/* Show app name only on smaller screens */}
           <h1 className="lg:hidden absolute top-4 left-4 text-xl font-semibold">
@@ -165,7 +169,7 @@ const SignUp = () => {
               kind="secondary"
               className="w-full"
               type="submit"
-              isLoading={isSignupLoading}
+              isLoading={isLoading}
             >
               Sign up
             </Button>
