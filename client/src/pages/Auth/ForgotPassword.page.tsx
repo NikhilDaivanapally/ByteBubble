@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import Button from "../../components/ui/Button";
 import { useCallback, useEffect, useState } from "react";
 import Input from "../../components/ui/Input";
@@ -16,8 +16,12 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [forgotpass, { isLoading, error, data }] = useForgotpassMutation();
   useEffect(() => {
-    data && toast.success(data.message);
-    error && toast.error((error as Error)?.data.message);
+    if (data) {
+      toast.success(data.message);
+      setEmail("");
+    } else if (error) {
+      toast.error((error as Error)?.data.message);
+    }
   }, [error, data]);
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value),
@@ -81,9 +85,8 @@ const ForgotPassword = () => {
           </p>
           <p className="text-black/60 text-center">
             We have sent you an email at{" "}
-            <span className="text-black">{email}</span>
-            Check your inbox and follow the instructions to reset your account
-            password
+            <span className="text-black">{email}</span> Check your inbox and
+            follow the instructions to reset your account password
           </p>
         </>
       )}

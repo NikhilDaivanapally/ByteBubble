@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const apiSlice = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://localhost:8000/api",
+    baseUrl: "http://localhost:8000/api",
     credentials: "include",
   }),
   endpoints: (builder) => ({
@@ -71,7 +71,7 @@ export const apiSlice = createApi({
       query: () => "/v1/user/get_users",
       keepUnusedDataFor: 2, // cache duration in seconds
     }),
-    friends: builder.query({
+    fetchFriends: builder.query({
       query: () => "/v1/user/get_friends",
       keepUnusedDataFor: 2, // cache duration in seconds
     }),
@@ -79,11 +79,11 @@ export const apiSlice = createApi({
       query: () => "/v1/user/get_friend_request",
       keepUnusedDataFor: 2, // cache duration in seconds
     }),
-    ExistingDirectConversations: builder.query({
+    fetchDirectConversations: builder.query({
       query: () => "/v1/user/get_direct_conversations",
       keepUnusedDataFor: 2, // cache duration in seconds
     }),
-    ExistingGroupConversations: builder.query({
+    fetchGroupConversations: builder.query({
       query: () => "/v1/user/get_group_conversations",
       keepUnusedDataFor: 2, // cache duration in seconds
     }),
@@ -103,10 +103,10 @@ export const {
   useForgotpassMutation,
   useResetpassMutation,
   useUsersQuery,
-  useFriendsQuery,
+  useFetchFriendsQuery,
   useFriendrequestsQuery,
-  useExistingDirectConversationsQuery,
-  useExistingGroupConversationsQuery,
+  useFetchDirectConversationsQuery,
+  useFetchGroupConversationsQuery,
   useLogoutMutation,
   useUpdateuserMutation,
   useGetConversationMutation,

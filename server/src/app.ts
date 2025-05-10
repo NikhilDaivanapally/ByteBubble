@@ -14,7 +14,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://byte-messenger.vercel.app", // Frontend origin
+    origin: "http://localhost:5173", // Frontend origin
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
     credentials: true, // Allow cookies and Authorization headers
   })
@@ -31,9 +31,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Secure cookies in production
-      sameSite: "none", // Required for cross-origin cookies
+      // httpOnly: true,
+      // secure: process.env.NODE_ENV === "production", // Secure cookies in production
+      // sameSite: "none", // Required for cross-origin cookies
       maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     },
   })

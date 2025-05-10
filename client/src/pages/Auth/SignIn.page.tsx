@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -35,7 +35,7 @@ const SignIn = () => {
     if (data) {
       dispatch(UpdateAuthState(data.user));
       toast.success(data.message);
-      Navigate("/");
+      Navigate("/chat");
     } else if (error) {
       toast.error((error as Error)?.data?.message || (error as Error)?.error);
     }

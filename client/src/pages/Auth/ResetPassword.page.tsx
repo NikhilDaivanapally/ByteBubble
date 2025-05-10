@@ -3,7 +3,7 @@ import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { useResetpassMutation } from "../../store/slices/apiSlice";
 import toast from "react-hot-toast";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { CheckBadgeIcon, LockClosedIcon } from "@heroicons/react/16/solid";
 type Error = {
   data: {
