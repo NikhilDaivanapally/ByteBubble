@@ -24,7 +24,14 @@ import {
   UserPlusIcon,
   UsersIcon,
 } from "@heroicons/react/16/solid";
-
+import { LuClock4, LuSend, LuSmile } from "react-icons/lu";
+import { RiAttachment2 } from "react-icons/ri";
+import { IoMicOutline } from "react-icons/io5";
+import { FaPause } from "react-icons/fa6";
+import { MdDelete, MdOutlineCameraAlt } from "react-icons/md";
+import { IoMic, IoPlay } from "react-icons/io5";
+import { TiTick } from "react-icons/ti";
+import { RxCross2 } from "react-icons/rx";
 export const Icons = {
   XMarkIcon,
   PauseIcon,
@@ -50,4 +57,16 @@ export const Icons = {
   ChatBubbleLeftRightIcon,
   UserPlusIcon,
   UsersIcon,
+  ClockIcon: LuClock4,
+  SendIcon: LuSend,
+  SmileIcon: LuSmile,
+  AttachmentIcons: RiAttachment2,
+  MicPrimary: IoMicOutline,
+  MicSecondary: IoMic,
+  PauseSeconday: FaPause,
+  DeleteIcon: MdDelete,
+  PlaySeconday: IoPlay,
+  TickIcon: TiTick,
+  XMarkIconSecondary: RxCross2,
+  CameraIconSecondary: MdOutlineCameraAlt,
 };

@@ -1,5 +1,4 @@
-import { IoMic } from "react-icons/io5";
-import { MdOutlineCameraAlt } from "react-icons/md";
+import { Icons } from "../icons";
 
 const Message = (msg: any) => {
   let message;
@@ -7,7 +6,7 @@ const Message = (msg: any) => {
     case "photo":
       message = (
         <div className="flex-center gap-1">
-          <MdOutlineCameraAlt />
+          <Icons.CameraIconSecondary />
           <>{msg?.message?.description ? msg?.message?.description : "Photo"}</>
         </div>
       );
@@ -15,17 +14,17 @@ const Message = (msg: any) => {
     case "audio":
       message = (
         <div className="flex-center gap-1">
-          <IoMic />
+          <Icons.MicSecondary />
           <span>Audio</span>
         </div>
       );
       break;
-    case "text" :
+    case "text":
       message = msg?.message?.text;
       break;
     case "link":
       message = msg?.message?.text;
-
+      break;
     default:
       break;
   }

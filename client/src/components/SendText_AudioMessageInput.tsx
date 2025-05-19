@@ -1,5 +1,3 @@
-import { RiAttachment2 } from "react-icons/ri";
-import { LuSend, LuSmile } from "react-icons/lu";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,11 +7,8 @@ import {
   addGroupMessage,
 } from "../store/slices/conversation";
 import { socket } from "../socket";
-import { IoMicOutline } from "react-icons/io5";
 import { motion, AnimatePresence } from "motion/react";
-import { FaPause } from "react-icons/fa6";
-import { MdDelete } from "react-icons/md";
-import { IoMic, IoPlay } from "react-icons/io5";
+
 import {
   updateMediaFiles,
   updateMediaPreviewUrls,
@@ -345,7 +340,9 @@ const SendText_AudioMessageInput = () => {
     if (audioRef.current) {
       const updateCurrentTime = () => {
         setCurrentTime(
-          audioRef.current.currentTime > 0 ? audioRef.current.currentTime : 0
+          (audioRef.current as HTMLAudioElement).currentTime > 0
+            ? (audioRef.current as HTMLAudioElement).currentTime
+            : 0
         );
       };
 
@@ -451,7 +448,7 @@ const SendText_AudioMessageInput = () => {
           />
 
           <div className="p-1 relative cursor-pointer rounded-lg text-black/60">
-            <LuSmile
+            <Icons.SmileIcon
               className="text-xl select-none"
               onClick={handleToggleEmojiPicker}
             />
@@ -477,7 +474,7 @@ const SendText_AudioMessageInput = () => {
             </div>
           </div>
           <div className="p-1 relative cursor-pointer rounded-lg text-black/60">
-            <RiAttachment2
+            <Icons.AttachmentIcons
               className="text-xl"
               onClick={() => setIsAttachementActive((prev) => !prev)}
             />
@@ -525,14 +522,14 @@ const SendText_AudioMessageInput = () => {
             className="p-1 cursor-pointer rounded-lg text-black/60"
             onClick={handleRecording}
           >
-            <IoMicOutline className="text-xl" />
+            <Icons.MicPrimary className="text-xl" />
           </div>
 
           <button
             type="submit"
             className="p-3 cursor-pointer bg-btn-primary text-white rounded-lg"
           >
-            <LuSend className="text-xl" />
+            <Icons.SendIcon className="text-xl" />
           </button>
         </form>
       ) : (
@@ -541,7 +538,7 @@ const SendText_AudioMessageInput = () => {
           className="w-full flex items-center gap-1 md:gap-3 p-1 md:p-1 bg-light mt-4  max-w-3xl rounded-lg md:rounded-xl mx-auto"
         >
           <div className="flex-1 flex-center gap-2">
-            <MdDelete className="text-xl" />
+            <Icons.DeleteIcon className="text-xl" />
             {audioUrl ? (
               <div className="flex flex-center gap-2">
                 <span
@@ -549,9 +546,9 @@ const SendText_AudioMessageInput = () => {
                   onClick={handlePlayPauseAudio}
                 >
                   {isPlaying ? (
-                    <FaPause className="text-xl" />
+                    <Icons.PauseSeconday className="text-xl" />
                   ) : (
-                    <IoPlay className="text-xl" />
+                    <Icons.PlaySeconday className="text-xl" />
                   )}
                 </span>
                 <input
@@ -560,10 +557,14 @@ const SendText_AudioMessageInput = () => {
                   max={RecordingTime || 0}
                   className="custom_range"
                   value={currentTime || 0}
-                  onChange={(e) =>
-                    (audioRef.current.currentTime = e.target.value)
-                  }
+                  onChange={(e) => {
+                    const audio = audioRef.current as HTMLAudioElement | null;
+                    if (audio) {
+                      audio.currentTime = parseFloat(e.target.value);
+                    }
+                  }}
                 />
+
                 <span className="recorded_duration">
                   {Math.floor(RecordingTime)
                     ? `00:${Math.floor(RecordingTime - currentTime)
@@ -582,12 +583,7 @@ const SendText_AudioMessageInput = () => {
                         .padStart(2, "0")}`
                     : "00:00"}
                 </span>
-                <canvas
-                  ref={canvasRef}
-                  className="w-40 h-10"
-                  // width="200"
-                  // height="20"
-                ></canvas>
+                <canvas ref={canvasRef} className="w-40 h-10"></canvas>
               </div>
             )}
             <audio
@@ -601,9 +597,9 @@ const SendText_AudioMessageInput = () => {
             ></audio>
             <div onClick={handleRecording}>
               {recordingState === "recording" ? (
-                <FaPause className="text-xl" />
+                <Icons.PauseSeconday className="text-xl" />
               ) : (
-                <IoMic className="text-xl" />
+                <Icons.MicSecondary className="text-xl" />
               )}
             </div>
           </div>
@@ -611,7 +607,7 @@ const SendText_AudioMessageInput = () => {
             type="submit"
             className="p-3 cursor-pointer bg-btn-primary text-white rounded-lg"
           >
-            <LuSend className="text-xl" />
+            <Icons.SendIcon className="text-xl" />
           </button>
         </form>
       )}

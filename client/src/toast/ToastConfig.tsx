@@ -1,6 +1,6 @@
 import { Toaster } from "react-hot-toast";
-import { TiTick } from "react-icons/ti";
-import { RxCross2 } from "react-icons/rx";
+import { Icons } from "../icons";
+
 const ToastConfig = () => {
   return (
     <Toaster
@@ -18,11 +18,15 @@ const ToastConfig = () => {
             primary: "green",
             secondary: "black",
           },
-          icon: <TiTick style={{ color: "lightgreen", fontSize: "1.3rem" }} />,
+          icon: (
+            <Icons.TickIcon
+              style={{ color: "lightgreen", fontSize: "1.3rem" }}
+            />
+          ),
         },
         error: {
           icon: (
-            <RxCross2
+            <Icons.XMarkIconSecondary
               style={{
                 color: "lightpink",
                 fontSize: "1.3rem",

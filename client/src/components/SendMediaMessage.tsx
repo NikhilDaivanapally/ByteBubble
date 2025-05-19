@@ -1,4 +1,3 @@
-import { LuSend, LuSmile } from "react-icons/lu";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,6 +11,7 @@ import {
   updateMediaFiles,
   updateMediaPreviewUrls,
 } from "../store/slices/appSlice";
+import { Icons } from "../icons";
 
 const SendMediaMessage = () => {
   const dispatch = useDispatch();
@@ -51,7 +51,7 @@ const SendMediaMessage = () => {
   let userList: {}[] = [];
 
   if (
-    group_chat.current_group_conversation?.users?.length > 0 &&
+    group_chat?.current_group_conversation?.users?.length > 0 &&
     group_chat.current_group_conversation?.admin
   ) {
     userList = [
@@ -180,7 +180,7 @@ const SendMediaMessage = () => {
       />
 
       <div className="p-1 relative cursor-pointer rounded-lg text-black/60">
-        <LuSmile
+        <Icons.SmileIcon
           className="text-xl select-none"
           onClick={handleToggleEmojiPicker}
         />
@@ -210,7 +210,7 @@ const SendMediaMessage = () => {
         type="submit"
         className="p-3 cursor-pointer bg-btn-primary text-white rounded-lg"
       >
-        <LuSend className="text-xl" />
+        <Icons.SendIcon className="text-xl" />
       </button>
     </form>
   );

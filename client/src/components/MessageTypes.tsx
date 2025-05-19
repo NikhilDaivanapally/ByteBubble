@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { LuClock4 } from "react-icons/lu";
 import formatTime from "../utils/formatTime";
 import formatTime2 from "../utils/formatTime2";
 import WaveSurfer from "wavesurfer.js";
@@ -52,7 +51,7 @@ const TextMsg = ({ el }: { el: DirectMessage | GroupMessage }) => {
         <div className="w-fit ml-auto flex gap-2">
           {!el?.incoming ? (
             el?.status === "pending" ? (
-              <LuClock4 />
+              <Icons.ClockIcon />
             ) : (
               <div className="flex-center gap-1">
                 <div
