@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { Message } from "../types/message.type";
+import { individual } from "../utils/conversationTypes";
 
 // Base message schema with discriminators for specific message types
 const messageSchema = new Schema<Message>(
@@ -20,7 +21,7 @@ const messageSchema = new Schema<Message>(
         validator: function (
           recipients: string | number | Uint8Array<ArrayBufferLike>
         ): boolean {
-          if (this.conversationType === "OneToOneMessage") {
+          if (this.conversationType === individual) {
             // Validate for a single ObjectId in OneToOneMessage
             const valid = mongoose.Types.ObjectId.isValid(recipients);
             return valid;
@@ -52,7 +53,7 @@ const messageSchema = new Schema<Message>(
     },
     conversationType: {
       type: String,
-      enum: ["OneToOneMessage", "OneToManyMessage"], // The model this refers to
+      enum: [individual, "OneToManyMessage"], // The model this refers to
       required: true,
     },
     createdAt: {

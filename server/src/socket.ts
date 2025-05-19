@@ -13,6 +13,7 @@ import {
   formatDirectMessages,
   formatGroupMessages,
 } from "./utils/formatMessages";
+import { individual } from "./utils/conversationTypes";
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -241,7 +242,7 @@ io.on("connection", async (socket) => {
       updatedAt,
     } = data;
     switch (conversationType) {
-      case "OneToOneMessage":
+      case individual:
         const msg_receiver = await User.findById(recipients);
         const msg_sender = await User.findById(sender);
         const _Message = {
@@ -338,7 +339,7 @@ io.on("connection", async (socket) => {
     uploadStream.on("finish", async () => {
       // console.log("Audio uploaded with ID:", uploadStream.id);
       switch (conversationType) {
-        case "OneToOneMessage":
+        case individual:
           const msg_receiver = await User.findById(recipients);
           const msg_sender = await User.findById(sender);
           const _Message = {
@@ -435,7 +436,7 @@ io.on("connection", async (socket) => {
     const img = await v2.uploader.upload(file[0].blob);
 
     switch (conversationType) {
-      case "OneToOneMessage":
+      case individual:
         const msg_receiver = await User.findById(recipients);
         const msg_sender = await User.findById(sender);
         const _Message = {
@@ -532,7 +533,7 @@ io.on("connection", async (socket) => {
       });
 
       switch (conversationType) {
-        case "OneToOneMessage":
+        case individual:
           const msg_receiver = await User.findById(recipients);
           const msg_sender = await User.findById(sender);
           const _Message = {
@@ -618,7 +619,7 @@ io.on("connection", async (socket) => {
   // update unreadMsgs to db event
   socket.on("update_unreadMsgs", async (message) => {
     switch (message?.conversationType) {
-      case "OneToOneMessage":
+      case individual:
         const to_user = await User.findById(message.recipients);
         io.to(to_user?.socket_id!).emit("on_update_unreadMsg", message);
         break;

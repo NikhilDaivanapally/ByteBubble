@@ -15,17 +15,18 @@ import SendText_AudioMessageInput from "./SendText_AudioMessageInput";
 import CameraModule from "./CameraModule";
 import { DirectMessage } from "../types";
 import UploadedFileModule from "./UploadedFileModule";
+import NoChat from "./ui/NoChat";
 
 const Chat = () => {
-  const [isloading, setIsloading] = useState(false);
+  const dispatch = useDispatch();
   const { direct_chat, group_chat } = useSelector(
     (state: RootState) => state.conversation
   );
   const { user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
   const { activeChatId, chatType, isCameraOpen } = useSelector(
     (state: RootState) => state.app
   );
+  const [isloading, setIsloading] = useState(false);
   const messagesListRef = useRef<HTMLUListElement | null>(null);
 
   const {
@@ -75,7 +76,6 @@ const Chat = () => {
     if (!activeChatId) return;
     switch (chatType) {
       case "individual":
-        // setIsloading(true);
         const currentDirectChat = direct_chat?.DirectConversations?.find(
           (el: any) => el?.id === activeChatId
         );
@@ -121,7 +121,6 @@ const Chat = () => {
         break;
     }
   }, [activeChatId]);
-  console.log(direct_chat.current_direct_messages)
 
   return (
     <div
@@ -219,7 +218,7 @@ const Chat = () => {
           )}
         </>
       ) : (
-        <span>select a conversation to start chat</span>
+        <NoChat />
       )}
     </div>
   );

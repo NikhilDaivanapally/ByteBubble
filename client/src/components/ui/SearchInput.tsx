@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import useDebounce from "../../hooks/useDebounce";
 import { Icons } from "../../icons";
 
@@ -15,22 +15,25 @@ const SearchInput: React.FC<SearchInputProps> = ({
   const inputRef = useRef<null | HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleWrapperFocus = () => {
+  const handleWrapperFocus = useCallback(() => {
     setIsFocused(true);
     inputRef.current?.focus();
-  };
+  }, []);
 
-  const handleWrapperBlur = () => {
+  const handleWrapperBlur = useCallback(() => {
     setIsFocused(false);
-  };
+  }, []);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value);
-  };
+  const handleFilterChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFilter(e.target.value);
+    },
+    []
+  );
 
-  const handleRemoveFilter = () => {
+  const handleRemoveFilter = useCallback(() => {
     setFilter("");
-  };
+  }, []);
 
   const handlFilterConversation = () => {
     let value = filter.toLowerCase();
@@ -77,4 +80,4 @@ const SearchInput: React.FC<SearchInputProps> = ({
   );
 };
 
-export default SearchInput;
+export default React.memo(SearchInput);

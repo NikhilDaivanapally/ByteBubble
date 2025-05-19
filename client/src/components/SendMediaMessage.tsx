@@ -12,6 +12,7 @@ import {
   updateMediaPreviewUrls,
 } from "../store/slices/appSlice";
 import { Icons } from "../icons";
+import { group, individual } from "../utils/conversationTypes";
 
 const SendMediaMessage = () => {
   const dispatch = useDispatch();
@@ -117,21 +118,7 @@ const SendMediaMessage = () => {
             seen: false,
           })
         );
-    console.log({
-      _id: messageId,
-      sender: auth_id,
-      recipients: to,
-      messageType: "photo",
-      message: {
-        file: mediaPreviewUrls,
-        text: message,
-      },
-      conversationType:
-        chatType == "individual" ? "OneToOneMessage" : "OneToManyMessage",
-      conversationId: activeChatId,
-      createdAt: messageCreatedAt,
-      updatedAt: messageCreatedAt,
-    });
+
     socket.emit("media_message", {
       _id: messageId,
       sender: auth_id,
@@ -141,8 +128,7 @@ const SendMediaMessage = () => {
         file: mediaPreviewUrls,
         text: message,
       },
-      conversationType:
-        chatType == "individual" ? "OneToOneMessage" : "OneToManyMessage",
+      conversationType: chatType == "individual" ? individual : group,
       conversationId: activeChatId,
       createdAt: messageCreatedAt,
       updatedAt: messageCreatedAt,

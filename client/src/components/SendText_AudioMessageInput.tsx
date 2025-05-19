@@ -16,6 +16,7 @@ import {
 } from "../store/slices/appSlice";
 import { parseFiles } from "../utils/parseFiles";
 import { Icons } from "../icons";
+import { group, individual } from "../utils/conversationTypes";
 
 const SendText_AudioMessageInput = () => {
   const dispatch = useDispatch();
@@ -135,8 +136,7 @@ const SendText_AudioMessageInput = () => {
       message: {
         text: message,
       },
-      conversationType:
-        chatType == "individual" ? "OneToOneMessage" : "OneToManyMessage",
+      conversationType: chatType == "individual" ? individual : group,
       conversationId: activeChatId,
       createdAt: messageCreatedAt,
       updatedAt: messageCreatedAt,
@@ -409,8 +409,7 @@ const SendText_AudioMessageInput = () => {
       recipients: to,
       messageType: "audio",
       message: new Blob(AudioChucksRef.current, { type: "audio/wav" }),
-      conversationType:
-        chatType == "individual" ? "OneToOneMessage" : "OneToManyMessage",
+      conversationType: chatType == "individual" ? individual : group,
       conversationId: activeChatId,
       createdAt: messageCreatedAt,
       updatedAt: messageCreatedAt,

@@ -12,6 +12,7 @@ import {
   formatDirectConversations,
   formatGroupConversations,
 } from "../utils/formatConversations";
+import { individual } from "../utils/conversationTypes";
 
 interface updateProfileRequest extends Request {
   user?: {
@@ -419,7 +420,7 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
   const { conversationId, conversationType } = req.body;
   let conversation;
   switch (conversationType) {
-    case "OneToOneMessage":
+    case individual:
       conversation = await OneToOneMessage.aggregate([
         {
           $match: {
