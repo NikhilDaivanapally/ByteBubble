@@ -46,6 +46,27 @@
   .flex-center {
     @apply flex items-center justify-center;
   }
+
+  .custom_range {
+    @apply appearance-none w-full h-1 bg-gray-300 rounded-lg cursor-pointer outline-none focus:outline-none focus:ring-2;
+
+    /* WebKit (Chrome, Safari) */
+    &::-webkit-slider-thumb {
+      @apply appearance-none h-4 w-4 rounded-full bg-btn-primary  hover:bg-blue-700;
+    }
+
+    /* Firefox */
+    &::-moz-range-thumb {
+      @apply h-4 w-4 rounded-full bg-blue-600 border-2 border-white shadow-md hover:bg-blue-700;
+    }
+
+    /* IE & Edge (Optional) */
+    &::-ms-thumb {
+      @apply h-4 w-4 rounded-full bg-blue-600 border-2 border-white shadow-md hover:bg-blue-700;
+    }
+  }
+
+
 }
 /* Customize Swiper pagination dots */
 .custom-swiper-pagination .swiper-pagination-bullet {

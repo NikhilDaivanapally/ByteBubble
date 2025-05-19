@@ -1,0 +1,62 @@
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store/store";
+import { useState } from "react";
+import { PlusIcon, XMarkIcon } from "@heroicons/react/16/solid";
+import SendMediaMessage from "./SendMediaMessage";
+import {
+  updateMediaFiles,
+  updateMediaPreviewUrls,
+} from "../store/slices/appSlice";
+
+const UploadedFileModule = () => {
+  const dispatch = useDispatch();
+  const { mediaPreviewUrls } = useSelector((state: RootState) => state.app);
+  const [activeIndex, setActiveIndex] = useState(
+    mediaPreviewUrls?.length - 1 || 0
+  );
+
+  const handleResetmediaFiles_mediaPreviewUrls = () => {
+    dispatch(updateMediaFiles(null));
+    dispatch(updateMediaPreviewUrls(null));
+  };
+
+  return (
+    <>
+      {mediaPreviewUrls ? (
+        <div className="absolute inset-0 flex-center flex-col gap-10 backdrop-blur z-50">
+          <XMarkIcon
+            className="w-8 absolute top-0 right-0 ml-auto cursor-pointer"
+            onClick={handleResetmediaFiles_mediaPreviewUrls}
+          />
+          {/* main Image */}
+          <img
+            src={mediaPreviewUrls[activeIndex].url}
+            alt={mediaPreviewUrls[activeIndex]?.file}
+            className="w-full max-w-xl mx-auto max-h-1/2"
+          />
+
+          {/* previews list */}
+          <ul className="flex-center gap-4">
+            {mediaPreviewUrls?.map((media, i) => {
+              return (
+                <li key={i} className="w-16 h-16 rounded-md">
+                  <img src={media.url} alt="" className="w-full h-full" />
+                </li>
+              );
+            })}
+            <label className="w-16 h-16 border-2 flex-center border-gray-400 rounded-md cursor-pointer">
+              <PlusIcon className="w-8 text-gray-400" />
+              <input type="text" />
+            </label>
+          </ul>
+          {/* send Media btn */}
+          <SendMediaMessage />
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
+  );
+};
+
+export default UploadedFileModule;

@@ -1,28 +1,31 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 
-const SenderFromGroup = (el) => {
+type senderProps = { avatar: string; userName: string };
+
+const SenderFromGroup = (el: any) => {
   const { GroupConversations } = useSelector(
-    (state:RootState) => state.conversation.group_chat
+    (state: RootState) => state.conversation.group_chat
   );
-  const { chat_type } = useSelector((state) => state.app);
-  let sender;
-  if (chat_type !== "individual" && !el.outgoing) {
-   GroupConversations && GroupConversations?.map((conv) => {
-      if (conv.id === el?.conversationId || conv.id === el?.id) {
-        const foundUser = [...conv?.users, conv?.admin].find(
-          (user) => el.from == user._id
-        );
-        if (foundUser) {
-          sender = {
-            avatar: foundUser.avatar,
-            userName: foundUser.userName,
-          };
+  const { chatType } = useSelector((state: RootState) => state.app);
+  let sender: senderProps = { avatar: "", userName: "" };
+  if (chatType !== "individual" && !el.outgoing) {
+    GroupConversations &&
+      GroupConversations?.map((conv) => {
+        if (conv.id === el?.conversationId || conv.id === el?.id) {
+          const foundUser = [...conv?.users, conv?.admin].find(
+            (user) => el.from == user?._id
+          );
+          if (foundUser) {
+            sender = {
+              avatar: foundUser.avatar,
+              userName: foundUser.userName,
+            };
+          }
         }
-      }
-    });
+      });
   }
-  return { sender };
+  return { ...sender };
 };
 
 export default SenderFromGroup;

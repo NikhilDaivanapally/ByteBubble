@@ -8,6 +8,10 @@ import { User as UserType } from "../types/user.type";
 import OneToOneMessage from "../models/oneToOneMessage.model";
 import OneToManyMessage from "../models/oneToManyMessage.model";
 import { Message } from "../models/message.mode";
+import {
+  formatDirectConversations,
+  formatGroupConversations,
+} from "../utils/formatConversations";
 
 interface updateProfileRequest extends Request {
   user?: {
@@ -108,10 +112,11 @@ const getFriends = async (
           // Exclude fields here using $project
           {
             $project: {
-              password: 0, // Exclude fields
+              password: 0,
+              passwordResetExpires: 0,
+              passwordResetToken: 0,
               confirmPassword: 0,
               verified: 0,
-              friends: 0,
               otp_expiry_time: 0,
               otp: 0,
               __v: 0,
@@ -197,10 +202,14 @@ const getDirectConversations = async (
             },
             {
               $project: {
-                password: 0, // Exclude sensitive fields
+                password: 0,
+                passwordResetExpires: 0,
+                passwordResetToken: 0,
                 confirmPassword: 0,
                 verified: 0,
-                friends: 0,
+                otp_expiry_time: 0,
+                otp: 0,
+                __v: 0,
               },
             },
           ],
@@ -221,14 +230,30 @@ const getDirectConversations = async (
         $project: {
           _id: 1,
           messages: 1, // Include messages
-          user: 1, // The user field will now contain the desired user object
+          user: {
+            _id: 1,
+            userName: 1,
+            email: 1,
+            gender: 1,
+            avatar: 1,
+            about: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            status: 1,
+          }, // The user field will now contain the desired user object
         },
       },
     ]);
 
+    const authUserId = req.user?._id as string;
+    const formatted = formatDirectConversations(
+      Existing_Direct_Conversations,
+      authUserId
+    );
+
     res.status(200).json({
       status: "success",
-      data: Existing_Direct_Conversations,
+      data: formatted,
       message: "Existing DirectConversations found successfully",
     });
     return;
@@ -265,10 +290,11 @@ const getGroupConversations = async (
           pipeline: [
             {
               $project: {
-                password: 0, // Exclude fields
+                password: 0,
+                passwordResetExpires: 0,
+                passwordResetToken: 0,
                 confirmPassword: 0,
                 verified: 0,
-                friends: 0,
                 otp_expiry_time: 0,
                 otp: 0,
                 __v: 0,
@@ -280,10 +306,9 @@ const getGroupConversations = async (
       {
         $unwind: {
           path: "$admin",
-          preserveNullAndEmptyArrays: true, // Optional: Keep documents without matching admins
+          preserveNullAndEmptyArrays: true,
         },
       },
-
       {
         $lookup: {
           from: "users",
@@ -293,10 +318,11 @@ const getGroupConversations = async (
           pipeline: [
             {
               $project: {
-                password: 0, // Exclude fields
+                password: 0,
+                passwordResetExpires: 0,
+                passwordResetToken: 0,
                 confirmPassword: 0,
                 verified: 0,
-                friends: 0,
                 otp_expiry_time: 0,
                 otp: 0,
                 __v: 0,
@@ -305,6 +331,7 @@ const getGroupConversations = async (
           ],
         },
       },
+      // Lookup messages
       {
         $lookup: {
           from: "messages",
@@ -313,11 +340,67 @@ const getGroupConversations = async (
           as: "messages",
         },
       },
+      // Unwind messages
+      {
+        $unwind: {
+          path: "$messages",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      // Lookup sender details
+      {
+        $lookup: {
+          from: "users",
+          localField: "messages.sender",
+          foreignField: "_id",
+          as: "messages.senderDetails",
+        },
+      },
+      // Unwind senderDetails
+      {
+        $unwind: {
+          path: "$messages.senderDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      // Replace sender with senderDetails
+      {
+        $addFields: {
+          "messages.sender": {
+            _id: "$messages.senderDetails._id",
+            userName: "$messages.senderDetails.userName",
+            avatar: "$messages.senderDetails.avatar",
+          },
+        },
+      },
+      // Remove the now redundant senderDetails
+      {
+        $project: {
+          "messages.senderDetails": 0,
+        },
+      },
+      // Regroup messages
+      {
+        $group: {
+          _id: "$_id",
+          groupName: { $first: "$title" },
+          groupImage: { $first: "$avatar" },
+          admin: { $first: "$admin" },
+          participants: { $first: "$participants" },
+          messages: { $push: "$messages" },
+        },
+      },
     ]);
+
+    const authUserId = req.user?._id as string;
+    const formatted = formatGroupConversations(
+      Existing_Group_Conversations,
+      authUserId
+    );
 
     res.status(200).json({
       status: "success",
-      data: Existing_Group_Conversations,
+      data: formatted,
       message: "Existing GroupConversations found successfully",
     });
     return;
@@ -357,10 +440,14 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
               },
               {
                 $project: {
-                  password: 0, // Exclude sensitive fields
+                  password: 0,
+                  passwordResetExpires: 0,
+                  passwordResetToken: 0,
                   confirmPassword: 0,
                   verified: 0,
-                  friends: 0,
+                  otp_expiry_time: 0,
+                  otp: 0,
+                  __v: 0,
                 },
               },
             ],
@@ -402,10 +489,11 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
             pipeline: [
               {
                 $project: {
-                  password: 0, // Exclude fields
+                  password: 0,
+                  passwordResetExpires: 0,
+                  passwordResetToken: 0,
                   confirmPassword: 0,
                   verified: 0,
-                  friends: 0,
                   otp_expiry_time: 0,
                   otp: 0,
                   __v: 0,
@@ -429,10 +517,11 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
             pipeline: [
               {
                 $project: {
-                  password: 0, // Exclude fields
+                  password: 0,
+                  passwordResetExpires: 0,
+                  passwordResetToken: 0,
                   confirmPassword: 0,
                   verified: 0,
-                  friends: 0,
                   otp_expiry_time: 0,
                   otp: 0,
                   __v: 0,
@@ -482,7 +571,10 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
   return;
 };
 
-const createGroup = async (req: Request, res: Response): Promise<Response | void> => {
+const createGroup = async (
+  req: Request,
+  res: Response
+): Promise<Response | void> => {
   try {
     const { title, users, admin } = req.body;
     const avatarLocalPath = req.file?.path;

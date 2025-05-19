@@ -1,16 +1,20 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
 import Loader from "./ui/Loader";
 import {
-  fetchCurrentDirectMessages,
-  fetchCurrentGroupMessages,
+  setCurrentDirectMessages,
+  setCurrentGroupMessages,
   setCurrentDirectConversation,
   setCurrentGroupConversation,
 } from "../store/slices/conversation";
-import SortMessages from "../utils/sortMessage";
-import { TextMsg, Timeline } from "./MessageTypes";
+import SortMessages from "../utils/sortMessages";
+import { MediaMsg, TextMsg, Timeline, AudioMsg } from "./MessageTypes";
+import SendText_AudioMessageInput from "./SendText_AudioMessageInput";
+import CameraModule from "./CameraModule";
+import { DirectMessage } from "../types/types";
+import UploadedFileModule from "./UploadedFileModule";
 
 const Chat = () => {
   const [isloading, setIsloading] = useState(false);
@@ -19,9 +23,11 @@ const Chat = () => {
   );
   const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
-  const { activeChatId, chatType } = useSelector(
+  const { activeChatId, chatType, isCameraOpen } = useSelector(
     (state: RootState) => state.app
   );
+  const messagesListRef = useRef<HTMLUListElement | null>(null);
+
   const {
     DatesArray: IndividualMessagesSortedDates,
     MessagesObject: IndividualMessagesObject,
@@ -38,6 +44,33 @@ const Chat = () => {
     sort: "Asc",
   });
 
+  // Scroll to the bottom when messages change
+  const scrollToBottomSmooth = () => {
+    if (messagesListRef.current) {
+      messagesListRef?.current?.scrollTo({
+        top: messagesListRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+      // messagesListRef?.current?.scrollIntoView({ behavior: "smooth" });
+      // messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
+    }
+  };
+
+  // Scroll to the bottom when messages change
+  const scrollToBottomQuick = () => {
+    if (messagesListRef?.current) {
+      messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    setTimeout(scrollToBottomQuick, 100);
+  }, [
+    direct_chat.current_direct_messages,
+    group_chat.current_group_messages,
+    activeChatId,
+  ]);
+
   useEffect(() => {
     if (!activeChatId) return;
     switch (chatType) {
@@ -49,11 +82,13 @@ const Chat = () => {
         if (currentDirectChat) {
           socket.emit(
             "get_messages",
-            { conversation_id: currentDirectChat?.id },
+            {
+              conversationId: currentDirectChat?.id,
+              chatType,
+              authUserId: user?._id,
+            },
             (data: any) => {
-              dispatch(
-                fetchCurrentDirectMessages({ auth: user, messages: data })
-              );
+              dispatch(setCurrentDirectMessages(data));
               setIsloading(false);
             }
           );
@@ -64,14 +99,18 @@ const Chat = () => {
         break;
       case "group":
         setIsloading(true);
-        const currentGroupChat = group_chat.GroupConversations.find(
+        const currentGroupChat = group_chat.GroupConversations?.find(
           (el: any) => el?.id === activeChatId
         );
         socket.emit(
           "get_messages",
-          { conversation_id: currentGroupChat?.id },
+          {
+            conversationId: currentGroupChat?.id,
+            chatType,
+            authUserId: user?._id,
+          },
           (data: any) => {
-            dispatch(fetchCurrentGroupMessages({ auth: user, messages: data }));
+            dispatch(setCurrentGroupMessages(data));
             setIsloading(false);
           }
         );
@@ -82,74 +121,101 @@ const Chat = () => {
         break;
     }
   }, [activeChatId]);
+  console.log(direct_chat.current_direct_messages)
 
   return (
     <div
       className={`
           flex-1 bg-gray-200 rounded-2xl p-4
-          ${true || activeChatId ? "block" : "hidden"}
+          ${activeChatId ? "block" : "hidden"}
           md:block
         `}
     >
       {activeChatId ? (
         <>
           {!isloading ? (
-            <div className="w-full h-full flex flex-col overflow-hidden">
+            <div className="w-full relative h-full flex flex-col overflow-hidden">
+              {/* camera overlay */}
+              {isCameraOpen && <CameraModule />}
+
+              {/* Image send overlary */}
+              <UploadedFileModule />
               {/* messages */}
-              <ul className="flex-1 overflow-x-hidden">
+              <ul
+                ref={messagesListRef}
+                className="flex-1 overflow-x-hidden scrollbar-custom px-4 space-y-2"
+              >
                 {chatType === "individual" ? (
                   <>
-                    {IndividualMessagesSortedDates.map((date, i) => (
-                      <div key={`${date}_Msgs`} className="datewise_msgs">
+                    {IndividualMessagesSortedDates.map((date) => (
+                      <div
+                        key={`${date}_Msgs`}
+                        className="datewise_msgs space-y-2"
+                      >
                         {/* Date */}
                         <Timeline date={date} />
                         {/* messages */}
-                        {IndividualMessagesObject[date].map((el, index) => {
-                          switch (el.type) {
-                            // case "photo":
-                            //   return (
-                            //     <MediaMsg
-                            //       el={el}
-                            //       key={index}
-                            //       scrollToBottom={scrollToBottomSmooth}
-                            //     />
-                            //   );
-                            // case "doc":
-                            //   return <DocMsg el={el} key={index} />;
-                            // case "link":
-                            //   return <LinkMsg el={el} key={index} />;
-                            // case "reply":
-                            //   return <ReplyMsg el={el} key={index} />;
-                            // case "audio":
-                            //   return <AudioMsg el={el} key={index} />;
-                            default:
-                              return <TextMsg el={el} key={index} />;
+                        {IndividualMessagesObject[date].map(
+                          (el: DirectMessage, index: number) => {
+                            switch (el.type) {
+                              case "photo":
+                                return (
+                                  <MediaMsg
+                                    el={el}
+                                    key={index}
+                                    scrollToBottom={scrollToBottomSmooth}
+                                  />
+                                );
+                              case "audio":
+                                return <AudioMsg el={el} key={index} />;
+                              default:
+                                return <TextMsg el={el} key={index} />;
+                            }
                           }
-                        })}
+                        )}
                       </div>
                     ))}
                   </>
                 ) : (
-                  <></>
+                  <>
+                    {GroupMessagesSortedDates.map((date) => (
+                      <div
+                        key={`${date}_Msgs`}
+                        className="datewise_msgs space-y-2"
+                      >
+                        {/* Date */}
+                        <Timeline date={date} />
+                        {/* messages */}
+                        {GroupMessagesObject[date].map(
+                          (el: DirectMessage, index: number) => {
+                            switch (el.type) {
+                              case "photo":
+                                return (
+                                  <MediaMsg
+                                    el={el}
+                                    key={index}
+                                    scrollToBottom={scrollToBottomSmooth}
+                                  />
+                                );
+                              case "audio":
+                                return <AudioMsg el={el} key={index} />;
+                              default:
+                                return <TextMsg el={el} key={index} />;
+                            }
+                          }
+                        )}
+                      </div>
+                    ))}
+                  </>
                 )}
               </ul>
-
               {/* send footer btn */}
-              <div className="w-full h-30 bg-green-300"></div>
+              <SendText_AudioMessageInput />
             </div>
           ) : (
-            // <ul className="space-y-2">
-            //   <li className="bg-red-200 w-fit ml-auto rounded-2xl rounded-br-none p-2">
-            //     Hi John
-            //   </li>
-            //   <li className="bg-red-200 w-fit rounded-2xl rounded-bl-none p-2">
-            //     Hi John
-            //   </li>
-            //   <li className="bg-red-200 w-fit ml-auto rounded-2xl rounded-br-none p-2">
-            //     Hi John
-            //   </li>
-            // </ul>
-            <Loader customColor={true} />
+            <div className="w-full h-full flex-center">
+              <Loader customColor={true} />
+            </div>
           )}
         </>
       ) : (

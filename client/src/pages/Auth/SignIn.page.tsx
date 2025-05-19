@@ -33,6 +33,7 @@ const SignIn = () => {
   // Hook for local login success
   useEffect(() => {
     if (data) {
+      console.log(data);
       dispatch(UpdateAuthState(data.user));
       toast.success(data.message);
       Navigate("/chat");

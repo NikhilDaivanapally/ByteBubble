@@ -14,20 +14,32 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import {
   addDirectConversation,
+  addDirectMessage,
   addGroupConversation,
-  updateDirectConversations,
+  addGroupMessage,
+  updateDirectConversation,
+  setDirectConversations,
+  updateDirectMessageSeenStatus,
+  updateDirectMessagesSeen,
+  updateExistingDirectMessage,
+  updateExistingGroupMessage,
 } from "../../store/slices/conversation";
 import { updateChatType, updateFriends } from "../../store/slices/appSlice";
 import { connectSocket, socket } from "../../socket";
 import toast from "react-hot-toast";
 import Loader from "../../components/ui/Loader";
+import ImagePreview from "../../components/ImagePreview";
 
 const ChatLayout = () => {
   const dispatch = useDispatch();
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
-  const { chatType } = useSelector((state: RootState) => state.app);
-  console.log(chatType);
+  const { chatType, activeChatId } = useSelector(
+    (state: RootState) => state.app
+  );
+  const { direct_chat, group_chat, fullImagePreview } = useSelector(
+    (state: RootState) => state.conversation
+  );
   const [getConversation, { data: getConversationData }] =
     useGetConversationMutation();
 
@@ -38,12 +50,7 @@ const ChatLayout = () => {
   // update DirectConversations to store
   useEffect(() => {
     if (DirectConversationData) {
-      dispatch(
-        updateDirectConversations({
-          conversations: DirectConversationData.data,
-          auth: user,
-        })
-      );
+      dispatch(setDirectConversations(DirectConversationData.data));
     } else if (DirectConversationError) {
       console.log(DirectConversationError);
     }
@@ -141,6 +148,133 @@ const ChatLayout = () => {
     }
   }, [pathname]);
 
+  // Hook for getting new_messages
+  useEffect(() => {
+    if (isSocketConnected) {
+      const handleNewMsg = (message) => {
+        console.log(message);
+        switch (message?.conversationType) {
+          case "OneToOneMessage":
+            switch (message?.conversationId.toString()) {
+              case direct_chat.current_direct_conversation?.id.toString():
+                console.log(message);
+                socket.emit("msg_seen_byreciever", {
+                  messageId: message?._id,
+                  conversationType: message?.conversationType,
+                  conversationId: message?.conversationId,
+                  sender: message?.sender,
+                });
+                dispatch(
+                  addDirectMessage({
+                    id: message?._id,
+                    type: message?.messageType,
+                    message: message?.message,
+                    createdAt: message?.createdAt,
+                    updatedAt: message?.updatedAt,
+                    incoming: message?.recipients === user?._id,
+                    outgoing: message?.sender === user?._id,
+                    status: "sent",
+                    seen: true,
+                  })
+                );
+
+                break;
+              default:
+                socket.emit("update_unreadMsgs", message);
+                break;
+            }
+            break;
+          case "OneToManyMessage":
+            switch (message?.conversationId.toString()) {
+              case group_chat.current_group_conversation?.id.toString():
+                dispatch(
+                  addGroupMessage({
+                    id: message?._id,
+                    type: message?.messageType,
+                    message: message?.message,
+                    conversationId: message?.conversationId,
+                    createdAt: message?.createdAt,
+                    updatedAt: message?.updatedAt,
+                    incoming: message?.recipients.includes(user?._id),
+                    outgoing: message?.sender === user?._id,
+                    from: message?.sender,
+                    status: "sent",
+                  })
+                );
+                break;
+              default:
+                socket.emit("update_unreadMsgs", message);
+                break;
+            }
+            break;
+          default:
+            console.log("Unknown chat type");
+            break;
+        }
+      };
+
+      const handleUpdateMsgStatus = (message) => {
+        switch (message?.conversationType) {
+          case "OneToOneMessage":
+            switch (message?.conversationId.toString()) {
+              case direct_chat.current_direct_conversation?.id.toString():
+                dispatch(updateExistingDirectMessage(message));
+                break;
+              default:
+                break;
+            }
+            break;
+          case "OneToManyMessage":
+            switch (message?.conversationId.toString()) {
+              case group_chat.current_group_conversation?.id.toString():
+                dispatch(updateExistingGroupMessage(message));
+                break;
+              default:
+                break;
+            }
+            break;
+          default:
+            console.log("Unknown chat type");
+            break;
+        }
+      };
+
+      const handleUpdateMsgSeen = (data) => {
+        dispatch(updateDirectMessageSeenStatus(data));
+      };
+
+      const handleUpdateAllMsgSeenTrue = (conversationId) => {
+        const conversation = direct_chat?.DirectConversations?.filter(
+          (conv) => conv?.id == conversationId
+        );
+        dispatch(
+          updateDirectConversation({
+            ...conversation[0],
+            seen: true,
+          })
+        );
+        dispatch(updateDirectMessagesSeen({}));
+      };
+
+      socket.on("new_message", handleNewMsg);
+      socket.on("update_msg_status", handleUpdateMsgStatus);
+      socket.on("update_msg_seen", handleUpdateMsgSeen);
+      socket.on("all_msg_seen", handleUpdateAllMsgSeenTrue);
+
+      return () => {
+        socket.off("new_message", handleNewMsg);
+        socket.off("update_msg_status", handleUpdateMsgStatus);
+        socket.off("update_msg_seen", handleUpdateMsgSeen);
+        socket.off("all_msg_seen", handleUpdateAllMsgSeenTrue);
+      };
+    }
+  }, [
+    isSocketConnected,
+    direct_chat.DirectConversations,
+    direct_chat.current_direct_conversation,
+    group_chat.current_group_conversation,
+  ]);
+
   return (
     <>
       {!isSocketConnected ? (
@@ -148,7 +282,11 @@ const ChatLayout = () => {
       ) : (
         <div className="h-full bg-light overflow-y-hidden  dark:bg-dark flex flex-col-reverse lg:flex-row">
           {/* nav bar */}
-          <nav className="w-full h-20 lg:h-full lg:w-20 flex lg:flex-col justify-between items-center px-4 py-2 lg:px-0 lg:py-4">
+          <nav
+            className={`w-full h-20 lg:h-full lg:w-20 flex ${
+              activeChatId ? "hidden md:flex" : ""
+            } lg:flex-col justify-between items-center px-4 py-2 lg:px-0 lg:py-4`}
+          >
             {/* logo */}
             <div>logo</div>
             {/* list */}
@@ -170,12 +308,16 @@ const ChatLayout = () => {
               </div>
             </ul>
             {/* profile */}
-            <img src="" className="w-10 h-10 bg-gray-200 rounded-full" alt="" />
+            <img className="w-10 h-10 bg-gray-200 rounded-full" alt="" />
           </nav>
 
           <div className="flex-1 overflow-hidden bg-light border-b md:border-l border-gray-300 lg:py-3">
             <Outlet />
           </div>
+
+          {/* fullImage Preview */}
+
+          {fullImagePreview && <ImagePreview />}
         </div>
       )}
     </>

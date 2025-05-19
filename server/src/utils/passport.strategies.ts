@@ -38,28 +38,21 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL:
-        "https://byte-messenger-api.onrender.com/api/v1/auth/google/callback",
-      scope: [
-        "profile",
-        "email",
-        "https://www.googleapis.com/auth/user.phonenumbers.read",
-      ],
+      callbackURL: "https://localhost:8000/api/v1/auth/google/callback",
+      scope: ["profile", "email"],
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const email = Array.isArray(profile.emails) && profile.emails[0].value;
-        const avatar = Array.isArray(profile.photos) && profile.photos[0].value;
-        // Find user by email
-        let user = await User.findOne({ email });
+        const email = profile.emails?.[0]?.value;
+        const avatar = profile.photos?.[0]?.value;
 
-        // If no user, create a new one
+        let user = await User.findOne({ email });
         if (!user) {
           user = await User.create({
             userName: profile.displayName,
             email,
             avatar,
-            googleId: profile.id, // Store Google ID
+            googleId: profile.id,
             verified: true,
           });
         }
@@ -72,14 +65,17 @@ passport.use(
   )
 );
 
-// Serialize and deserialize user
+// Serialize user: store user ID in session
 passport.serializeUser((user: any, done) => {
-  done(null, user?.id); // user.id should now exist
+  done(null, user._id);
 });
 
+// Deserialize user: retrieve user by ID from database
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(id).select(
+      "_id email userName avatar about gender socket_id status verified createdAt"
+    );
     done(null, user);
   } catch (error) {
     done(error, null);

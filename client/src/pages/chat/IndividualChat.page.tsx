@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import Conversation from "../../components/Conversation";
+import { DirectConversation } from "../../components/Conversation";
 import {
   MagnifyingGlassIcon,
   SignalSlashIcon,
@@ -16,7 +16,6 @@ const IndividualChat = () => {
     (state: RootState) => state.conversation.direct_chat
   );
   const { activeChatId } = useSelector((state: RootState) => state.app);
-  console.log(DirectConversations);
   const [isChatActive, setIsChatActive] = useState(false);
   const [filter, setFilter] = useState("");
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,7 +40,7 @@ const IndividualChat = () => {
           {/* Conversations Sidebar */}
           <div
             className={`flex flex-col gap-4 px-4 flex-1 md:flex-none min-w-[340px] md:w-[370px]
-          ${isChatActive ? "hidden" : ""}
+          ${activeChatId ? "hidden md:flex" : ""}
           md:h-full overflow-y-hidden
         `}
           >
@@ -76,7 +75,7 @@ const IndividualChat = () => {
 
             <ul className="overflow-y-auto scrollbar-custom flex-1 flex flex-col gap-4">
               {DirectConversations?.map((conversation: any, i: number) => (
-                <Conversation key={i} conversation={conversation} />
+                <DirectConversation key={i} conversation={conversation} />
               ))}
             </ul>
           </div>

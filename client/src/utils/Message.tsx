@@ -20,7 +20,7 @@ const Message = (msg: any) => {
         </div>
       );
       break;
-    case "text":
+    case "text" :
       message = msg?.message?.text;
       break;
     case "link":

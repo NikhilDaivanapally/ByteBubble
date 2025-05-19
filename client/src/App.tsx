@@ -13,8 +13,7 @@ import ChatLayout from "./pages/chat/ChatLayout.page";
 import IndividualChat from "./pages/chat/IndividualChat.page";
 import GroupChat from "./pages/chat/GroupChat.page";
 import { updateOnlineStatus } from "./store/slices/appSlice";
-import React, { useEffect } from "react";
-import { checkAuth } from "./utils/auth";
+import { useEffect } from "react";
 import { ProtectedPage } from "./pages/chat/ProtectedRoute.page";
 const App = () => {
   const dispatch = useDispatch();
@@ -47,7 +46,6 @@ const App = () => {
   }, [dispatch]);
 
   const router = createBrowserRouter([
-
     { path: "/", element: <Home /> },
 
     {
@@ -59,7 +57,7 @@ const App = () => {
         { path: "/reset-password", element: <ResetPassword /> },
       ],
     },
-    
+
     {
       element: (
         <ProtectedPage>

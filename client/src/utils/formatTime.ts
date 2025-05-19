@@ -1,4 +1,4 @@
-const formatTime = (date:Date) => {
+const formatTime = (date:string) => {
   const Time = new Date(date).toLocaleString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
