@@ -1,12 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  XMarkIcon,
-} from "@heroicons/react/16/solid";
 import { setfullImagePreview } from "../store/slices/conversation";
 import { useRef } from "react";
+import { Icons } from "../icons";
 
 const ImagePreview = () => {
   const dispatch = useDispatch();
@@ -103,7 +99,7 @@ const ImagePreview = () => {
           <div></div>
         </div>
 
-        <XMarkIcon
+        <Icons.XMarkIcon
           className="w-6 md:w-8 cursor-pointer"
           onClick={handleClose}
         />
@@ -123,14 +119,14 @@ const ImagePreview = () => {
           onClick={handleChangeImage}
           disabled={Current_index == 0}
         >
-          <ChevronLeftIcon className="w-8 md:w-12" />
+          <Icons.ChevronLeftIcon className="w-8 md:w-12" />
         </button>
         <button
           className="next-btn absolute shadow bg-light rounded-full right-10 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
           onClick={handleChangeImage}
           disabled={Current_index == MediaImgs.length - 1}
         >
-          <ChevronRightIcon className="w-8 md:w-12" />
+          <Icons.ChevronRightIcon className="w-8 md:w-12" />
         </button>
       </div>
       {/* Images list */}

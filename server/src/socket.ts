@@ -259,11 +259,7 @@ io.on("connection", async (socket) => {
         // emit incoming_message -> to user
         io.to(msg_receiver?.socket_id!).emit("new_message", _Message);
         // emit outgoing_message -> from user
-        io.to(msg_sender?.socket_id!).emit("update_msg_status", {
-          messageId: _Message?._id,
-          conversationId,
-          conversationType,
-        });
+        io.to(msg_sender?.socket_id!).emit("update_msg_status", _Message);
         break;
       case "OneToManyMessage":
         const from_user_group = await User.findById(sender);
@@ -279,11 +275,10 @@ io.on("connection", async (socket) => {
           updatedAt,
         };
         await Message.create(_GroupMessage);
-        io.to(from_user_group?.socket_id!).emit("update_msg_status", {
-          messageId: _GroupMessage?._id,
-          conversationId,
-          conversationType,
-        });
+        io.to(from_user_group?.socket_id!).emit(
+          "update_msg_status",
+          _GroupMessage
+        );
         const socket_ids = recipients.map(async (id: string) => {
           const { socket_id }: any = await User.findById(id).select(
             "socket_id -_id"

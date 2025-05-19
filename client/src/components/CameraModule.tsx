@@ -1,13 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { useCallback, useEffect, useRef } from "react";
-import { CameraIcon, XMarkIcon } from "@heroicons/react/16/solid";
-
 import {
   updateMediaPreviewUrls,
   updateOpenCamera,
 } from "../store/slices/appSlice";
 import { parseFiles } from "../utils/parseFiles";
+import { Icons } from "../icons";
 
 const CameraModule = () => {
   const dispatch = useDispatch();
@@ -79,13 +78,16 @@ const CameraModule = () => {
 
   return (
     <div className="absolute inset-0 flex-center flex-col gap-10 backdrop-blur z-50">
-      <XMarkIcon
+      <Icons.XMarkIcon
         className="w-8 absolute top-0 right-0 ml-auto cursor-pointer"
         onClick={handleOffCamera}
       />
       <video ref={cameraRef} autoPlay></video>
       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
-      <CameraIcon className="w-10 cursor-pointer" onClick={handleTakePicture} />
+      <Icons.CameraIcon
+        className="w-10 cursor-pointer"
+        onClick={handleTakePicture}
+      />
     </div>
   );
 };

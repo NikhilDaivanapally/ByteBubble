@@ -4,6 +4,14 @@ import Message from "../utils/Message";
 import { RootState } from "../store/store";
 import { useCallback, useState } from "react";
 import { selectConversation } from "../store/slices/appSlice";
+import { socket } from "../socket";
+import {
+  setCurrentDirectMessages,
+  setCurrentGroupMessages,
+  updateDirectConversation,
+  updateGroupConversation,
+} from "../store/slices/conversation";
+// import { DirectConversation, GroupConversation } from "../types/types";
 
 type ConversationProps = {
   conversation: any;
@@ -26,6 +34,7 @@ const DirectConversation: React.FC<ConversationProps> = ({ conversation }) => {
   const Time = ConversationTime(time);
   const { message } = Message(msg);
   const dispatch = useDispatch();
+  const auth = useSelector((state: RootState) => state.auth.user);
   const { DirectConversations } = useSelector(
     (state: RootState) => state.conversation.direct_chat
   );
@@ -33,24 +42,23 @@ const DirectConversation: React.FC<ConversationProps> = ({ conversation }) => {
 
   const handleSelectConversation = useCallback(() => {
     if (activeChatId !== id) {
-      // dispatch(setCurrentDirectMessages([]));
+      dispatch(setCurrentDirectMessages([]));
       dispatch(selectConversation({ chatId: id }));
-      // const [updateConversation] = DirectConversations.filter(
-      //   (el) => el.id == id
-      // );
-      // if (updateConversation.unread) {
-      //   socket.emit("clear_unread", {
-      //     conversationId: id,
-      //     recipients: auth._id,
-      //     sender: user_id,
-      //   });
-      //   dispatch(
-      //     updateDirectConversation({
-      //       ...updateConversation,
-      //       unread: 0,
-      //     })
-      //   );
-      // }
+      const updateConversation =
+        DirectConversations?.find((el) => el.id == id);
+      if (updateConversation?.unread) {
+        socket.emit("clear_unread", {
+          conversationId: id,
+          recipients: auth?._id,
+          sender: userId,
+        });
+        dispatch(
+          updateDirectConversation({
+            ...updateConversation,
+            unread: 0,
+          })
+        );
+      }
     }
   }, [DirectConversations, activeChatId]);
 
@@ -127,33 +135,27 @@ const GroupConversation: React.FC<ConversationProps> = ({ conversation }) => {
   const Time = ConversationTime(time);
   const { message } = Message(msg);
   const dispatch = useDispatch();
-  const { DirectConversations } = useSelector(
-    (state: RootState) => state.conversation.direct_chat
+  const { GroupConversations } = useSelector(
+    (state: RootState) => state.conversation.group_chat
   );
   const { activeChatId } = useSelector((state: RootState) => state.app);
 
   const handleSelectConversation = useCallback(() => {
     if (activeChatId !== id) {
-      // dispatch(setCurrentDirectMessages([]));
+      dispatch(setCurrentGroupMessages([]));
       dispatch(selectConversation({ chatId: id }));
-      // const [updateConversation] = DirectConversations.filter(
-      //   (el) => el.id == id
-      // );
-      // if (updateConversation.unread) {
-      //   socket.emit("clear_unread", {
-      //     conversationId: id,
-      //     recipients: auth._id,
-      //     sender: user_id,
-      //   });
-      //   dispatch(
-      //     updateDirectConversation({
-      //       ...updateConversation,
-      //       unread: 0,
-      //     })
-      //   );
-      // }
+      const updateConversation =
+        GroupConversations?.find((el) => el.id == id);
+      if (updateConversation?.unread) {
+        dispatch(
+          updateGroupConversation({
+            ...updateConversation,
+            unread: 0,
+          })
+        );
+      }
     }
-  }, [DirectConversations, activeChatId]);
+  }, [GroupConversations, activeChatId]);
 
   return (
     <li

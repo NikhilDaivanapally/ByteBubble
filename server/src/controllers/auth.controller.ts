@@ -359,16 +359,16 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
 const googleLogin = (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate("google", (err: Error, user: UserType) => {
     if (err || !user) {
-      return res.redirect("https://byte-messenger.vercel.app/login");
+      return res.redirect("http://localhost:5173/signin");
     }
 
     req.login(user, (err) => {
       if (err) {
-        return res.redirect("https://byte-messenger.vercel.app/login");
+        return res.redirect("http://localhost:5173/signin");
       }
 
       // Redirect to your frontend with a success query param
-      return res.redirect("https://byte-messenger.vercel.app");
+      return res.redirect("http://localhost:5173/chat");
     });
   })(req, res, next); // Call the passport function with req, res, and next
 };

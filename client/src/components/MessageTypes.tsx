@@ -6,10 +6,10 @@ import formatTime2 from "../utils/formatTime2";
 import WaveSurfer from "wavesurfer.js";
 import SenderFromGroup from "../utils/SenderFromGroup";
 import { RootState } from "../store/store";
-import { PauseIcon, PlayIcon } from "@heroicons/react/16/solid";
 import { DirectMessage, GroupMessage } from "../types/types";
 import { setfullImagePreview } from "../store/slices/conversation";
 import Loader from "./ui/Loader";
+import { Icons } from "../icons";
 
 type senderProps = { avatar: string; userName: string };
 
@@ -49,7 +49,7 @@ const TextMsg = ({ el }: { el: DirectMessage | GroupMessage }) => {
           )}
           <p>{el.message?.text}</p>
         </div>
-       <div className="w-fit ml-auto flex gap-2">
+        <div className="w-fit ml-auto flex gap-2">
           {!el?.incoming ? (
             el?.status === "pending" ? (
               <LuClock4 />
@@ -277,7 +277,7 @@ const AudioMsg = ({ el }: { el: DirectMessage | GroupMessage }) => {
             {audioUrl ? (
               <div className="w-50 flex items-center gap-2">
                 <span className="w-5" onClick={handlePlayPauseAudio}>
-                  {isPlaying ? <PauseIcon /> : <PlayIcon />}
+                  {isPlaying ? <Icons.PauseIcon /> : <Icons.PlayIcon />}
                 </span>
                 <div ref={waveformRef} id="waveform" className="flex-1"></div>
                 <span className="text-sm">

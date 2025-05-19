@@ -14,13 +14,13 @@ import { motion, AnimatePresence } from "motion/react";
 import { FaPause } from "react-icons/fa6";
 import { MdDelete } from "react-icons/md";
 import { IoMic, IoPlay } from "react-icons/io5";
-import { CameraIcon, DocumentIcon, PhotoIcon } from "@heroicons/react/16/solid";
 import {
   updateMediaFiles,
   updateMediaPreviewUrls,
   updateOpenCamera,
 } from "../store/slices/appSlice";
 import { parseFiles } from "../utils/parseFiles";
+import { Icons } from "../icons";
 
 const SendText_AudioMessageInput = () => {
   const dispatch = useDispatch();
@@ -89,7 +89,7 @@ const SendText_AudioMessageInput = () => {
     if (!message.trim()) return;
     const to =
       chatType === "individual"
-        ? direct_chat?.current_direct_conversation!?.user_id
+        ? direct_chat?.current_direct_conversation?.userId
         : userList;
 
     const messageId = crypto.randomUUID();
@@ -164,7 +164,7 @@ const SendText_AudioMessageInput = () => {
 
   const attachementsArray = [
     {
-      icon: <DocumentIcon className="w-5 text-violet-400" />,
+      icon: <Icons.DocumentIcon className="w-5 text-violet-400" />,
       title: "Documents",
       accept: ".pdf, .doc, .docx, .xls, .xlsx",
       onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -173,7 +173,7 @@ const SendText_AudioMessageInput = () => {
       },
     },
     {
-      icon: <PhotoIcon className="w-5 text-blue-400" />,
+      icon: <Icons.PhotoIcon className="w-5 text-blue-400" />,
       title: "Photos & Videos",
       accept: "image/*",
       onChange: async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -187,7 +187,7 @@ const SendText_AudioMessageInput = () => {
       },
     },
     {
-      icon: <CameraIcon className="w-5 text-red-400" />,
+      icon: <Icons.CameraIcon className="w-5 text-red-400" />,
       title: "Camera",
       onClick: () => {
         dispatch(updateOpenCamera(true));

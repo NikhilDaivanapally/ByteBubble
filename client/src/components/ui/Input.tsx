@@ -1,6 +1,6 @@
-import { EyeIcon, EyeSlashIcon, PencilIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import { useState } from "react";
+import { Icons } from "../../icons";
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   className?: string;
@@ -38,7 +38,7 @@ const Input: React.FC<InputProps> = ({
               className="w-14 aspect-square object-cover rounded-full z-5"
             />
             <label htmlFor="avatar" className="absolute top-2/3 right-0 z-1">
-              <PencilIcon className="w-6 h-6 cursor-pointer p-1 rounded-full" />
+              <Icons.PencilIcon className="w-6 h-6 cursor-pointer p-1 rounded-full" />
             </label>
           </>
         )}
@@ -63,9 +63,9 @@ const Input: React.FC<InputProps> = ({
         )}
         <div onClick={() => setShowpassword((prev) => !prev)}>
           {!showpassword ? (
-            <EyeIcon className="w-5 absolute top-1/2 right-2 -translate-1/2 cursor-pointer select-none" />
+            <Icons.EyeIcon className="w-5 absolute top-1/2 right-2 -translate-1/2 cursor-pointer select-none" />
           ) : (
-            <EyeSlashIcon className="w-5 absolute top-1/2 right-2 -translate-1/2 cursor-pointer select-none" />
+            <Icons.EyeSlashIcon className="w-5 absolute top-1/2 right-2 -translate-1/2 cursor-pointer select-none" />
           )}
         </div>
       </div>

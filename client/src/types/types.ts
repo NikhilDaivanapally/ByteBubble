@@ -43,6 +43,7 @@ export type DirectConversation = {
 export type DirectMessage = {
   id: string;
   type: string;
+  sender:string,
   message: {
     _id?: string;
     text?: string;

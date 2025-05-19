@@ -1,22 +1,22 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DirectConversation } from "../../components/Conversation";
-import {
-  MagnifyingGlassIcon,
-  SignalSlashIcon,
-  XMarkIcon,
-} from "@heroicons/react/16/solid";
-import { useSelector } from "react-redux";
+import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/16/solid";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import ShowOfflineStatus from "../../components/ShowOfflineStatus";
 import Loader from "../../components/ui/Loader";
 import Chat from "../../components/Chat";
+import { updateDirectConversation } from "../../store/slices/conversation";
 
 const IndividualChat = () => {
-  const { DirectConversations } = useSelector(
-    (state: RootState) => state.conversation.direct_chat
-  );
+  
+  const dispatch = useDispatch();
+  const {
+    DirectConversations,
+    current_direct_conversation,
+    current_direct_messages,
+  } = useSelector((state: RootState) => state.conversation.direct_chat);
   const { activeChatId } = useSelector((state: RootState) => state.app);
-  const [isChatActive, setIsChatActive] = useState(false);
   const [filter, setFilter] = useState("");
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
@@ -32,6 +32,24 @@ const IndividualChat = () => {
   const handleWrapperBlur = () => {
     setIsFocused(false);
   };
+
+  useEffect(() => {
+    if (current_direct_messages?.length > 0) {
+      dispatch(
+        updateDirectConversation({
+          ...current_direct_conversation,
+          outgoing: current_direct_messages?.slice(-1)[0]?.outgoing,
+          message: {
+            type: current_direct_messages?.slice(-1)[0]?.type,
+            message: current_direct_messages?.slice(-1)[0]?.message,
+            createdAt: current_direct_messages?.slice(-1)[0]?.createdAt,
+          },
+          time: current_direct_messages?.slice(-1)[0]?.createdAt,
+          seen: current_direct_messages?.slice(-1)[0]?.seen,
+        })
+      );
+    }
+  }, [current_direct_messages]);
 
   return (
     <div className="h-full flex">

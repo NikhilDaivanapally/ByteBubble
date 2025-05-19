@@ -23,12 +23,14 @@ import {
   updateDirectMessagesSeen,
   updateExistingDirectMessage,
   updateExistingGroupMessage,
+  updateGroupConversation,
 } from "../../store/slices/conversation";
 import { updateChatType, updateFriends } from "../../store/slices/appSlice";
 import { connectSocket, socket } from "../../socket";
 import toast from "react-hot-toast";
 import Loader from "../../components/ui/Loader";
 import ImagePreview from "../../components/ImagePreview";
+import { DirectMessage, GroupMessage } from "../../types/types";
 
 const ChatLayout = () => {
   const dispatch = useDispatch();
@@ -151,7 +153,12 @@ const ChatLayout = () => {
   // Hook for getting new_messages
   useEffect(() => {
     if (isSocketConnected) {
-      const handleNewMsg = (message) => {
+      const handleNewMsg = (
+        message: DirectMessage & {
+          conversationType: string;
+          conversationId: string;
+        }
+      ) => {
         console.log(message);
         switch (message?.conversationType) {
           case "OneToOneMessage":
@@ -213,10 +220,12 @@ const ChatLayout = () => {
         }
       };
 
-      const handleUpdateMsgStatus = (message) => {
+      const handleUpdateMsgStatus = (
+        message: GroupMessage & { conversationType: string }
+      ) => {
         switch (message?.conversationType) {
           case "OneToOneMessage":
-            switch (message?.conversationId.toString()) {
+            switch (message?.conversationId?.toString()) {
               case direct_chat.current_direct_conversation?.id.toString():
                 dispatch(updateExistingDirectMessage(message));
                 break;
@@ -225,7 +234,7 @@ const ChatLayout = () => {
             }
             break;
           case "OneToManyMessage":
-            switch (message?.conversationId.toString()) {
+            switch (message?.conversationId?.toString()) {
               case group_chat.current_group_conversation?.id.toString():
                 dispatch(updateExistingGroupMessage(message));
                 break;
@@ -239,17 +248,17 @@ const ChatLayout = () => {
         }
       };
 
-      const handleUpdateMsgSeen = (data) => {
+      const handleUpdateMsgSeen = (data: { messageId: string }) => {
         dispatch(updateDirectMessageSeenStatus(data));
       };
 
-      const handleUpdateAllMsgSeenTrue = (conversationId) => {
-        const conversation = direct_chat?.DirectConversations?.filter(
+      const handleUpdateAllMsgSeenTrue = (conversationId: string) => {
+        const conversation = direct_chat?.DirectConversations?.find(
           (conv) => conv?.id == conversationId
         );
         dispatch(
           updateDirectConversation({
-            ...conversation[0],
+            ...conversation,
             seen: true,
           })
         );
@@ -271,8 +280,87 @@ const ChatLayout = () => {
   }, [
     isSocketConnected,
     direct_chat.DirectConversations,
+    group_chat.GroupConversations,
     direct_chat.current_direct_conversation,
     group_chat.current_group_conversation,
+  ]);
+
+  // Hook for getting unread_messages
+  useEffect(() => {
+    if (isSocketConnected) {
+      const handleUnreadMsgs = async (message) => {
+        switch (message?.conversationType) {
+          case "OneToOneMessage":
+            const update_Direct_Conversation =
+              direct_chat?.DirectConversations?.find(
+                (el) => el.id == message?.conversationId
+              );
+            if (update_Direct_Conversation) {
+              console.log(message);
+              dispatch(
+                updateDirectConversation({
+                  ...update_Direct_Conversation,
+                  message: {
+                    type: message?.messageType,
+                    message: message?.message,
+                    createdAt: message?.createdAt,
+                  },
+                  outgoing: message?.sender === user?._id,
+                  time: message?.createdAt,
+                  unread: (update_Direct_Conversation?.unread || 0) + 1,
+                })
+              );
+            } else {
+              await getConversation({
+                conversationId: message?.conversationId,
+                conversationType: message?.conversationType,
+              });
+            }
+            break;
+          case "OneToManyMessage":
+            const update_Group_Conversation =
+              group_chat?.GroupConversations?.find(
+                (el) => el.id == message?.conversationId
+              );
+            if (update_Group_Conversation) {
+              dispatch(
+                updateGroupConversation({
+                  ...update_Group_Conversation,
+                  outgoing: message?.sender === user?._id,
+                  message: {
+                    type: message?.messageType,
+                    message: message?.message,
+                    createdAt: message?.createdAt,
+                  },
+                  from: message?.sender,
+                  time: message?.createdAt,
+                  unread: (update_Group_Conversation?.unread || 0) + 1,
+                })
+              );
+            } else {
+              await getConversation({
+                conversationId: message?.conversationId,
+                conversationType: message?.conversationType,
+              });
+            }
+            break;
+          default:
+            console.log("Invalid chat_type at on_update_unreadMsg");
+            break;
+        }
+      };
+      socket?.on("on_update_unreadMsg", handleUnreadMsgs);
+      return () => {
+        socket?.off("on_update_unreadMsg", handleUnreadMsgs);
+      };
+    }
+  }, [
+    isSocketConnected,
+    direct_chat.DirectConversations,
+    group_chat.GroupConversations,
+    direct_chat.current_direct_conversation,
+    group_chat.current_group_conversation,
+    user?._id,
   ]);
 
   return (

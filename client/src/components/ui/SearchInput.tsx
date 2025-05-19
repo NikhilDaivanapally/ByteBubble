@@ -1,6 +1,6 @@
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/16/solid";
 import React, { useEffect, useRef, useState } from "react";
 import useDebounce from "../../hooks/useDebounce";
+import { Icons } from "../../icons";
 
 type SearchInputProps = {
   setFilteredConversations: React.Dispatch<React.SetStateAction<any>>;
@@ -58,7 +58,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         transition-shadow duration-200
         ${isFocused ? "ring-2 ring-btn-primary/70" : "ring-0"}`}
     >
-      <MagnifyingGlassIcon className="w-5 text-gray-500" />
+      <Icons.MagnifyingGlassIcon className="w-5 text-gray-500" />
       <input
         ref={inputRef}
         placeholder="Search"
@@ -68,7 +68,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         onChange={handleFilterChange}
       />
       {filter && (
-        <XMarkIcon
+        <Icons.XMarkIcon
           onClick={handleRemoveFilter}
           className="w-5 text-gray-500 cursor-pointer"
         />
