@@ -13,7 +13,7 @@ import SortMessages from "../utils/sortMessages";
 import { MediaMsg, TextMsg, Timeline, AudioMsg } from "./MessageTypes";
 import SendText_AudioMessageInput from "./SendText_AudioMessageInput";
 import CameraModule from "./CameraModule";
-import { DirectMessage } from "../types/types";
+import { DirectMessage } from "../types";
 import UploadedFileModule from "./UploadedFileModule";
 
 const Chat = () => {

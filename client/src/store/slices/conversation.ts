@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { conversationSliceProps } from "../../types/types";
+import { conversationSliceProps } from "../../types";
 
 const initialState: conversationSliceProps = {
   direct_chat: {

@@ -32,6 +32,7 @@ import { MdDelete, MdOutlineCameraAlt } from "react-icons/md";
 import { IoMic, IoPlay } from "react-icons/io5";
 import { TiTick } from "react-icons/ti";
 import { RxCross2 } from "react-icons/rx";
+import { GoogleIcon } from "./SvgIcons";
 export const Icons = {
   XMarkIcon,
   PauseIcon,
@@ -66,7 +67,8 @@ export const Icons = {
   PauseSeconday: FaPause,
   DeleteIcon: MdDelete,
   PlaySeconday: IoPlay,
-  TickIcon: TiTick,
-  XMarkIconSecondary: RxCross2,
+  ToastSuccessIcon: TiTick,
+  ToastFailureIcon: RxCross2,
   CameraIconSecondary: MdOutlineCameraAlt,
+  GoogleIcon,
 };

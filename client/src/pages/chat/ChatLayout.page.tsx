@@ -27,10 +27,10 @@ import {
 } from "../../store/slices/conversation";
 import { updateChatType, updateFriends } from "../../store/slices/appSlice";
 import { connectSocket, socket } from "../../socket";
-import toast from "react-hot-toast";
 import Loader from "../../components/ui/Loader";
 import ImagePreview from "../../components/ImagePreview";
-import { DirectMessage, GroupMessage } from "../../types/types";
+import { DirectMessage, GroupMessage } from "../../types";
+import toast from "react-hot-toast";
 
 const ChatLayout = () => {
   const dispatch = useDispatch();
@@ -95,9 +95,9 @@ const ChatLayout = () => {
       }
     }
   }, [getConversationData]);
-
   // Hook for initiating a socket connection with server after user login
   useEffect(() => {
+    toast.error("hello")
     if (user?._id) {
       // Connect to the socket and set up event listeners
       connectSocket(user?._id)

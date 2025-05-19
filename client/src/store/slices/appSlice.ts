@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { appSliceProps } from "../../types/types";
+import { appSliceProps } from "../../types";
 
 const initialState: appSliceProps = {
   onlineStatus: true,

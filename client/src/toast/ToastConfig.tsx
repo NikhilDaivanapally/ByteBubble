@@ -4,7 +4,7 @@ import { Icons } from "../icons";
 const ToastConfig = () => {
   return (
     <Toaster
-      gutter={"-8"}
+      gutter={-8}
       position="bottom-right"
       reverseOrder={false}
       toastOptions={{
@@ -19,14 +19,14 @@ const ToastConfig = () => {
             secondary: "black",
           },
           icon: (
-            <Icons.TickIcon
+            <Icons.ToastSuccessIcon
               style={{ color: "lightgreen", fontSize: "1.3rem" }}
             />
           ),
         },
         error: {
           icon: (
-            <Icons.XMarkIconSecondary
+            <Icons.ToastFailureIcon
               style={{
                 color: "lightpink",
                 fontSize: "1.3rem",

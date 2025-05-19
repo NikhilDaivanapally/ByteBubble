@@ -5,7 +5,7 @@ import formatTime2 from "../utils/formatTime2";
 import WaveSurfer from "wavesurfer.js";
 import SenderFromGroup from "../utils/SenderFromGroup";
 import { RootState } from "../store/store";
-import { DirectMessage, GroupMessage } from "../types/types";
+import { DirectMessage, GroupMessage } from "../types";
 import { setfullImagePreview } from "../store/slices/conversation";
 import Loader from "./ui/Loader";
 import { Icons } from "../icons";
