@@ -222,8 +222,9 @@ io.on("connection", async (socket) => {
     let formatted;
     if (data?.chatType == "group") {
       formatted = formatGroupMessages(messages, data.authUserId);
+    } else {
+      formatted = formatDirectMessages(messages, data.authUserId);
     }
-    formatted = formatDirectMessages(messages, data.authUserId);
     callback(formatted);
   });
 
@@ -281,9 +282,8 @@ io.on("connection", async (socket) => {
           _GroupMessage
         );
         const socket_ids = recipients.map(async (id: string) => {
-          const { socket_id }: any = await User.findById(id).select(
-            "socket_id -_id"
-          );
+          const { socket_id }: any =
+            await User.findById(id).select("socket_id -_id");
           return socket_id;
         });
 
@@ -388,9 +388,8 @@ io.on("connection", async (socket) => {
           });
 
           const socket_ids = recipients.map(async (id: string) => {
-            const { socket_id }: any = await User.findById(id).select(
-              "socket_id -_id"
-            );
+            const { socket_id }: any =
+              await User.findById(id).select("socket_id -_id");
             return socket_id;
           });
 
@@ -484,9 +483,8 @@ io.on("connection", async (socket) => {
         );
 
         const socket_ids = recipients.map(async (id: string) => {
-          const { socket_id }: any = await User.findById(id).select(
-            "socket_id -_id"
-          );
+          const { socket_id }: any =
+            await User.findById(id).select("socket_id -_id");
           return socket_id;
         });
 
@@ -587,9 +585,8 @@ io.on("connection", async (socket) => {
           });
 
           const socket_ids = recipients.map(async (id: string) => {
-            const { socket_id }: any = await User.findById(id).select(
-              "socket_id -_id"
-            );
+            const { socket_id }: any =
+              await User.findById(id).select("socket_id -_id");
             return socket_id;
           });
 
@@ -625,9 +622,8 @@ io.on("connection", async (socket) => {
         break;
       case "OneToManyMessage":
         const socket_ids = message.recipients.map(async (id: string) => {
-          const { socket_id }: any = await User.findById(id).select(
-            "socket_id -_id"
-          );
+          const { socket_id }: any =
+            await User.findById(id).select("socket_id -_id");
           return socket_id;
         });
         Promise.all(socket_ids)
@@ -777,9 +773,8 @@ io.on("connection", async (socket) => {
       );
 
       const socket_ids = friends?.map(async (id: string) => {
-        const { socket_id }: any = await User.findById(id).select(
-          "socket_id -_id"
-        );
+        const { socket_id }: any =
+          await User.findById(id).select("socket_id -_id");
         return socket_id;
       });
       const EmmitStatusTo = await Promise.all(socket_ids);

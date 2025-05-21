@@ -1,15 +1,10 @@
-import {
-  ChatBubbleLeftRightIcon,
-  UserPlusIcon,
-  UsersIcon,
-} from "@heroicons/react/16/solid";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import {
   useFetchDirectConversationsQuery,
   useFetchFriendsQuery,
   useGetConversationMutation,
 } from "../../store/slices/apiSlice";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import {
@@ -31,14 +26,13 @@ import Loader from "../../components/ui/Loader";
 import ImagePreview from "../../components/ImagePreview";
 import { DirectMessage, GroupMessage } from "../../types";
 import { group, individual } from "../../utils/conversationTypes";
+import { navListData } from "../../data/navigation.data";
 
 const ChatLayout = () => {
   const dispatch = useDispatch();
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
-  const { chatType, activeChatId } = useSelector(
-    (state: RootState) => state.app
-  );
+  const { activeChatId } = useSelector((state: RootState) => state.app);
   const { direct_chat, group_chat, fullImagePreview } = useSelector(
     (state: RootState) => state.conversation
   );
@@ -51,31 +45,31 @@ const ChatLayout = () => {
 
   useEffect(() => {
     if (!DirectConversationData) return;
-    dispatch(setDirectConversations(DirectConversationData.data));
+    dispatch(setDirectConversations(DirectConversationData?.data));
   }, [DirectConversationData]);
 
   const { data: friendsData } = useFetchFriendsQuery({});
 
   useEffect(() => {
-    if (!friendsData && !friendsData.data) return;
-    dispatch(updateFriends(friendsData.data));
+    if (!friendsData && !friendsData?.data) return;
+    dispatch(updateFriends(friendsData?.data));
   }, [friendsData]);
 
   useEffect(() => {
     if (!ConversationData) return;
-    switch (ConversationData.data.messages[0]?.conversationType) {
+    switch (ConversationData?.data.messages[0]?.conversationType) {
       case individual:
         dispatch(
           addDirectConversation({
             auth: user,
-            conversation: ConversationData.data,
+            conversation: ConversationData?.data,
           })
         );
         break;
       case group:
         dispatch(
           addGroupConversation({
-            conversation: ConversationData.data,
+            conversation: ConversationData?.data,
             auth: user,
           })
         );
@@ -135,7 +129,6 @@ const ChatLayout = () => {
         break;
       case "/chat/group":
         dispatch(updateChatType("group"));
-
         break;
     }
   }, [pathname]);
@@ -271,69 +264,69 @@ const ChatLayout = () => {
 
   useEffect(() => {
     if (!isSocketConnected) return;
-      const handleUnreadMsgs = async (message) => {
-        switch (message?.conversationType) {
-          case individual:
-            const update_Direct_Conversation =
-              direct_chat?.DirectConversations?.find(
-                (el) => el.id == message?.conversationId
-              );
-            if (update_Direct_Conversation) {
-              dispatch(
-                updateDirectConversation({
-                  ...update_Direct_Conversation,
-                  message: {
-                    type: message?.messageType,
-                    message: message?.message,
-                    createdAt: message?.createdAt,
-                  },
-                  outgoing: message?.sender === user?._id,
-                  time: message?.createdAt,
-                  unread: (update_Direct_Conversation?.unread || 0) + 1,
-                })
-              );
-            } else {
-              await getConversation({
-                conversationId: message?.conversationId,
-                conversationType: message?.conversationType,
-              });
-            }
-            break;
-          case group:
-            const update_Group_Conversation =
-              group_chat?.GroupConversations?.find(
-                (el) => el.id == message?.conversationId
-              );
-            if (update_Group_Conversation) {
-              dispatch(
-                updateGroupConversation({
-                  ...update_Group_Conversation,
-                  outgoing: message?.sender === user?._id,
-                  message: {
-                    type: message?.messageType,
-                    message: message?.message,
-                    createdAt: message?.createdAt,
-                  },
-                  from: message?.sender,
-                  time: message?.createdAt,
-                  unread: (update_Group_Conversation?.unread || 0) + 1,
-                })
-              );
-            } else {
-              await getConversation({
-                conversationId: message?.conversationId,
-                conversationType: message?.conversationType,
-              });
-            }
-            break;
-          default:
-            break;
-        }
-      };
-      socket?.on("on_update_unreadMsg", handleUnreadMsgs);
-      return () => {
-        socket?.off("on_update_unreadMsg", handleUnreadMsgs);
-      };
+    const handleUnreadMsgs = async (message) => {
+      switch (message?.conversationType) {
+        case individual:
+          const update_Direct_Conversation =
+            direct_chat?.DirectConversations?.find(
+              (el) => el.id == message?.conversationId
+            );
+          if (update_Direct_Conversation) {
+            dispatch(
+              updateDirectConversation({
+                ...update_Direct_Conversation,
+                message: {
+                  type: message?.messageType,
+                  message: message?.message,
+                  createdAt: message?.createdAt,
+                },
+                outgoing: message?.sender === user?._id,
+                time: message?.createdAt,
+                unread: (update_Direct_Conversation?.unread || 0) + 1,
+              })
+            );
+          } else {
+            await getConversation({
+              conversationId: message?.conversationId,
+              conversationType: message?.conversationType,
+            });
+          }
+          break;
+        case group:
+          const update_Group_Conversation =
+            group_chat?.GroupConversations?.find(
+              (el) => el.id == message?.conversationId
+            );
+          if (update_Group_Conversation) {
+            dispatch(
+              updateGroupConversation({
+                ...update_Group_Conversation,
+                outgoing: message?.sender === user?._id,
+                message: {
+                  type: message?.messageType,
+                  message: message?.message,
+                  createdAt: message?.createdAt,
+                },
+                from: message?.sender,
+                time: message?.createdAt,
+                unread: (update_Group_Conversation?.unread || 0) + 1,
+              })
+            );
+          } else {
+            await getConversation({
+              conversationId: message?.conversationId,
+              conversationType: message?.conversationType,
+            });
+          }
+          break;
+        default:
+          break;
+      }
+    };
+    socket?.on("on_update_unreadMsg", handleUnreadMsgs);
+    return () => {
+      socket?.off("on_update_unreadMsg", handleUnreadMsgs);
+    };
   }, [
     isSocketConnected,
     direct_chat.DirectConversations,
@@ -343,7 +336,9 @@ const ChatLayout = () => {
   return (
     <>
       {!isSocketConnected ? (
-        <Loader customColor={true} />
+        <div className="w-full h-full flex-center">
+          <Loader customColor={true} />
+        </div>
       ) : (
         <div className="h-full bg-light overflow-y-hidden  dark:bg-dark flex flex-col-reverse lg:flex-row">
           <nav
@@ -352,22 +347,37 @@ const ChatLayout = () => {
             } lg:flex-col justify-between items-center px-4 py-2 lg:px-0 lg:py-4`}
           >
             <div>logo</div>
-            <ul className="flex gap-5 lg:flex-col relative h-full lg:h-fit lg:w-full justify-center items-center">
-              <Link to={"/chat"}>
-                <div className="w-fit aspect-square p-2 bg-btn-primary/20 rounded-lg cursor-pointer">
-                  <ChatBubbleLeftRightIcon className="w-7 fill-btn-primary" />
-                </div>
-              </Link>
-              <Link to="/chat/group">
-                <div className="w-fit aspect-square p-2 hover:bg-btn-primary/20  rounded-lg cursor-pointer">
-                  <UsersIcon className="w-7 fill-light stroke-[0.7px] stroke-black" />
-                </div>
-              </Link>
-              <div className="w-fit aspect-square p-2 hover:bg-btn-primary/20  rounded-lg cursor-pointer">
-                <UserPlusIcon className="w-7 fill-light stroke-[0.7px] stroke-black" />
-              </div>
+            <ul className="list-none flex gap-5 lg:flex-col relative h-full lg:h-fit lg:w-full justify-center items-center">
+              {navListData?.map(
+                (item: { path: string; icon: any }, i: number) => {
+                  return (
+                    <li
+                      key={i}
+                      className={`w-fit aspect-square p-2 ${
+                        pathname == item.path ? "bg-btn-primary/20" : ""
+                      } rounded-lg cursor-pointer`}
+                    >
+                      <Link to={item.path}>
+                        <div className="">
+                          <item.icon
+                            className={`w-7 ${
+                              pathname == item.path
+                                ? "fill-btn-primary"
+                                : "fill-light stroke-[0.7px] stroke-black"
+                            }`}
+                          />
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                }
+              )}
             </ul>
-            <img className="w-10 h-10 bg-gray-200 rounded-full" alt="" />
+            <img
+              className="w-12 h-12 object-cover rounded-full"
+              src={user?.avatar}
+              alt=""
+            />
           </nav>
           <div className="flex-1 overflow-hidden bg-light border-b md:border-l border-gray-300 lg:py-3">
             <Outlet />

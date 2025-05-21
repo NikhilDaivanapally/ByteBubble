@@ -13,7 +13,7 @@ import SortMessages from "../utils/sortMessages";
 import { MediaMsg, TextMsg, Timeline, AudioMsg } from "./MessageTypes";
 import SendText_AudioMessageInput from "./SendText_AudioMessageInput";
 import CameraModule from "./CameraModule";
-import { DirectMessage } from "../types";
+import { DirectMessage, GroupMessage } from "../types";
 import UploadedFileModule from "./UploadedFileModule";
 import NoChat from "./ui/NoChat";
 
@@ -44,7 +44,6 @@ const Chat = () => {
     messages: group_chat?.current_group_messages,
     sort: "Asc",
   });
-
   // Scroll to the bottom when messages change
   const scrollToBottomSmooth = () => {
     if (messagesListRef.current) {
@@ -186,7 +185,7 @@ const Chat = () => {
                         <Timeline date={date} />
                         {/* messages */}
                         {GroupMessagesObject[date].map(
-                          (el: DirectMessage, index: number) => {
+                          (el: GroupMessage, index: number) => {
                             switch (el.type) {
                               case "photo":
                                 return (

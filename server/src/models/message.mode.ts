@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { Message } from "../types/message.type";
-import { individual } from "../utils/conversationTypes";
+import { group, individual } from "../utils/conversationTypes";
 
 // Base message schema with discriminators for specific message types
 const messageSchema = new Schema<Message>(
@@ -26,7 +26,7 @@ const messageSchema = new Schema<Message>(
             const valid = mongoose.Types.ObjectId.isValid(recipients);
             return valid;
           } else if (
-            this.conversationType === "OneToManyMessage" &&
+            this.conversationType === group &&
             Array.isArray(recipients)
           ) {
             // Validate for an array of ObjectIds in OneToManyMessage
@@ -45,7 +45,24 @@ const messageSchema = new Schema<Message>(
       enum: ["text", "audio", "photo", "video", "link", "reply"],
       required: true,
     },
-    isRead: { type: Boolean, default: false },
+    isRead: {
+      type: mongoose.Schema.Types.Mixed,
+      default: function () {
+        return this.conversationType === "OneToOneMessage" ? false : [];
+      },
+      validate: {
+        validator: function (value) {
+          if (this.conversationType === individual) {
+            return typeof value === "boolean";
+          }
+          if (this.conversationType === group) {
+            return Array.isArray(value);
+          }
+          return false;
+        },
+        message: "Invalid isRead type for conversationType",
+      },
+    },
     conversationId: {
       type: mongoose.Schema.Types.ObjectId,
       refPath: "conversationType", // Dynamic reference
@@ -53,7 +70,7 @@ const messageSchema = new Schema<Message>(
     },
     conversationType: {
       type: String,
-      enum: [individual, "OneToManyMessage"], // The model this refers to
+      enum: [individual, group], // The model this refers to
       required: true,
     },
     createdAt: {

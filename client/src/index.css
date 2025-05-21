@@ -3,7 +3,11 @@
 
 @font-face {
   font-family: "gilroy";
-  src: url("../fonts/GILROY-MEDIUM.woff");
+  src: url("../fonts/GILROY-MEDIUM.woff2") format("woff"),
+    url("../fonts/GILROY-MEDIUM.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
 @theme {
@@ -65,8 +69,6 @@
       @apply h-4 w-4 rounded-full bg-blue-600 border-2 border-white shadow-md hover:bg-blue-700;
     }
   }
-
-
 }
 /* Customize Swiper pagination dots */
 .custom-swiper-pagination .swiper-pagination-bullet {

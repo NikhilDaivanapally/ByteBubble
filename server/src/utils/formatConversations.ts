@@ -116,7 +116,7 @@ const formatGroupConversations = (
   const formatted = conversations.map((el) => {
     const messages = el.messages || [];
     const lastMessage = messages.slice(-1)[0];
-    const unreadMessages = messages.filter(
+    const unreadMessages = messages?.filter(
       (msg) =>
         msg.recipients?.toString() === authUserId.toString() &&
         msg.isRead === false
@@ -131,24 +131,30 @@ const formatGroupConversations = (
       users: el?.participants,
       admin: el?.admin,
       message: {
-        type: lastMessage?.messageType,
-        message: lastMessage?.message,
-        createdAt: lastMessage?.createdAt,
+        type: lastMessage?.messageType || "",
+        message: lastMessage?.message || "",
+        createdAt: lastMessage?.createdAt || "",
       },
-      from: lastMessage?.sender,
-      outgoing: lastMessage?.sender?._id.toString() === authUserId.toString(),
+      from: lastMessage?.sender || "",
+      outgoing:
+        lastMessage?.sender?._id?.toString() === authUserId?.toString() || null,
       time: lastMessage?.createdAt || "",
       unread: unreadMessages?.length,
-      seen: lastMessage?.isRead,
+      seen: lastMessage?.isRead || "",
     };
   });
 
-  return formatted
-    .filter(Boolean)
+  const hasLastMessage = formatted
+    .filter((el) => el?.message.message && el?.time)
     .sort(
       (a: any, b: any) =>
         new Date(b.time).getTime() - new Date(a.time).getTime()
     );
+
+  const hasNoLastMessage = formatted.filter(
+    (el) => !el?.message.message && !el?.time
+  );
+  return [...hasLastMessage, ...hasNoLastMessage];
 };
 
 export { formatDirectConversations, formatGroupConversations };

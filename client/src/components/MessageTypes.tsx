@@ -14,11 +14,11 @@ type senderProps = { avatar: string; userName: string };
 
 const TextMsg = ({ el }: { el: DirectMessage | GroupMessage }) => {
   const { chatType } = useSelector((state: RootState) => state.app);
-  console.log(el);
   let sender: senderProps = { avatar: "", userName: "" };
   if (chatType == "group") {
     sender = SenderFromGroup(el);
   }
+
   const { Time } = formatTime(el.createdAt);
 
   return (
@@ -37,14 +37,14 @@ const TextMsg = ({ el }: { el: DirectMessage | GroupMessage }) => {
       <div className="space-y-1">
         {" "}
         <div
-          className={`px-2 py-1 rounded-xl ${
+          className={`px-2 py-1 rounded-xl  ${
             !el.incoming
               ? "bg-gray-300 rounded-br-none"
               : "bg-white rounded-bl-none"
           }`}
         >
           {chatType !== "individual" && (
-            <p className="userName">{sender?.userName}</p>
+            <p className="userName text-sm text-black/60">{sender?.userName}</p>
           )}
           <p>{el.message?.text}</p>
         </div>
@@ -107,10 +107,10 @@ const MediaMsg = ({
       )}
       <div className={`p-1 rounded-xl space-y-1 `}>
         <div
-          className={`Media_Container relative rounded-xl ${
+          className={`Media_Container p-1 relative border-1  shadow rounded-lg ${
             !el.incoming
-              ? "bg-gray-300 rounded-br-none"
-              : "bg-white rounded-bl-none"
+              ? "bg-gray-300 rounded-br-none border-transparent shadow-gray-400"
+              : "bg-white rounded-bl-none border-gray-200"
           }`}
         >
           {chatType !== "individual" && (
@@ -122,7 +122,7 @@ const MediaMsg = ({
             }}
           >
             <img
-              className="h-40 w-auto rounded-xl"
+              className="h-40 w-auto rounded-lg"
               src={el?.message?.photoUrl}
               alt={""}
               style={{ userSelect: "none" }}
@@ -135,13 +135,13 @@ const MediaMsg = ({
             )}
           </div>
           {el?.message?.description && (
-            <p className="text-sm">{el?.message?.description}</p>
+            <p className="text-sm px-2 py-1">{el?.message?.description}</p>
           )}
         </div>
         <div className="w-fit ml-auto flex gap-2">
           {!el?.incoming ? (
             el?.status === "pending" ? (
-              <LuClock4 />
+              <Icons.ClockIcon />
             ) : (
               <div className="flex-center gap-1">
                 <div
@@ -295,7 +295,7 @@ const AudioMsg = ({ el }: { el: DirectMessage | GroupMessage }) => {
           <div className="w-fit ml-auto flex gap-2">
             {!el?.incoming ? (
               el?.status === "pending" ? (
-                <LuClock4 />
+                <Icons.ClockIcon />
               ) : (
                 <div className="flex-center gap-1">
                   <div

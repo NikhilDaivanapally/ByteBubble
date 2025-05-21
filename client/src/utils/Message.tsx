@@ -5,9 +5,11 @@ const Message = (msg: any) => {
   switch (msg?.type) {
     case "photo":
       message = (
-        <div className="flex-center gap-1">
-          <Icons.CameraIconSecondary />
-          <>{msg?.message?.description ? msg?.message?.description : "Photo"}</>
+        <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
+          <Icons.CameraIconSecondary className="shrink-0 leading-0" />
+          <span className="overflow-hidden whitespace-nowrap text-ellipsis block">
+            {msg?.message?.description ? msg?.message?.description : "Photo"}
+          </span>
         </div>
       );
       break;

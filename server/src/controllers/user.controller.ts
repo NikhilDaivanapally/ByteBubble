@@ -273,6 +273,7 @@ const getGroupConversations = async (
   res: Response
 ) => {
   try {
+    console.log(req.user?._id);
     const Existing_Group_Conversations = await OneToManyMessage.aggregate([
       {
         $match: {
@@ -406,6 +407,7 @@ const getGroupConversations = async (
     });
     return;
   } catch (err) {
+    console.log(err)
     // Handle error appropriately
     res.status(400).json({
       status: "Error",
