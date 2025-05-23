@@ -4,6 +4,8 @@ import { appSliceProps } from "../../types";
 const initialState: appSliceProps = {
   onlineStatus: true,
   friends: [],
+  friendRequests: [],
+  users: [],
   activeChatId: null,
   chatType: null,
   isCameraOpen: false,
@@ -39,6 +41,15 @@ const slice = createSlice({
     updateMediaPreviewUrls(state, action) {
       state.mediaPreviewUrls = action.payload;
     },
+    setUsers(state, action) {
+      state.users = action.payload;
+    },
+    setFriends(state, action) {
+      state.friends = action.payload;
+    },
+    setFriendRequests(state, action) {
+      state.friendRequests = action.payload;
+    },
   },
 });
 export const {
@@ -49,6 +60,9 @@ export const {
   updateChatType,
   updateMediaFiles,
   updateMediaPreviewUrls,
+  setUsers,
+  setFriends,
+  setFriendRequests,
 } = slice.actions;
 
 export default slice.reducer;

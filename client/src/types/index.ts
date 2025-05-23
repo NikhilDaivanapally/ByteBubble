@@ -9,6 +9,13 @@ export type User = {
   status: string;
   verified: boolean;
   createdAt: string;
+  updatedAt: string;
+};
+
+export type FriendRequest = {
+  _id: string;
+  sender: User;
+  recipient: User;
 };
 
 // export type friend = {};
@@ -43,7 +50,7 @@ export type DirectConversation = {
 export type DirectMessage = {
   id: string;
   type: string;
-  sender:string,
+  sender: string;
   message: {
     _id?: string;
     text?: string;
@@ -116,6 +123,8 @@ export type previewObj = {
 export type appSliceProps = {
   onlineStatus: boolean;
   friends: User[] | [];
+  friendRequests: FriendRequest[] | [];
+  users: User[] | [];
   activeChatId: string | null;
   chatType: string | null;
   isCameraOpen: boolean;

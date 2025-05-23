@@ -67,7 +67,7 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
-    users: builder.query({
+    fetchUsers: builder.query({
       query: () => "/v1/user/get_users",
       keepUnusedDataFor: 2, // cache duration in seconds
     }),
@@ -102,7 +102,7 @@ export const {
   useLoginMutation,
   useForgotpassMutation,
   useResetpassMutation,
-  useUsersQuery,
+  useFetchUsersQuery,
   useFetchFriendsQuery,
   useFriendrequestsQuery,
   useFetchDirectConversationsQuery,

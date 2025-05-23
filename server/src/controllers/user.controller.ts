@@ -47,8 +47,9 @@ const updateProfile = async (req: updateProfileRequest, res: Response) => {
 const getUsers = async (req: updateProfileRequest, res: Response) => {
   const currentUserId = req.user?._id;
   const all_users = await User.find({ verified: true }).select(
-    "_id userName avatar about socket_id"
+    "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
   );
+
   // Fetch friendships where the current user is either sender or recipient
   const currentuser_friends = await Friendship.find({
     $or: [{ sender: currentUserId }, { recipient: currentUserId }],
@@ -166,7 +167,8 @@ const getFriendrequest = async (req: updateProfileRequest, res: Response) => {
     .select("_id sender recipient")
     .populate({
       path: "sender recipient",
-      select: "_id userName avatar status",
+      select:
+        "_id email userName avatar about gender socket_id status verified createdAt updatedAt",
     });
   // console.log(requests);
   res.status(200).json({
@@ -407,7 +409,7 @@ const getGroupConversations = async (
     });
     return;
   } catch (err) {
-    console.log(err)
+    console.log(err);
     // Handle error appropriately
     res.status(400).json({
       status: "Error",

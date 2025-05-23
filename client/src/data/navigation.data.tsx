@@ -10,7 +10,7 @@ const navListData = [
     icon: Icons.UsersIcon,
   },
   {
-    path: "/",
+    path: "/connect",
     icon: Icons.UserPlusIcon,
   },
 ];

@@ -15,6 +15,7 @@ import GroupChat from "./pages/chat/GroupChat.page";
 import { updateOnlineStatus } from "./store/slices/appSlice";
 import { useEffect } from "react";
 import { ProtectedPage } from "./pages/chat/ProtectedRoute.page";
+import Connect from "./pages/chat/Connect.page";
 const App = () => {
   const dispatch = useDispatch();
   const { theme } = useSelector((state: RootState) => state.theme);
@@ -67,6 +68,7 @@ const App = () => {
       children: [
         { path: "/chat", element: <IndividualChat /> },
         { path: "/chat/group", element: <GroupChat /> },
+        { path: "/connect", element: <Connect /> },
       ],
     },
   ]);

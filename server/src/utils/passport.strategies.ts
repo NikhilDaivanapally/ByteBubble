@@ -74,7 +74,7 @@ passport.serializeUser((user: any, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id).select(
-      "_id email userName avatar about gender socket_id status verified createdAt"
+      "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
     );
     done(null, user);
   } catch (error) {
