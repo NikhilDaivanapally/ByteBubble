@@ -19,18 +19,19 @@ const ToastConfig = () => {
             secondary: "black",
           },
           icon: (
-            <Icons.ToastSuccessIcon
-              style={{ color: "lightgreen", fontSize: "1.3rem" }}
+            <Icons.CheckIcon
+              style={{ color: "lightgreen", fontSize: "1.3rem", width: "20px" }}
             />
           ),
         },
         error: {
           icon: (
-            <Icons.ToastFailureIcon
+            <Icons.XMarkIcon
               style={{
                 color: "lightpink",
                 fontSize: "1.3rem",
                 fontWeight: "600",
+                width: "20px",
               }}
             />
           ),

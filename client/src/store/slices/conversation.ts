@@ -49,7 +49,6 @@ const slice = createSlice({
           return action.payload;
         }
       });
-      console.log(action.payload,list)
       const filterList = list?.filter((val) => val);
       filterList?.sort((a, b) => Date.parse(b.time) - Date.parse(a.time));
       state.direct_chat.DirectConversations = filterList || [];

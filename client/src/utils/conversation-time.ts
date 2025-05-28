@@ -1,5 +1,5 @@
-import formatTime from "./formatTime";
-import formatTime2 from "./formatTime2";
+import formatTime from "./format-time";
+import formatTime2 from "./format-time2";
 
 const ConversationTime = (time: any) => {
   let Time;

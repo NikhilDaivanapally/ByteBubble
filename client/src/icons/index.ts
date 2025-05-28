@@ -23,6 +23,8 @@ import {
   ChatBubbleLeftRightIcon,
   UserPlusIcon,
   UsersIcon,
+  CheckIcon,
+  UserIcon,
 } from "@heroicons/react/16/solid";
 import { LuClock4, LuSend, LuSmile } from "react-icons/lu";
 import { RiAttachment2 } from "react-icons/ri";
@@ -58,6 +60,8 @@ export const Icons = {
   ChatBubbleLeftRightIcon,
   UserPlusIcon,
   UsersIcon,
+  CheckIcon,
+  UserIcon,
   ClockIcon: LuClock4,
   SendIcon: LuSend,
   SmileIcon: LuSmile,
@@ -67,8 +71,6 @@ export const Icons = {
   PauseSeconday: FaPause,
   DeleteIcon: MdDelete,
   PlaySeconday: IoPlay,
-  ToastSuccessIcon: TiTick,
-  ToastFailureIcon: RxCross2,
   CameraIconSecondary: MdOutlineCameraAlt,
   GoogleIcon,
 };

@@ -5,7 +5,7 @@ import {
   updateMediaPreviewUrls,
   updateOpenCamera,
 } from "../store/slices/appSlice";
-import { parseFiles } from "../utils/parseFiles";
+import { parseFiles } from "../utils/parse-files";
 import { Icons } from "../icons";
 
 const CameraModule = () => {

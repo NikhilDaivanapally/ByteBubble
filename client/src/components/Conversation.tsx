@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
-import ConversationTime from "../utils/ConversationTime";
-import Message from "../utils/Message";
+import ConversationTime from "../utils/conversation-time";
+import getFormattedMessage from "../utils/Message";
 import { RootState } from "../store/store";
 import React, { useCallback, useMemo } from "react";
 import { selectConversation } from "../store/slices/appSlice";
@@ -30,7 +30,7 @@ const DirectConversation: React.FC<ConversationProps> = ({ conversation }) => {
     unread,
   } = conversation;
   const Time = useMemo(() => ConversationTime(time), [time]);
-  const { message } = useMemo(() => Message(msg), [msg]);
+  const { message } = useMemo(() => getFormattedMessage(msg), [msg]);
   const dispatch = useDispatch();
   const auth = useSelector((state: RootState) => state.auth.user);
   const { DirectConversations } = useSelector(
@@ -81,7 +81,7 @@ const DirectConversation: React.FC<ConversationProps> = ({ conversation }) => {
         )}
       </div>
 
-      {/* Name and Message */}
+      {/* Name and getFormattedMessage */}
       <div className="info flex-1 min-w-0">
         <p className="friend_name">{name}</p>
         <div className="text-black/60 text-sm flex items-center gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
@@ -135,7 +135,7 @@ const GroupConversation: React.FC<ConversationProps> = React.memo(
       unread,
     } = conversation;
     const Time = useMemo(() => (time ? ConversationTime(time) : null), [time]);
-    const message = useMemo(() => (msg ? Message(msg) : null), [msg]);
+    const message = useMemo(() => (msg ? getFormattedMessage(msg) : null), [msg]);
     const dispatch = useDispatch();
     const { GroupConversations } = useSelector(
       (state: RootState) => state.conversation.group_chat
@@ -183,7 +183,7 @@ const GroupConversation: React.FC<ConversationProps> = React.memo(
           )}
         </div>
 
-        {/* Group Name and Message */}
+        {/* Group Name and getFormattedMessage */}
         <div className="info flex-1 min-w-0">
           <p className="friend_name">{groupName}</p>
           {from && message?.message && (

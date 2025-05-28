@@ -240,6 +240,7 @@ const getDirectConversations = async (
             gender: 1,
             avatar: 1,
             about: 1,
+            socket_id: 1,
             createdAt: 1,
             updatedAt: 1,
             status: 1,

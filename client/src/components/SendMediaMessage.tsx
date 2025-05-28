@@ -12,7 +12,7 @@ import {
   updateMediaPreviewUrls,
 } from "../store/slices/appSlice";
 import { Icons } from "../icons";
-import { group, individual } from "../utils/conversationTypes";
+import { group, individual } from "../utils/conversation-types";
 
 const SendMediaMessage = () => {
   const dispatch = useDispatch();

@@ -1,14 +1,32 @@
+import { ReactNode } from "react";
 import { Icons } from "../icons";
 
-const Message = (msg: any) => {
-  let message;
+type MessageType = "text" | "photo" | "audio" | "link";
+
+type MessageContent = {
+  text?: string;
+  description?: string;
+};
+
+type MessageInput = {
+  type?: MessageType;
+  message?: MessageContent;
+};
+
+type FormattedMessage = {
+  message: ReactNode;
+};
+
+const getFormattedMessage = (msg: MessageInput): FormattedMessage => {
+  let message: ReactNode = null;
+
   switch (msg?.type) {
     case "photo":
       message = (
         <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
           <Icons.CameraIconSecondary className="shrink-0 leading-0" />
           <span className="overflow-hidden whitespace-nowrap text-ellipsis block">
-            {msg?.message?.description ? msg?.message?.description : "Photo"}
+            {msg?.message?.description || "Photo"}
           </span>
         </div>
       );
@@ -22,15 +40,14 @@ const Message = (msg: any) => {
       );
       break;
     case "text":
-      message = msg?.message?.text;
-      break;
     case "link":
-      message = msg?.message?.text;
+      message = msg?.message?.text || "";
       break;
     default:
-      break;
+      message = null;
   }
+
   return { message };
 };
 
-export default Message;
+export default getFormattedMessage;

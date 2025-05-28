@@ -1,4 +1,4 @@
-import formatDate from "./formatDate";
+import formatDate from "./format-date";
 
 type Message = {
   id: string;

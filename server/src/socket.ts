@@ -14,6 +14,8 @@ import {
   formatGroupMessages,
 } from "./utils/formatMessages";
 import { individual } from "./utils/conversationTypes";
+import mongoose from "mongoose";
+import { formatDirectConversations } from "./utils/formatConversations";
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -113,11 +115,11 @@ io.on("connection", async (socket) => {
     const { sender, recipient } = data;
     // sender
     const Sender = await User.findById(sender).select(
-      "_id userName avatar about socket_id"
+      "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
     );
     // recipient
     const Recipient = await User.findById(recipient).select(
-      "_id userName avatar about socket_id"
+      "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
     );
 
     const friendship = await Friendship.create({
@@ -126,10 +128,11 @@ io.on("connection", async (socket) => {
     });
 
     const FriendRequestData = await Friendship.findById(friendship._id)
-      .select("_id sender")
+      .select("_id sender recipient")
       .populate({
-        path: "sender",
-        select: "_id userName avatar status",
+        path: "sender recipient",
+        select:
+          "_id email userName avatar about gender socket_id status verified createdAt updatedAt",
       });
 
     io.to(Recipient?.socket_id!).emit("new_friendrequest", {
@@ -154,10 +157,10 @@ io.on("connection", async (socket) => {
         if (!request_doc) return;
 
         const sender = await User.findById(request_doc.sender).select(
-          "_id userName email about avatar verified status socket_id"
+          "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
         );
         const receiver = await User.findById(request_doc.recipient).select(
-          "_id userName email about avatar verified status socket_id"
+          "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
         );
 
         if (!sender || !receiver) return;
@@ -182,23 +185,123 @@ io.on("connection", async (socket) => {
     }
   );
 
-  socket.on("start_conversation", async (data) => {
-    const { to, from } = data;
+  socket.on("start_conversation", async ({ to, from }) => {
+    console.log(to, from);
+    try {
+      if (!to || !from) {
+        return socket.emit("error", {
+          message: "Both sender and recipient are required.",
+        });
+      }
+
+      // check if a conversation already exists
+      const exisitingConversation = await OneToOneMessage.findOne({
+        participants: { $all: [to, from] },
+      });
+
+      // If it doesn't exist, create a new one
+      if (!exisitingConversation) {
+        await OneToOneMessage.create({ participants: [from, to] });
+      }
+
+      // Fetch the conversation and associated data
+      const conversation = await OneToOneMessage.aggregate([
+        {
+          $match: {
+            participants: {
+              $all: [
+                new mongoose.Types.ObjectId(from),
+                new mongoose.Types.ObjectId(to),
+              ],
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            let: { participants: "$participants" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $in: ["$_id", "$$participants"] },
+                      { $ne: ["$_id", new mongoose.Types.ObjectId(from)] },
+                    ],
+                  },
+                },
+              },
+              {
+                $project: {
+                  password: 0,
+                  passwordResetExpires: 0,
+                  passwordResetToken: 0,
+                  confirmPassword: 0,
+                  verified: 0,
+                  otp_expiry_time: 0,
+                  otp: 0,
+                  __v: 0,
+                },
+              },
+            ],
+            as: "user",
+          },
+        },
+        {
+          $unwind: "$user",
+        },
+        {
+          $lookup: {
+            from: "messages",
+            localField: "_id",
+            foreignField: "conversationId",
+            as: "messages",
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            messages: 1,
+            user: {
+              _id: 1,
+              userName: 1,
+              email: 1,
+              gender: 1,
+              avatar: 1,
+              about: 1,
+              socket_id: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              status: 1,
+            },
+          },
+        },
+      ]);
+
+      if (conversation.length === 0) {
+        return socket.emit("error", { message: "Conversation not found." });
+      }
+
+      // Format the data
+      const formattedConversations = formatDirectConversations(
+        conversation,
+        from
+      );
+
+      console.log(formattedConversations);
+      // Emit the result
+      socket.emit("start_chat", formattedConversations[0]);
+    } catch (error) {
+      socket.emit("error", { message: "Failed to initiate chat." });
+    }
+
     const existing_conversations = await OneToOneMessage.find({
       participants: { $all: [to, from] },
-    })
-      .populate("participants")
-      .select("userName avatar _id email status");
+    });
     if (existing_conversations.length === 0) {
-      let chat = await OneToOneMessage.create({
+      await OneToOneMessage.create({
         participants: [to, from],
       });
-      let new_chat = await OneToOneMessage.findById(chat._id)
-        .populate("participants")
-        .select("userName avatar _id email status");
-      socket.emit("start_chat", new_chat);
-    } else {
-      socket.emit("start_chat", existing_conversations[0]);
     }
   });
 

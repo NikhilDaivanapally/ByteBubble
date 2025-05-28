@@ -50,6 +50,22 @@ const slice = createSlice({
     setFriendRequests(state, action) {
       state.friendRequests = action.payload;
     },
+    addFriend(state, action) {
+      state.friends = [...state?.friends, action.payload];
+    },
+    addFriendRequest(state, action) {
+      state.friendRequests = [...state.friendRequests, action.payload];
+    },
+    removeUserFromUsers(state, action) {
+      state.users = state.users?.filter(
+        (el) => el?._id !== action?.payload?._id
+      );
+    },
+    removeRequestFromFriendRequests(state, action) {
+      state.friendRequests = state.friendRequests?.filter(
+        (el) => el?._id !== action?.payload?._id
+      );
+    },
   },
 });
 export const {
@@ -63,6 +79,10 @@ export const {
   setUsers,
   setFriends,
   setFriendRequests,
+  addFriend,
+  addFriendRequest,
+  removeUserFromUsers,
+  removeRequestFromFriendRequests,
 } = slice.actions;
 
 export default slice.reducer;

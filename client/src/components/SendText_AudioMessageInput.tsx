@@ -14,9 +14,9 @@ import {
   updateMediaPreviewUrls,
   updateOpenCamera,
 } from "../store/slices/appSlice";
-import { parseFiles } from "../utils/parseFiles";
+import { parseFiles } from "../utils/parse-files";
 import { Icons } from "../icons";
-import { group, individual } from "../utils/conversationTypes";
+import { group, individual } from "../utils/conversation-types";
 
 const SendText_AudioMessageInput = () => {
   const dispatch = useDispatch();

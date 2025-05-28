@@ -42,7 +42,7 @@ const ConnectUsers = () => {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.3 }}
-                      className="w-full max-w-md mx-auto border border-btn-primary flex items-center gap-x-4 py-2 rounded-full px-3 cursor-pointer"
+                      className="w-full max-w-md mx-auto border border-purple-200 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-x-4 py-3 px-3 cursor-pointer"
                     >
                       {/* Avatar */}
                       <div className="w-10 h-10 relative shrink-0">
@@ -55,7 +55,14 @@ const ConnectUsers = () => {
                           <span className="w-2 h-2 absolute bottom-0 right-0 bg-green-600 rounded-full"></span>
                         )}
                       </div>
-                      <p>{user.userName}</p>
+                      <div>
+                        <p className="text-base font-medium text-gray-900">
+                          {user.userName}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {online ? "Online" : "Offline"}
+                        </p>
+                      </div>
                       <Button
                         kind="primary"
                         className="ml-auto"
@@ -70,7 +77,7 @@ const ConnectUsers = () => {
             </ul>
           ) : (
             <div className="w-full h-full flex-center">
-              <p>No Friend Requests Found</p>
+              <p>No Users Found</p>
             </div>
           )}
         </>

@@ -4,7 +4,7 @@ import {
   useFetchFriendsQuery,
   useGetConversationMutation,
 } from "../../store/slices/apiSlice";
-import { ReactNode, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import {
@@ -20,13 +20,23 @@ import {
   updateExistingGroupMessage,
   updateGroupConversation,
 } from "../../store/slices/conversation";
-import { updateChatType, updateFriends } from "../../store/slices/appSlice";
+import {
+  addFriend,
+  addFriendRequest,
+  removeRequestFromFriendRequests,
+  removeUserFromUsers,
+  selectConversation,
+  updateChatType,
+  updateFriends,
+} from "../../store/slices/appSlice";
 import { connectSocket, socket } from "../../socket";
 import Loader from "../../components/ui/Loader";
 import ImagePreview from "../../components/ImagePreview";
 import { DirectMessage, GroupMessage } from "../../types";
-import { group, individual } from "../../utils/conversationTypes";
+import { group, individual } from "../../utils/conversation-types";
 import { navListData } from "../../data/navigation.data";
+import toast from "react-hot-toast";
+import { DirectConversation as DirectConversationProps } from "../../types";
 
 const ChatLayout = () => {
   const dispatch = useDispatch();
@@ -92,32 +102,32 @@ const ChatLayout = () => {
         setIsSocketConnected(false);
       });
 
-    // // Set up socket event listeners
-    // const handleNewFriendRequest = (data) => {
-    //   toast.success(data.message);
-    //   dispatch(addFriendRequest(data?.friendRequest));
-    //   dispatch(removeUserFromUsers(data?.user));
-    // };
-    // const handleRequestAccepted = (data) => {
-    //   toast.success(data.message);
-    //   dispatch(removeRequestFromFriendRequests(data?.data));
-    //   dispatch(addFriend(data?.friend));
-    // };
-    // const handleRequestSent = (data) => {
-    //   toast.success(data.message);
-    //   dispatch(addFriendRequest(data?.friendRequest));
-    //   dispatch(removeUserFromUsers(data?.user));
-    // };
-    // socket.on("new_friendrequest", handleNewFriendRequest);
-    // socket.on("friendrequest_accepted", handleRequestAccepted);
-    // socket.on("friendrequest_sent", handleRequestSent);
+    // Set up socket event listeners
+    const handleNewFriendRequest = (data: any) => {
+      toast.success(data.message);
+      dispatch(addFriendRequest(data?.friendRequest));
+      dispatch(removeUserFromUsers(data?.user));
+    };
+    const handleRequestAccepted = (data: any) => {
+      toast.success(data.message);
+      dispatch(removeRequestFromFriendRequests(data?.data));
+      dispatch(addFriend(data?.friend));
+    };
+    const handleRequestSent = (data: any) => {
+      toast.success(data.message);
+      dispatch(addFriendRequest(data?.friendRequest));
+      dispatch(removeUserFromUsers(data?.user));
+    };
+    socket.on("new_friendrequest", handleNewFriendRequest);
+    socket.on("friendrequest_accepted", handleRequestAccepted);
+    socket.on("friendrequest_sent", handleRequestSent);
 
-    // // Clean up socket event listeners on component unmount
-    // return () => {
-    //   socket?.off("new_friendrequest");
-    //   socket?.off("friendrequest_accepted");
-    //   socket?.off("friendrequest_sent");
-    // };
+    // Clean up socket event listeners on component unmount
+    return () => {
+      socket?.off("new_friendrequest");
+      socket?.off("friendrequest_accepted");
+      socket?.off("friendrequest_sent");
+    };
   }, [user?._id]);
 
   // update the chatType based on Path
@@ -332,6 +342,30 @@ const ChatLayout = () => {
     direct_chat.DirectConversations,
     group_chat.GroupConversations,
   ]);
+
+  // Handle incoming chat starts
+  const handleStartChat = useCallback(
+    (data: DirectConversationProps) => {
+      console.log(data);
+      const existing = direct_chat.DirectConversations?.find(
+        (el) => el.id === data.id
+      );
+      if (existing) {
+        dispatch(updateDirectConversation(data));
+      } else {
+        dispatch(addDirectConversation(data));
+      }
+      dispatch(selectConversation({ chatId: data.id }));
+    },
+    [direct_chat.DirectConversations, dispatch]
+  );
+
+  useEffect(() => {
+    socket.on("start_chat", handleStartChat);
+    return () => {
+      socket.off("start_chat", handleStartChat);
+    };
+  }, [handleStartChat]);
 
   return (
     <>

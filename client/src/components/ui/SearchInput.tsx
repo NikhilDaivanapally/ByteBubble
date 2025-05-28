@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import useDebounce from "../../hooks/useDebounce";
+import useDebounce from "../../hooks/use-debounce";
 import { Icons } from "../../icons";
 
 type SearchInputProps = {
   setFilteredConversations: React.Dispatch<React.SetStateAction<any>>;
-  conversations: any;
+  conversations: any[];
 };
 
 const SearchInput: React.FC<SearchInputProps> = ({
@@ -12,7 +12,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   conversations,
 }) => {
   const [filter, setFilter] = useState("");
-  const inputRef = useRef<null | HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [isFocused, setIsFocused] = useState(false);
 
   const handleWrapperFocus = useCallback(() => {
@@ -35,22 +35,23 @@ const SearchInput: React.FC<SearchInputProps> = ({
     setFilter("");
   }, []);
 
-  const handlFilterConversation = () => {
-    let value = filter.toLowerCase();
-    const regex = new RegExp(`^${value?.trim()}`, "i");
-    const filteredConversations = value
-      ? conversations?.filter((el: any) => regex.test(el.name.toLowerCase()))
+  const handleFilterConversation = () => {
+    const value = filter.toLowerCase().trim();
+    const regex = new RegExp(value, "i");
+
+    const filtered = value
+      ? conversations.filter(
+          (conv) => regex.test(conv?.name) || regex.test(conv?.email)
+        )
       : conversations;
-    setFilteredConversations(filteredConversations);
+    setFilteredConversations(filtered);
   };
 
-  const debounce = useDebounce({ func: handlFilterConversation, delay: 300 });
+  const debounce = useDebounce({ func: handleFilterConversation, delay: 300 });
 
   useEffect(() => {
-    if (filter) {
-      debounce();
-    }
-  }, [filter]);
+    debounce();
+  }, [filter, conversations]);
 
   return (
     <div
@@ -64,8 +65,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
       <Icons.MagnifyingGlassIcon className="w-5 text-gray-500" />
       <input
         ref={inputRef}
-        placeholder="Search"
-        tabIndex={-1} // prevent tab focusing the input before wrapper
+        placeholder="Search by name, email"
+        tabIndex={-1}
         className="h-10 flex-1 border-none outline-none bg-transparent"
         value={filter}
         onChange={handleFilterChange}

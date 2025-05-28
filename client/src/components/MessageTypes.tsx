@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import formatTime from "../utils/formatTime";
-import formatTime2 from "../utils/formatTime2";
+import formatTime from "../utils/format-time";
+import formatTime2 from "../utils/format-time2";
 import WaveSurfer from "wavesurfer.js";
-import SenderFromGroup from "../utils/SenderFromGroup";
+import getSenderFromGroup from "../utils/get-sender-from-group";
 import { RootState } from "../store/store";
 import { DirectMessage, GroupMessage } from "../types";
 import { setfullImagePreview } from "../store/slices/conversation";
@@ -14,9 +14,12 @@ type senderProps = { avatar: string; userName: string };
 
 const TextMsg = ({ el }: { el: DirectMessage | GroupMessage }) => {
   const { chatType } = useSelector((state: RootState) => state.app);
+  const { GroupConversations } = useSelector(
+    (state: RootState) => state.conversation.group_chat
+  );
   let sender: senderProps = { avatar: "", userName: "" };
   if (chatType == "group") {
-    sender = SenderFromGroup(el);
+    sender = getSenderFromGroup(el, chatType, GroupConversations);
   }
 
   const { Time } = formatTime(el.createdAt);
@@ -84,10 +87,12 @@ const MediaMsg = ({
   scrollToBottom: () => void;
 }) => {
   const { chatType } = useSelector((state: RootState) => state.app);
-
+  const { GroupConversations } = useSelector(
+    (state: RootState) => state.conversation.group_chat
+  );
   let sender: senderProps = { avatar: "", userName: "" };
   if (chatType == "group") {
-    sender = SenderFromGroup(el);
+    sender = getSenderFromGroup(el, chatType, GroupConversations);
   }
   const dispatch = useDispatch();
   const { Time } = formatTime(el?.createdAt);
@@ -167,7 +172,6 @@ const MediaMsg = ({
 };
 
 const AudioMsg = ({ el }: { el: DirectMessage | GroupMessage }) => {
-  const { chatType } = useSelector((state: RootState) => state.app);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -176,9 +180,13 @@ const AudioMsg = ({ el }: { el: DirectMessage | GroupMessage }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const waveformRef = useRef<HTMLDivElement | null>(null);
   const waveSurferRef = useRef<WaveSurfer | null>(null);
+  const { chatType } = useSelector((state: RootState) => state.app);
+  const { GroupConversations } = useSelector(
+    (state: RootState) => state.conversation.group_chat
+  );
   let sender: senderProps = { avatar: "", userName: "" };
   if (chatType == "group") {
-    sender = SenderFromGroup(el);
+    sender = getSenderFromGroup(el, chatType, GroupConversations);
   }
   const { Time } = formatTime(el?.createdAt);
   useEffect(() => {
@@ -322,7 +330,7 @@ const AudioMsg = ({ el }: { el: DirectMessage | GroupMessage }) => {
         ref={audioRef}
         hidden
         controls
-        src={audioUrl || ""}
+        src={audioUrl || null}
         className="audioPlayer"
       />
     </div>

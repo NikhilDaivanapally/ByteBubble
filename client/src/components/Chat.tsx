@@ -9,7 +9,7 @@ import {
   setCurrentDirectConversation,
   setCurrentGroupConversation,
 } from "../store/slices/conversation";
-import SortMessages from "../utils/sortMessages";
+import SortMessages from "../utils/sort-messages";
 import { MediaMsg, TextMsg, Timeline, AudioMsg } from "./MessageTypes";
 import SendText_AudioMessageInput from "./SendText_AudioMessageInput";
 import CameraModule from "./CameraModule";
@@ -26,7 +26,7 @@ const Chat = () => {
   const { activeChatId, chatType, isCameraOpen } = useSelector(
     (state: RootState) => state.app
   );
-  const [isloading, setIsloading] = useState(false);
+  const [isloading, setIsLoading] = useState(true);
   const messagesListRef = useRef<HTMLUListElement | null>(null);
 
   const {
@@ -73,6 +73,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (!activeChatId) return;
+    setIsLoading(true);
     switch (chatType) {
       case "individual":
         const currentDirectChat = direct_chat?.DirectConversations?.find(
@@ -88,16 +89,17 @@ const Chat = () => {
             },
             (data: any) => {
               dispatch(setCurrentDirectMessages(data));
-              setIsloading(false);
+
+              setIsLoading(false);
             }
           );
           dispatch(setCurrentDirectConversation(currentDirectChat));
         } else {
-          setIsloading(false);
+          setIsLoading(false);
         }
         break;
       case "group":
-        setIsloading(true);
+        setIsLoading(true);
         const currentGroupChat = group_chat.GroupConversations?.find(
           (el: any) => el?.id === activeChatId
         );
@@ -110,7 +112,7 @@ const Chat = () => {
           },
           (data: any) => {
             dispatch(setCurrentGroupMessages(data));
-            setIsloading(false);
+            setIsLoading(false);
           }
         );
         dispatch(setCurrentGroupConversation(currentGroupChat));
