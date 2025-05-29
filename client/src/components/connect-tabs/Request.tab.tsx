@@ -8,7 +8,6 @@ import Button from "../ui/Button";
 import { motion, AnimatePresence } from "motion/react";
 import { socket } from "../../socket";
 import { Icons } from "../../icons";
-import toast from "react-hot-toast";
 
 const Requests = () => {
   const dispatch = useDispatch<AppDispatch>();

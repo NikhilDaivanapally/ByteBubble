@@ -25,6 +25,10 @@ import {
   UsersIcon,
   CheckIcon,
   UserIcon,
+  ArrowLeftIcon,
+  PhoneIcon,
+  VideoCameraIcon,
+  EllipsisVerticalIcon,
 } from "@heroicons/react/16/solid";
 import { LuClock4, LuSend, LuSmile } from "react-icons/lu";
 import { RiAttachment2 } from "react-icons/ri";
@@ -62,6 +66,10 @@ export const Icons = {
   UsersIcon,
   CheckIcon,
   UserIcon,
+  ArrowLeftIcon,
+  PhoneIcon,
+  VideoCameraIcon,
+  EllipsisVerticalIcon,
   ClockIcon: LuClock4,
   SendIcon: LuSend,
   SmileIcon: LuSmile,

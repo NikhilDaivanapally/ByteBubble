@@ -16,6 +16,7 @@ import {
 import { individual } from "./utils/conversationTypes";
 import mongoose from "mongoose";
 import { formatDirectConversations } from "./utils/formatConversations";
+import OneToManyMessage from "./models/oneToManyMessage.model";
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -186,7 +187,6 @@ io.on("connection", async (socket) => {
   );
 
   socket.on("start_conversation", async ({ to, from }) => {
-    console.log(to, from);
     try {
       if (!to || !from) {
         return socket.emit("error", {
@@ -288,8 +288,6 @@ io.on("connection", async (socket) => {
         from
       );
 
-      console.log(formattedConversations);
-      // Emit the result
       socket.emit("start_chat", formattedConversations[0]);
     } catch (error) {
       socket.emit("error", { message: "Failed to initiate chat." });
@@ -753,7 +751,6 @@ io.on("connection", async (socket) => {
       { conversationId, recipients },
       { $set: { isRead: true } }
     );
-    console.log(recordsfound);
 
     const from_user = await User.findById(sender);
     console.log(from_user);
@@ -761,104 +758,145 @@ io.on("connection", async (socket) => {
     io.to(from_user?.socket_id!).emit("all_msg_seen", conversationId);
   });
 
-  // // show Typing - Stop_Typing status event
-  // socket.on("Typing", async (data) => {
-  //   const { room_id, currentUser, type, current_conversation } = data;
-  //   const { admin } = await OneToManyMessage.findById(room_id);
-  //   switch (type) {
-  //     case "individual":
-  //       const { socket_id } =
-  //         await User.findById(current_conversation).select("socket_id -_id");
-  //       io.to(socket_id).emit("Is_Typing", {
-  //         userName: currentUser.userName,
-  //         room_id,
-  //       });
-  //       console.log("emiiter");
-  //       break;
-  //     case "group":
-  //       const TypingStatSendto = [
-  //         ...current_conversation,
-  //         admin.toString(),
-  //       ].filter((id) => id !== currentUser.auth_id.toString());
-  //       const socket_ids = TypingStatSendto.map(async (id) => {
-  //         const { socket_id } =
-  //           await User.findById(id).select("socket_id -_id");
-  //         return socket_id;
-  //       });
-  //       Promise.all(socket_ids)
-  //         .then((Sockets) => {
-  //           Sockets.forEach((socketId) => {
-  //             if (socketId) {
-  //               const socketExists = io.sockets.sockets.get(socketId);
-  //               if (socketExists) {
-  //                 io.to(socketId).emit("Is_Typing", {
-  //                   userName: currentUser.userName,
-  //                   room_id,
-  //                 });
-  //               } else {
-  //                 console.error(`Socket ID not connected: ${socketId}`);
-  //               }
-  //             } else {
-  //               console.error("Encountered a null or undefined socket ID.");
-  //             }
-  //           });
-  //         })
-  //         .catch(() => console.log("error will finding scoket ids"));
+  interface TypingData {
+    roomId: string;
+    user: {
+      userName: string;
+      auth_id: string;
+    };
+    chatType: "individual" | "group";
+    currentConversation: string[] | string;
+  }
 
-  //       break;
-  //     default:
-  //       console.log("type is not mentioned unable to emit typing event");
-  //       break;
-  //   }
-  // });
+  interface UserSocketInfo {
+    socket_id: string;
+  }
 
-  // socket.on("Stop_Typing", async (data) => {
-  //   const { room_id, currentUser, type, current_conversation } = data;
-  //   const { admin } = await OneToOneMessage.findById(room_id);
-  //   switch (type) {
-  //     case "individual":
-  //       const { socket_id } =
-  //         await User.findById(current_conversation).select("socket_id -_id");
-  //       io.to(socket_id).emit("Is_Stop_Typing", {
-  //         userName: currentUser.userName,
-  //         room_id,
-  //       });
-  //       break;
-  //     case "group":
-  //       const TypingStatSendto = [
-  //         ...current_conversation,
-  //         admin.toString(),
-  //       ].filter((id) => id !== currentUser.auth_id.toString());
-  //       const socket_ids = TypingStatSendto.map(async (id) => {
-  //         const { socket_id } =
-  //           await User.findById(id).select("socket_id -_id");
-  //         return socket_id;
-  //       });
-  //       Promise.all(socket_ids)
-  //         .then((Sockets) => {
-  //           Sockets.forEach((socketId) => {
-  //             if (socketId) {
-  //               const socketExists = io.sockets.sockets.get(socketId);
-  //               if (socketExists) {
-  //                 io.to(socketId).emit("Is_Stop_Typing", {
-  //                   userName: currentUser.userName,
-  //                   room_id,
-  //                 });
-  //               } else {
-  //                 console.error(`Socket ID not connected: ${socketId}`);
-  //               }
-  //             } else {
-  //               console.error("Encountered a null or undefined socket ID.");
-  //             }
-  //           });
-  //         })
-  //         .catch(() => console.log("error will finding scoket ids"));
-  //       break;
-  //     default:
-  //       console.log("type is not mentioned unable to emit typing event");
-  //       break;
-  //   }
-  // });
+  // show typing - stopTyping status event
+  socket.on("typing", async (data: TypingData) => {
+    const { roomId, user, chatType, currentConversation } = data;
+
+    try {
+      switch (chatType) {
+        case "individual": {
+          const recipient = await User.findById(currentConversation as string)
+            .select("socket_id -_id")
+            .lean<UserSocketInfo | null>();
+
+          if (recipient?.socket_id) {
+            io.to(recipient.socket_id).emit("userTyping", {
+              userName: user.userName,
+              roomId,
+            });
+          }
+          break;
+        }
+
+        case "group": {
+          const groupInfo = await OneToManyMessage.findById(roomId)
+            .select("admin")
+            .lean<{ admin: string } | null>();
+          if (!groupInfo) {
+            return;
+          }
+          const { admin } = groupInfo;
+          const recipientIds: string[] = [
+            ...(currentConversation as string[]),
+            admin.toString(),
+          ].filter((id) => id !== user.auth_id);
+          const socketInfoPromises = recipientIds.map(async (id) => {
+            const user = await User.findById(id).select("socket_id -_id");
+            return user?.socket_id;
+          });
+
+          const recipients = await Promise.all(socketInfoPromises);
+
+          recipients.forEach((socketId) => {
+            if (socketId && io.sockets.sockets.get(socketId)) {
+              io.to(socketId).emit("userTyping", {
+                userName: user.userName,
+                roomId,
+              });
+            }
+          });
+          break;
+        }
+        default:
+          console.warn(
+            "Invalid chat type specified. Typing event not emitted."
+          );
+          break;
+      }
+    } catch (error: any) {
+      console.error("Error handling typing event:", error.message || error);
+    }
+  });
+
+  socket.on("stopTyping", async (data: TypingData) => {
+    const { roomId, user, chatType, currentConversation } = data;
+
+    try {
+      switch (chatType) {
+        case "individual": {
+          const recipient = await User.findById(currentConversation as string)
+            .select("socket_id -_id")
+            .lean<UserSocketInfo | null>();
+
+          if (recipient?.socket_id) {
+            io.to(recipient.socket_id).emit("userStoppedTyping", {
+              userName: user.userName,
+              roomId,
+            });
+          }
+          break;
+        }
+
+        case "group": {
+          const messageDoc = await OneToManyMessage.findById(roomId)
+            .select("admin")
+            .lean<{ admin: string } | null>();
+
+          if (!messageDoc) {
+            return;
+          }
+
+          const { admin } = messageDoc;
+          const recipientIds: string[] = [
+            ...(currentConversation as string[]),
+            admin.toString(),
+          ].filter((id) => id !== user.auth_id);
+
+          const socketInfoPromises = recipientIds.map(async (id) => {
+            const user = await User.findById(id).select("socket_id -_id");
+            return user?.socket_id;
+          });
+
+          const recipients = await Promise.all(socketInfoPromises);
+
+          recipients.forEach((socketId) => {
+            if (socketId && io.sockets.sockets.get(socketId)) {
+              io.to(socketId).emit("userStoppedTyping", {
+                userName: user.userName,
+                roomId,
+              });
+            }
+          });
+          break;
+        }
+
+        default:
+          console.warn(
+            "Invalid type provided. Unable to emit stop typing event."
+          );
+          break;
+      }
+    } catch (error: any) {
+      console.error(
+        "Error handling userStoppedTyping event:",
+        error.message || error
+      );
+    }
+  });
 
   // msg has read by the recipient
 

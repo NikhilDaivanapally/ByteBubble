@@ -12,11 +12,15 @@ import {
   updateGroupConversation,
 } from "../store/slices/conversation";
 import { Icons } from "../icons";
-
+import { motion } from "motion/react";
 type ConversationProps = {
   conversation: any;
+  index: number;
 };
-const DirectConversation: React.FC<ConversationProps> = ({ conversation }) => {
+const DirectConversation: React.FC<ConversationProps> = ({
+  conversation,
+  index,
+}) => {
   const {
     id,
     userId,
@@ -58,19 +62,32 @@ const DirectConversation: React.FC<ConversationProps> = ({ conversation }) => {
       }
     }
   }, [DirectConversations, activeChatId, dispatch, id]);
-
+  const isActive = activeChatId === id;
   return (
-    <li
+    <motion.li
       role="button"
       tabIndex={0}
-      className={`w-full flex gap-x-4 py-2 rounded-lg px-2 ${
-        activeChatId == id ? "bg-btn-primary/30" : ""
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.3 }}
+      className={`w-full flex gap-x-4 py-2 rounded-lg px-2 relative overflow-hidden ${
+        isActive ? "bg-btn-primary/30" : ""
       } hover:bg-btn-primary/20 cursor-pointer`}
       onClick={handleSelectConversation}
       onKeyDown={(e) => e.key === "Enter" && handleSelectConversation()}
     >
+      {/* Animated background highlight for active */}
+      {isActive && (
+        <motion.div
+          layoutId="conversation-highlight"
+          className="absolute inset-0 bg-btn-primary/20 rounded-lg z-0"
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        />
+      )}
+
       {/* Avatar */}
-      <div className="w-10 h-10 relative shrink-0">
+      <div className="w-10 h-10 relative shrink-0 z-10">
         <img
           src={avatar}
           className="w-full h-full rounded-full object-cover"
@@ -81,8 +98,8 @@ const DirectConversation: React.FC<ConversationProps> = ({ conversation }) => {
         )}
       </div>
 
-      {/* Name and getFormattedMessage */}
-      <div className="info flex-1 min-w-0">
+      {/* Name and message */}
+      <div className="info flex-1 min-w-0 z-10">
         <p className="friend_name">{name}</p>
         <div className="text-black/60 text-sm flex items-center gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
           {outgoing ? "You - " : ""}
@@ -92,10 +109,10 @@ const DirectConversation: React.FC<ConversationProps> = ({ conversation }) => {
         </div>
       </div>
 
-      {/* Time and Unread */}
-      <div className="ml-auto shrink-0 flex flex-col items-end justify-between">
+      {/* Time and unread */}
+      <div className="ml-auto shrink-0 flex flex-col items-end justify-between z-10">
         <div className="seen_time text-sm text-black/60 flex gap-1">
-          {outgoing ? (
+          {outgoing && (
             <div className="flex-center gap-1">
               <div
                 className={`w-2 h-2 rounded-full ${
@@ -108,7 +125,7 @@ const DirectConversation: React.FC<ConversationProps> = ({ conversation }) => {
                 }`}
               ></div>
             </div>
-          ) : null}
+          )}
           <span className="lasttime_msg text-nowrap">{Time}</span>
         </div>
         {unread ? (
@@ -117,12 +134,12 @@ const DirectConversation: React.FC<ConversationProps> = ({ conversation }) => {
           </span>
         ) : null}
       </div>
-    </li>
+    </motion.li>
   );
 };
 
 const GroupConversation: React.FC<ConversationProps> = React.memo(
-  ({ conversation }) => {
+  ({ conversation, index }) => {
     const {
       id,
       groupName,
@@ -135,7 +152,10 @@ const GroupConversation: React.FC<ConversationProps> = React.memo(
       unread,
     } = conversation;
     const Time = useMemo(() => (time ? ConversationTime(time) : null), [time]);
-    const message = useMemo(() => (msg ? getFormattedMessage(msg) : null), [msg]);
+    const message = useMemo(
+      () => (msg ? getFormattedMessage(msg) : null),
+      [msg]
+    );
     const dispatch = useDispatch();
     const { GroupConversations } = useSelector(
       (state: RootState) => state.conversation.group_chat
@@ -159,17 +179,30 @@ const GroupConversation: React.FC<ConversationProps> = React.memo(
         }
       }
     }, [activeChatId, dispatch, GroupConversations, id]);
+    const isActive = activeChatId === id;
 
     return (
-      <li
+      <motion.li
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === "Enter" && handleSelectConversation()}
-        className={`w-full flex gap-x-4 py-2 rounded-lg px-2 ${
-          activeChatId == id ? "bg-btn-primary/30" : ""
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ delay: index * 0.1, duration: 0.3 }}
+        className={`w-full flex gap-x-4 py-2 rounded-lg px-2 relative overflow-hidden ${
+          isActive ? "bg-btn-primary/30" : ""
         } hover:bg-btn-primary/20 cursor-pointer`}
         onClick={handleSelectConversation}
+        onKeyDown={(e) => e.key === "Enter" && handleSelectConversation()}
       >
+        {/* Animated background highlight for active */}
+        {isActive && (
+          <motion.div
+            layoutId="conversation-highlight"
+            className="absolute inset-0 bg-btn-primary/20 rounded-lg z-0"
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          />
+        )}
         {/* Avatar */}
         <div className="w-10 h-10 relative flex-center shrink-0">
           {groupImage ? (
@@ -223,7 +256,7 @@ const GroupConversation: React.FC<ConversationProps> = React.memo(
             </span>
           ) : null}
         </div>
-      </li>
+      </motion.li>
     );
   }
 );

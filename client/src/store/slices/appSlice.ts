@@ -24,7 +24,7 @@ const slice = createSlice({
       state.friends = action.payload;
     },
     selectConversation(state, action) {
-      state.activeChatId = action.payload.chatId;
+      state.activeChatId = action.payload?.chatId ?? null;
     },
     updateChatType(state, action) {
       state.chatType = action.payload;

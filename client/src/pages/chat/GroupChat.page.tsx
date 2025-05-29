@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import { GroupConversation } from "../../components/Conversation";
 import { useFetchGroupConversationsQuery } from "../../store/slices/apiSlice";
-import { setGroupConversations } from "../../store/slices/conversation";
+import {
+  ResetGroupChat,
+  setGroupConversations,
+} from "../../store/slices/conversation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import ShowOfflineStatus from "../../components/ShowOfflineStatus";
 import Chat from "../../components/Chat";
 import SearchInput from "../../components/ui/SearchInput";
+import { motion } from "motion/react";
+import { selectConversation } from "../../store/slices/appSlice";
 
 const GroupChat = () => {
   const dispatch = useDispatch();
@@ -15,8 +20,9 @@ const GroupChat = () => {
   const { GroupConversations } = useSelector(
     (state: RootState) => state.conversation.group_chat
   );
-  const [filteredConversations, setFilteredConversations] =
-    useState(GroupConversations);
+  const [filteredConversations, setFilteredConversations] = useState(
+    GroupConversations || []
+  );
 
   useEffect(() => {
     if (!GroupConversations) return;
@@ -27,6 +33,14 @@ const GroupChat = () => {
     if (!data) return;
     dispatch(setGroupConversations(data.data));
   }, [data]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(selectConversation(null));
+      dispatch(ResetGroupChat());
+    };
+  }, []);
+
   return (
     <div className="h-full flex">
       <div
@@ -45,9 +59,17 @@ const GroupChat = () => {
         <ShowOfflineStatus />
         <h3 className="">Last Chats</h3>
         <ul className="overflow-y-auto scrollbar-custom flex-1 flex flex-col gap-4">
-          {filteredConversations
+          {filteredConversations?.length > 0
             ? filteredConversations?.map((conversation: any, i: number) => (
-                <GroupConversation key={i} conversation={conversation} />
+                <motion.div
+                  key={conversation.id ?? i} // Prefer using a unique id if available
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ delay: i * 0.02, duration: 0.3 }}
+                >
+                  <GroupConversation conversation={conversation} index={i} />
+                </motion.div>
               ))
             : [...Array(5)].map((_, i: number) => {
                 return (

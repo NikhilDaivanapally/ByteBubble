@@ -6,7 +6,7 @@ const navListData = [
     icon: Icons.ChatBubbleLeftRightIcon,
   },
   {
-    path: "/chat/group",
+    path: "/group",
     icon: Icons.UsersIcon,
   },
   {

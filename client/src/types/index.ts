@@ -68,8 +68,8 @@ export type DirectMessage = {
 
 export type GroupConversation = {
   id: string;
-  title: string;
-  img: string;
+  groupName: string;
+  groupImage: string;
   users: User[];
   admin?: User;
   msg: {

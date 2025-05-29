@@ -16,6 +16,10 @@ import CameraModule from "./CameraModule";
 import { DirectMessage, GroupMessage } from "../types";
 import UploadedFileModule from "./UploadedFileModule";
 import NoChat from "./ui/NoChat";
+import { Icons } from "../icons";
+import { AnimatePresence, motion } from "motion/react";
+import ChatHeader from "./chat-header/ChatHeader";
+import ProfileDetails from "./ProfileDetails";
 
 const Chat = () => {
   const dispatch = useDispatch();
@@ -28,7 +32,7 @@ const Chat = () => {
   );
   const [isloading, setIsLoading] = useState(true);
   const messagesListRef = useRef<HTMLUListElement | null>(null);
-
+  const [showDetails, setShowDetails] = useState(false);
   const {
     DatesArray: IndividualMessagesSortedDates,
     MessagesObject: IndividualMessagesObject,
@@ -44,6 +48,7 @@ const Chat = () => {
     messages: group_chat?.current_group_messages,
     sort: "Asc",
   });
+
   // Scroll to the bottom when messages change
   const scrollToBottomSmooth = () => {
     if (messagesListRef.current) {
@@ -51,8 +56,6 @@ const Chat = () => {
         top: messagesListRef.current.scrollHeight,
         behavior: "smooth",
       });
-      // messagesListRef?.current?.scrollIntoView({ behavior: "smooth" });
-      // messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
     }
   };
 
@@ -61,6 +64,14 @@ const Chat = () => {
     if (messagesListRef?.current) {
       messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
     }
+  };
+
+  const handleOpenShowDetails = () => {
+    setShowDetails(true);
+  };
+
+  const handleCloseShowDetails = () => {
+    setShowDetails(false);
   };
 
   useEffect(() => {
@@ -118,99 +129,107 @@ const Chat = () => {
         dispatch(setCurrentGroupConversation(currentGroupChat));
         break;
       default:
-        console.log("Invalid Chat_type");
+        console.log("Invalid Chat_type", chatType);
         break;
     }
   }, [activeChatId]);
-
   return (
     <div
       className={`
-          flex-1 bg-gray-200 rounded-2xl p-4
+          flex-1 bg-gray-200 rounded-2xl p-2
           ${activeChatId ? "block" : "hidden"}
-          md:block
+          md:block overflow-hidden
         `}
     >
       {activeChatId ? (
         <>
           {!isloading ? (
-            <div className="w-full relative h-full flex flex-col overflow-hidden">
-              {/* camera overlay */}
-              {isCameraOpen && <CameraModule />}
+            <div className="w-full h-full relative flex gap-2 overflow-hidden">
+              {/* Left: Main Chat Panel */}
+              <div className="flex flex-col flex-1 h-full relative overflow-hidden">
+                {/* camera */}
+                {isCameraOpen && <CameraModule />}
+                {/* send image preview */}
+                <UploadedFileModule />
+                {/* Header */}
+                <ChatHeader handleOpenShowDetails={handleOpenShowDetails} />
+                <ul
+                  ref={messagesListRef}
+                  className="flex-1 overflow-x-hidden mt-1 scrollbar-custom px-4 space-y-2"
+                >
+                  {chatType === "individual" ? (
+                    <>
+                      {IndividualMessagesSortedDates.map((date) => (
+                        <div
+                          key={`${date}_Msgs`}
+                          className="datewise_msgs space-y-2"
+                        >
+                          {/* Date */}
+                          <Timeline date={date} />
+                          {/* messages */}
+                          {IndividualMessagesObject[date].map(
+                            (el: DirectMessage, index: number) => {
+                              switch (el.type) {
+                                case "photo":
+                                  return (
+                                    <MediaMsg
+                                      el={el}
+                                      key={index}
+                                      scrollToBottom={scrollToBottomSmooth}
+                                    />
+                                  );
+                                case "audio":
+                                  return <AudioMsg el={el} key={index} />;
+                                default:
+                                  return <TextMsg el={el} key={index} />;
+                              }
+                            }
+                          )}
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      {GroupMessagesSortedDates.map((date) => (
+                        <div
+                          key={`${date}_Msgs`}
+                          className="datewise_msgs space-y-2"
+                        >
+                          {/* Date */}
+                          <Timeline date={date} />
+                          {/* messages */}
+                          {GroupMessagesObject[date].map(
+                            (el: GroupMessage, index: number) => {
+                              switch (el.type) {
+                                case "photo":
+                                  return (
+                                    <MediaMsg
+                                      el={el}
+                                      key={index}
+                                      scrollToBottom={scrollToBottomSmooth}
+                                    />
+                                  );
+                                case "audio":
+                                  return <AudioMsg el={el} key={index} />;
+                                default:
+                                  return <TextMsg el={el} key={index} />;
+                              }
+                            }
+                          )}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </ul>
 
-              {/* Image send overlary */}
-              <UploadedFileModule />
-              {/* messages */}
-              <ul
-                ref={messagesListRef}
-                className="flex-1 overflow-x-hidden scrollbar-custom px-4 space-y-2"
-              >
-                {chatType === "individual" ? (
-                  <>
-                    {IndividualMessagesSortedDates.map((date) => (
-                      <div
-                        key={`${date}_Msgs`}
-                        className="datewise_msgs space-y-2"
-                      >
-                        {/* Date */}
-                        <Timeline date={date} />
-                        {/* messages */}
-                        {IndividualMessagesObject[date].map(
-                          (el: DirectMessage, index: number) => {
-                            switch (el.type) {
-                              case "photo":
-                                return (
-                                  <MediaMsg
-                                    el={el}
-                                    key={index}
-                                    scrollToBottom={scrollToBottomSmooth}
-                                  />
-                                );
-                              case "audio":
-                                return <AudioMsg el={el} key={index} />;
-                              default:
-                                return <TextMsg el={el} key={index} />;
-                            }
-                          }
-                        )}
-                      </div>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    {GroupMessagesSortedDates.map((date) => (
-                      <div
-                        key={`${date}_Msgs`}
-                        className="datewise_msgs space-y-2"
-                      >
-                        {/* Date */}
-                        <Timeline date={date} />
-                        {/* messages */}
-                        {GroupMessagesObject[date].map(
-                          (el: GroupMessage, index: number) => {
-                            switch (el.type) {
-                              case "photo":
-                                return (
-                                  <MediaMsg
-                                    el={el}
-                                    key={index}
-                                    scrollToBottom={scrollToBottomSmooth}
-                                  />
-                                );
-                              case "audio":
-                                return <AudioMsg el={el} key={index} />;
-                              default:
-                                return <TextMsg el={el} key={index} />;
-                            }
-                          }
-                        )}
-                      </div>
-                    ))}
-                  </>
-                )}
-              </ul>
-              {/* send footer btn */}
-              <SendText_AudioMessageInput />
+                <SendText_AudioMessageInput />
+              </div>
+
+              {/* Right: Expandable Profile Panel */}
+              <ProfileDetails
+                showDetails={showDetails}
+                handleCloseShowDetails={handleCloseShowDetails}
+              />
             </div>
           ) : (
             <div className="w-full h-full flex-center">

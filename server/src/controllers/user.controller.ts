@@ -170,7 +170,6 @@ const getFriendrequest = async (req: updateProfileRequest, res: Response) => {
       select:
         "_id email userName avatar about gender socket_id status verified createdAt updatedAt",
     });
-  // console.log(requests);
   res.status(200).json({
     status: "success",
     data: requests,
@@ -276,7 +275,6 @@ const getGroupConversations = async (
   res: Response
 ) => {
   try {
-    console.log(req.user?._id);
     const Existing_Group_Conversations = await OneToManyMessage.aggregate([
       {
         $match: {

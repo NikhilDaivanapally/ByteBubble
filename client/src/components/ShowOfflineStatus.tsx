@@ -9,7 +9,7 @@ const ShowOfflineStatus = () => {
   return (
     <>
       {!onlineStatus && showDialog ? (
-        <div className="flex gap-4 p-2 bg-gray-100 rounded-lg">
+        <div className="flex gap-4 p-2 bg-gray-100 whitespace-nowrap rounded-lg">
           <Icons.SignalSlashIcon className="w-6 fill-orange-400" />
           <div>
             <p>Device is Offline</p>

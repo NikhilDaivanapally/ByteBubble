@@ -17,27 +17,46 @@ import {
 import { parseFiles } from "../utils/parse-files";
 import { Icons } from "../icons";
 import { group, individual } from "../utils/conversation-types";
+import useTypingStatus from "../hooks/use-typing-status";
 
 const SendText_AudioMessageInput = () => {
   const dispatch = useDispatch();
-  const [isEmojiPickerActive, setIsEmojiPickerActive] = useState(false);
   const [message, setMessage] = useState("");
+  const [isEmojiPickerActive, setIsEmojiPickerActive] = useState(false);
   const [isAttachementActive, setIsAttachementActive] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const { _id: auth_id }: any = useSelector(
-    (state: RootState) => state.auth.user
-  );
-
   const { activeChatId, chatType } = useSelector(
     (state: RootState) => state.app
   );
   const { direct_chat, group_chat } = useSelector(
     (state: RootState) => state.conversation
   );
+  const { _id: auth_id, userName }: any = useSelector(
+    (state: RootState) => state.auth.user
+  );
+  const currentConversation =
+    chatType == "individual"
+      ? direct_chat.current_direct_conversation?.userId
+      : [
+          ...group_chat?.current_group_conversation?.users,
+          group_chat?.current_group_conversation?.admin,
+        ]
+          .filter((el) => el._id !== auth_id)
+          .map((el) => el._id);
+
+  const { handleTyping } = useTypingStatus(
+    socket,
+    activeChatId,
+    { auth_id, userName },
+    chatType,
+    currentConversation
+  );
+
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setMessage(e.target.value);
       autoResize();
+      handleTyping();
     },
     []
   );

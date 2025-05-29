@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import {
   addDirectConversation,
+  ResetDirectChat,
   updateDirectConversation,
 } from "../../store/slices/conversation";
 import { selectConversation } from "../../store/slices/appSlice";
@@ -12,7 +13,7 @@ import { socket } from "../../socket";
 import ShowOfflineStatus from "../../components/ShowOfflineStatus";
 import SearchInput from "../../components/ui/SearchInput";
 import Chat from "../../components/Chat";
-
+import { motion } from "motion/react";
 import { DirectConversation as DirectConversationProps } from "../../types";
 import { DirectConversation } from "../../components/Conversation";
 
@@ -31,30 +32,31 @@ const IndividualChat = () => {
 
   // Keep filtered conversations in sync
   useEffect(() => {
+    if (!DirectConversations) return;
     setFilteredConversations(DirectConversations || []);
   }, [DirectConversations]);
 
-  // // Handle incoming chat starts
-  // const handleStartChat = useCallback(
-  //   (data: DirectConversationProps) => {
-  //     console.log(data)
-  //     const existing = DirectConversations?.find((el) => el.id === data.id);
-  //     if (existing) {
-  //       dispatch(updateDirectConversation(data));
-  //     } else {
-  //       dispatch(addDirectConversation(data));
-  //     }
-  //     dispatch(selectConversation({ chatId: data.id }));
-  //   },
-  //   [DirectConversations, dispatch]
-  // );
+  // Handle incoming chat starts
+  const handleStartChat = useCallback(
+    (data: DirectConversationProps) => {
+      console.log(data);
+      const existing = DirectConversations?.find((el) => el.id === data.id);
+      if (existing) {
+        dispatch(updateDirectConversation(data));
+      } else {
+        dispatch(addDirectConversation(data));
+      }
+      dispatch(selectConversation({ chatId: data.id }));
+    },
+    [DirectConversations, dispatch]
+  );
 
-  // useEffect(() => {
-  //   socket.on("start_chat", handleStartChat);
-  //   return () => {
-  //     socket.off("start_chat", handleStartChat);
-  //   };
-  // }, [handleStartChat]);
+  useEffect(() => {
+    socket.on("start_chat", handleStartChat);
+    return () => {
+      socket.off("start_chat", handleStartChat);
+    };
+  }, [handleStartChat]);
 
   // console.log(activeChatId)
 
@@ -80,6 +82,13 @@ const IndividualChat = () => {
     );
   }, [current_direct_messages, current_direct_conversation, dispatch]);
 
+  useEffect(() => {
+    return () => {
+      dispatch(selectConversation(null));
+      dispatch(ResetDirectChat());
+    };
+  }, []);
+
   return (
     <div className="h-full flex">
       {/* Sidebar */}
@@ -100,10 +109,15 @@ const IndividualChat = () => {
         <ul className="overflow-y-auto scrollbar-custom flex-1 flex flex-col gap-4">
           {filteredConversations?.length > 0
             ? filteredConversations.map((conversation, i) => (
-                <DirectConversation
-                  key={conversation.id ?? i}
-                  conversation={conversation}
-                />
+                <motion.div
+                  key={conversation.id ?? i} // Prefer using a unique id if available
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ delay: i * 0.02, duration: 0.3 }}
+                >
+                  <DirectConversation conversation={conversation} index={i} />
+                </motion.div>
               ))
             : [...Array(5)].map((_, i) => (
                 <li

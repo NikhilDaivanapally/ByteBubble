@@ -37,12 +37,15 @@ import { group, individual } from "../../utils/conversation-types";
 import { navListData } from "../../data/navigation.data";
 import toast from "react-hot-toast";
 import { DirectConversation as DirectConversationProps } from "../../types";
+import { motion } from "motion/react";
 
 const ChatLayout = () => {
   const dispatch = useDispatch();
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
-  const { activeChatId } = useSelector((state: RootState) => state.app);
+  const { friends, activeChatId } = useSelector(
+    (state: RootState) => state.app
+  );
   const { direct_chat, group_chat, fullImagePreview } = useSelector(
     (state: RootState) => state.conversation
   );
@@ -137,7 +140,7 @@ const ChatLayout = () => {
       case "/chat":
         dispatch(updateChatType("individual"));
         break;
-      case "/chat/group":
+      case "/group":
         dispatch(updateChatType("group"));
         break;
     }
@@ -343,29 +346,18 @@ const ChatLayout = () => {
     group_chat.GroupConversations,
   ]);
 
-  // Handle incoming chat starts
-  const handleStartChat = useCallback(
-    (data: DirectConversationProps) => {
-      console.log(data);
-      const existing = direct_chat.DirectConversations?.find(
-        (el) => el.id === data.id
-      );
-      if (existing) {
-        dispatch(updateDirectConversation(data));
-      } else {
-        dispatch(addDirectConversation(data));
-      }
-      dispatch(selectConversation({ chatId: data.id }));
-    },
-    [direct_chat.DirectConversations, dispatch]
-  );
-
   useEffect(() => {
-    socket.on("start_chat", handleStartChat);
-    return () => {
-      socket.off("start_chat", handleStartChat);
+    if (!friends.length) return;
+    const handleChangeStatus = () => {
+      console.log("emitting logout");
+      socket.emit("exit", { user_id: user?._id, friends });
     };
-  }, [handleStartChat]);
+    window.addEventListener("beforeunload", handleChangeStatus);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleChangeStatus);
+    };
+  }, [friends]);
 
   return (
     <>
@@ -382,30 +374,39 @@ const ChatLayout = () => {
           >
             <div>logo</div>
             <ul className="list-none flex gap-5 lg:flex-col relative h-full lg:h-fit lg:w-full justify-center items-center">
-              {navListData?.map(
-                (item: { path: string; icon: any }, i: number) => {
-                  return (
-                    <li
-                      key={i}
-                      className={`w-fit aspect-square p-2 ${
-                        pathname == item.path ? "bg-btn-primary/20" : ""
-                      } rounded-lg cursor-pointer`}
-                    >
-                      <Link to={item.path}>
-                        <div className="">
-                          <item.icon
-                            className={`w-7 ${
-                              pathname == item.path
-                                ? "fill-btn-primary"
-                                : "fill-light stroke-[0.7px] stroke-black"
-                            }`}
-                          />
-                        </div>
-                      </Link>
-                    </li>
-                  );
-                }
-              )}
+              {navListData?.map((item, i) => {
+                const isActive = item.path.includes(pathname);
+
+                return (
+                  <li
+                    key={i}
+                    className="w-fit aspect-square p-2 relative rounded-lg cursor-pointer"
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="nav-highlight"
+                        className="absolute inset-0 bg-btn-primary/20 rounded-lg z-0"
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+                    <Link to={item.path}>
+                      <div className="relative z-10 flex justify-center items-center w-full h-full">
+                        <item.icon
+                          className={`w-7 ${
+                            isActive
+                              ? "fill-btn-primary"
+                              : "fill-light stroke-[0.7px] stroke-black"
+                          }`}
+                        />
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
             <img
               className="w-12 h-12 object-cover rounded-full"
@@ -416,7 +417,7 @@ const ChatLayout = () => {
           <div className="flex-1 overflow-hidden bg-light border-b md:border-l border-gray-300 lg:py-3">
             <Outlet />
           </div>
-          {fullImagePreview && <ImagePreview />}
+          <ImagePreview />
         </div>
       )}
     </>

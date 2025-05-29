@@ -67,7 +67,7 @@ const App = () => {
       ),
       children: [
         { path: "/chat", element: <IndividualChat /> },
-        { path: "/chat/group", element: <GroupChat /> },
+        { path: "/group", element: <GroupChat /> },
         { path: "/connect", element: <Connect /> },
       ],
     },
