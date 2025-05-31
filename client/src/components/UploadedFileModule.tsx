@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import SendMediaMessage from "./SendMediaMessage";
 import {
   updateMediaFiles,
@@ -15,10 +15,10 @@ const UploadedFileModule = () => {
     mediaPreviewUrls?.length - 1 || 0
   );
 
-  const handleResetmediaFiles_mediaPreviewUrls = () => {
+  const handleResetmediaFiles_mediaPreviewUrls = useCallback(() => {
     dispatch(updateMediaFiles(null));
     dispatch(updateMediaPreviewUrls(null));
-  };
+  }, []);
 
   return (
     <>

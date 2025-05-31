@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { GroupConversation } from "../../components/Conversation";
-import { useFetchGroupConversationsQuery } from "../../store/slices/apiSlice";
+import { useLazyFetchGroupConversationsQuery } from "../../store/slices/apiSlice";
 import {
   ResetGroupChat,
   setGroupConversations,
@@ -12,17 +12,21 @@ import Chat from "../../components/Chat";
 import SearchInput from "../../components/ui/SearchInput";
 import { motion } from "motion/react";
 import { selectConversation } from "../../store/slices/appSlice";
+import { GroupConversationProps } from "../../types";
+import ConversationSkeleton from "../../components/Loaders/ConversationSkeleton";
 
 const GroupChat = () => {
   const dispatch = useDispatch();
   const { activeChatId } = useSelector((state: RootState) => state.app);
-  const { data } = useFetchGroupConversationsQuery({});
   const { GroupConversations } = useSelector(
     (state: RootState) => state.conversation.group_chat
   );
-  const [filteredConversations, setFilteredConversations] = useState(
-    GroupConversations || []
-  );
+  const [filteredConversations, setFilteredConversations] = useState<
+    GroupConversationProps[]
+  >(GroupConversations || []);
+
+  const [fetchGroupConversations, { data }] =
+    useLazyFetchGroupConversationsQuery({});
 
   useEffect(() => {
     if (!GroupConversations) return;
@@ -34,6 +38,10 @@ const GroupChat = () => {
     dispatch(setGroupConversations(data.data));
   }, [data]);
 
+  useEffect(() => {
+    if (GroupConversations) return;
+    fetchGroupConversations({});
+  }, [GroupConversations]);
   useEffect(() => {
     return () => {
       dispatch(selectConversation(null));
@@ -60,9 +68,9 @@ const GroupChat = () => {
         <h3 className="">Last Chats</h3>
         <ul className="overflow-y-auto scrollbar-custom flex-1 flex flex-col gap-4">
           {filteredConversations?.length > 0
-            ? filteredConversations?.map((conversation: any, i: number) => (
+            ? filteredConversations?.map((conversation: GroupConversationProps, i: number) => (
                 <motion.div
-                  key={conversation.id ?? i} // Prefer using a unique id if available
+                  key={conversation._id ?? i} // Prefer using a unique id if available
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -73,16 +81,8 @@ const GroupChat = () => {
               ))
             : [...Array(5)].map((_, i: number) => {
                 return (
-                  <li
-                    key={i}
-                    className="w-full flex gap-x-4 py-2 rounded-lg px-2"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-gray-300 animate-pulse"></div>
-                    <div className="space-y-3">
-                      <p className="w-20 h-3 rounded-lg bg-gray-300 animate-pulse"></p>
-                      <p className=" w-40 h-3 rounded-lg bg-gray-300 animate-pulse"></p>
-                    </div>
-                    <div className="ml-auto w-16 h-3 rounded-lg bg-gray-300 animate-pulse"></div>
+                  <li key={i}>
+                    <ConversationSkeleton />
                   </li>
                 );
               })}

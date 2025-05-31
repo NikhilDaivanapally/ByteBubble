@@ -11,6 +11,8 @@ const initialState: appSliceProps = {
   isCameraOpen: false,
   mediaFiles: null,
   mediaPreviewUrls: null,
+  isTyping: "",
+  isTypingRoomId: null,
 };
 
 const slice = createSlice({
@@ -66,6 +68,11 @@ const slice = createSlice({
         (el) => el?._id !== action?.payload?._id
       );
     },
+    setIsTyping(state, action) {
+      const { roomId, userName } = action.payload;
+      state.isTyping = userName;
+      state.isTypingRoomId = roomId;
+    },
   },
 });
 export const {
@@ -83,6 +90,7 @@ export const {
   addFriendRequest,
   removeUserFromUsers,
   removeRequestFromFriendRequests,
+  setIsTyping,
 } = slice.actions;
 
 export default slice.reducer;

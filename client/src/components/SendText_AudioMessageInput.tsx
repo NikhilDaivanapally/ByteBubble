@@ -18,6 +18,7 @@ import { parseFiles } from "../utils/parse-files";
 import { Icons } from "../icons";
 import { group, individual } from "../utils/conversation-types";
 import useTypingStatus from "../hooks/use-typing-status";
+import { UserProps } from "../types";
 
 const SendText_AudioMessageInput = () => {
   const dispatch = useDispatch();
@@ -38,11 +39,11 @@ const SendText_AudioMessageInput = () => {
     chatType == "individual"
       ? direct_chat.current_direct_conversation?.userId
       : [
-          ...group_chat?.current_group_conversation?.users,
+          ...(group_chat?.current_group_conversation?.users as UserProps[]),
           group_chat?.current_group_conversation?.admin,
         ]
-          .filter((el) => el._id !== auth_id)
-          .map((el) => el._id);
+          .filter((el) => el?._id !== auth_id)
+          .map((el) => el?._id);
 
   const { handleTyping } = useTypingStatus(
     socket,
@@ -77,7 +78,7 @@ const SendText_AudioMessageInput = () => {
   let userList: {}[] = [];
 
   if (
-    group_chat?.current_group_conversation?.users.length > 0 &&
+    (group_chat?.current_group_conversation?.users as [])?.length > 0 &&
     group_chat.current_group_conversation?.admin
   ) {
     userList = [
@@ -113,35 +114,38 @@ const SendText_AudioMessageInput = () => {
       case "group":
         dispatch(
           addGroupMessage({
-            id: messageId,
-            type: containsUrl(message) ? "link" : "text",
+            _id: messageId,
+            messageType: containsUrl(message) ? "link" : "text",
             message: {
               text: message,
             },
             conversationId: activeChatId,
+            conversationType: group,
             createdAt: messageCreatedAt,
             updatedAt: messageCreatedAt,
-            incoming: false,
-            outgoing: true,
+            isIncoming: false,
+            isOutgoing: true,
             status: "pending",
-            seen: false,
+            isSeen: false,
           })
         );
         break;
       default:
         dispatch(
           addDirectMessage({
-            id: messageId,
-            type: containsUrl(message) ? "link" : "text",
+            _id: messageId,
+            messageType: containsUrl(message) ? "link" : "text",
             message: {
               text: message,
             },
             createdAt: messageCreatedAt,
             updatedAt: messageCreatedAt,
-            incoming: false,
-            outgoing: true,
+            conversationId: activeChatId,
+            conversationType: individual,
+            isIncoming: false,
+            isOutgoing: true,
             status: "pending",
-            seen: false,
+            isSeen: false,
           })
         );
         break;
@@ -387,33 +391,36 @@ const SendText_AudioMessageInput = () => {
     chatType === "individual"
       ? dispatch(
           addDirectMessage({
-            id: messageId,
-            type: "audio",
-            message: {
-              audioId: audioUrl,
-            },
-            createdAt: messageCreatedAt,
-            updatedAt: messageCreatedAt,
-            incoming: false,
-            outgoing: true,
-            status: "pending",
-            seen: false,
-          })
-        )
-      : dispatch(
-          addGroupMessage({
-            id: messageId,
-            type: "audio",
+            _id: messageId,
+            messageType: "audio",
             message: {
               audioId: audioUrl,
             },
             conversationId: activeChatId,
+            conversationType: individual,
             createdAt: messageCreatedAt,
             updatedAt: messageCreatedAt,
-            incoming: false,
-            outgoing: true,
+            isIncoming: false,
+            isOutgoing: true,
             status: "pending",
-            seen: false,
+            isSeen: false,
+          })
+        )
+      : dispatch(
+          addGroupMessage({
+            _id: messageId,
+            messageType: "audio",
+            message: {
+              audioId: audioUrl,
+            },
+            conversationId: activeChatId,
+            conversationType: group,
+            createdAt: messageCreatedAt,
+            updatedAt: messageCreatedAt,
+            isIncoming: false,
+            isOutgoing: true,
+            status: "pending",
+            isSeen: false,
           })
         );
 
@@ -482,7 +489,6 @@ const SendText_AudioMessageInput = () => {
                 height={370}
                 width={320}
                 open={isEmojiPickerActive}
-                emojiStyle="native" // or "google", "apple", etc.
                 previewConfig={{
                   showPreview: false,
                 }}

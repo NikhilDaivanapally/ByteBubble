@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
 import Loader from "./ui/Loader";
 import {
@@ -13,11 +13,14 @@ import SortMessages from "../utils/sort-messages";
 import { MediaMsg, TextMsg, Timeline, AudioMsg } from "./MessageTypes";
 import SendText_AudioMessageInput from "./SendText_AudioMessageInput";
 import CameraModule from "./CameraModule";
-import { DirectMessage, GroupMessage } from "../types";
+import {
+  DirectConversationProps,
+  DirectMessageProps,
+  GroupConversationProps,
+  GroupMessageProps,
+} from "../types";
 import UploadedFileModule from "./UploadedFileModule";
 import NoChat from "./ui/NoChat";
-import { Icons } from "../icons";
-import { AnimatePresence, motion } from "motion/react";
 import ChatHeader from "./chat-header/ChatHeader";
 import ProfileDetails from "./ProfileDetails";
 
@@ -50,29 +53,29 @@ const Chat = () => {
   });
 
   // Scroll to the bottom when messages change
-  const scrollToBottomSmooth = () => {
+  const scrollToBottomSmooth = useCallback(() => {
     if (messagesListRef.current) {
       messagesListRef?.current?.scrollTo({
         top: messagesListRef.current.scrollHeight,
         behavior: "smooth",
       });
     }
-  };
+  }, [messagesListRef]);
 
   // Scroll to the bottom when messages change
-  const scrollToBottomQuick = () => {
+  const scrollToBottomQuick = useCallback(() => {
     if (messagesListRef?.current) {
       messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
     }
-  };
+  }, [messagesListRef]);
 
-  const handleOpenShowDetails = () => {
+  const handleOpenShowDetails = useCallback(() => {
     setShowDetails(true);
-  };
+  }, []);
 
-  const handleCloseShowDetails = () => {
+  const handleCloseShowDetails = useCallback(() => {
     setShowDetails(false);
-  };
+  }, []);
 
   useEffect(() => {
     setTimeout(scrollToBottomQuick, 100);
@@ -88,17 +91,17 @@ const Chat = () => {
     switch (chatType) {
       case "individual":
         const currentDirectChat = direct_chat?.DirectConversations?.find(
-          (el: any) => el?.id === activeChatId
+          (el: DirectConversationProps) => el?._id === activeChatId
         );
         if (currentDirectChat) {
           socket.emit(
             "get_messages",
             {
-              conversationId: currentDirectChat?.id,
+              conversationId: currentDirectChat?._id,
               chatType,
               authUserId: user?._id,
             },
-            (data: any) => {
+            (data: DirectMessageProps) => {
               dispatch(setCurrentDirectMessages(data));
 
               setIsLoading(false);
@@ -112,16 +115,16 @@ const Chat = () => {
       case "group":
         setIsLoading(true);
         const currentGroupChat = group_chat.GroupConversations?.find(
-          (el: any) => el?.id === activeChatId
+          (el: GroupConversationProps) => el?._id === activeChatId
         );
         socket.emit(
           "get_messages",
           {
-            conversationId: currentGroupChat?.id,
+            conversationId: currentGroupChat?._id,
             chatType,
             authUserId: user?._id,
           },
-          (data: any) => {
+          (data: GroupMessageProps) => {
             dispatch(setCurrentGroupMessages(data));
             setIsLoading(false);
           }
@@ -152,7 +155,7 @@ const Chat = () => {
                 {/* send image preview */}
                 <UploadedFileModule />
                 {/* Header */}
-                <ChatHeader handleOpenShowDetails={handleOpenShowDetails} />
+                <ChatHeader handleOpenShowDetails={handleOpenShowDetails}  />
                 <ul
                   ref={messagesListRef}
                   className="flex-1 overflow-x-hidden mt-1 scrollbar-custom px-4 space-y-2"
@@ -168,8 +171,8 @@ const Chat = () => {
                           <Timeline date={date} />
                           {/* messages */}
                           {IndividualMessagesObject[date].map(
-                            (el: DirectMessage, index: number) => {
-                              switch (el.type) {
+                            (el: DirectMessageProps, index: number) => {
+                              switch (el.messageType) {
                                 case "photo":
                                   return (
                                     <MediaMsg
@@ -199,8 +202,8 @@ const Chat = () => {
                           <Timeline date={date} />
                           {/* messages */}
                           {GroupMessagesObject[date].map(
-                            (el: GroupMessage, index: number) => {
-                              switch (el.type) {
+                            (el: GroupMessageProps, index: number) => {
+                              switch (el.messageType) {
                                 case "photo":
                                   return (
                                     <MediaMsg

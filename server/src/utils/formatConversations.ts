@@ -1,4 +1,4 @@
-type DirectMessage = {
+type DirectMessageProps = {
   _id: string;
   sender: string;
   recipients: string;
@@ -49,18 +49,19 @@ type User = {
 type DirectConversationInput = {
   _id: string;
   user: User;
-  messages: DirectMessage[];
+  messages: DirectMessageProps[];
 };
 
 type GroupConversationInput = {
   _id: string;
+  name: string;
+  avatar: string;
+  about: string;
   admin: User;
   participants: User[];
-  groupName: string;
-  groupImage: string;
+  messages: GroupMessage[];
   createdAt: string;
   updatedAt: string;
-  messages: GroupMessage[];
 };
 
 const formatDirectConversations = (
@@ -81,21 +82,21 @@ const formatDirectConversations = (
     if (!lastMessage) return null;
 
     return {
-      id: el._id,
+      _id: el._id,
       userId: el.user?._id,
       name: el.user?.userName,
-      online: el.user?.status === "Online",
       avatar: el.user?.avatar,
+      isOnline: el.user?.status === "Online",
       message: {
-        type: lastMessage.messageType || "",
+        messageType: lastMessage.messageType || "",
         message: lastMessage.message || "",
         createdAt: lastMessage.createdAt || "",
       },
-      unread: unreadMessages.length || 0,
-      seen: lastMessage?.isRead || "",
-      outgoing: lastMessage?.sender?.toString() === authUserId.toString() || "",
+      unreadMessagesCount: unreadMessages.length || 0,
+      isSeen: lastMessage?.isRead || "",
+      isOutgoing:
+        lastMessage?.sender?.toString() === authUserId.toString() || "",
       time: lastMessage?.createdAt || "",
-      pinned: false,
       about: el.user?.about,
     };
   });
@@ -125,22 +126,23 @@ const formatGroupConversations = (
     if (!lastMessage) return null;
 
     return {
-      id: el?._id,
-      groupName: el?.groupName,
-      groupImage: el?.groupImage,
+      _id: el?._id,
+      name: el?.name,
+      avatar: el?.avatar,
+      about: el?.about,
       users: el?.participants,
       admin: el?.admin,
       message: {
-        type: lastMessage?.messageType || "",
+        messageType: lastMessage?.messageType || "",
         message: lastMessage?.message || "",
         createdAt: lastMessage?.createdAt || "",
       },
       from: lastMessage?.sender || "",
-      outgoing:
+      isOutgoing:
         lastMessage?.sender?._id?.toString() === authUserId?.toString() || null,
       time: lastMessage?.createdAt || "",
-      unread: unreadMessages?.length,
-      seen: lastMessage?.isRead || "",
+      unreadMessagesCount: unreadMessages?.length,
+      isSeen: lastMessage?.isRead || "",
     };
   });
 

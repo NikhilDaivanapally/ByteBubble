@@ -19,15 +19,15 @@ const ImagePreview = () => {
 
   if (chatType == "individual") {
     MediaImgs = direct_chat?.current_direct_messages?.filter(
-      (el) => el.type == "photo"
+      (el) => el.messageType == "photo"
     );
   } else {
     MediaImgs = group_chat?.current_group_messages?.filter(
-      (el) => el.type == "photo"
+      (el) => el.messageType == "photo"
     );
   }
   const Current_index = MediaImgs.findIndex(
-    (el) => el?.id == fullImagePreview?.id
+    (el) => el?._id == fullImagePreview?._id
   );
 
   const handleChangeImage = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -75,10 +75,10 @@ const ImagePreview = () => {
                     className="w-full h-full rounded-full object-cover"
                     src={
                       chatType === "individual"
-                        ? fullImagePreview?.outgoing
+                        ? fullImagePreview?.isOutgoing
                           ? authUser?.avatar
                           : current_direct_conversation?.avatar
-                        : current_group_conversation?.groupImage
+                        : current_group_conversation?.avatar
                     }
                     alt=""
                   />
@@ -90,12 +90,12 @@ const ImagePreview = () => {
                 <div className="">
                   <p className="font-semibold">
                     {chatType === "individual"
-                      ? fullImagePreview?.outgoing
+                      ? fullImagePreview?.isOutgoing
                         ? "you"
                         : current_direct_conversation?.name
-                      : fullImagePreview?.outgoing
+                      : fullImagePreview?.isOutgoing
                       ? "you"
-                      : current_group_conversation?.title}
+                      : current_group_conversation?.name}
                   </p>
                   <p className="text-sm text-black/60">
                     {new Date(
@@ -153,12 +153,12 @@ const ImagePreview = () => {
                     <li
                       key={i}
                       className={`min-w-20 h-20 p-1 flex items-center justify-center border-2 cursor-pointer transition duration-200 rounded-md hover:border-gray-400 ${
-                        fullImagePreview?.id === el.id
+                        fullImagePreview?._id === el._id
                           ? "border-gray-400"
                           : "border-transparent"
                       }`}
                       ref={
-                        fullImagePreview?.id === el.id ? currentImgRef : null
+                        fullImagePreview?._id === el._id ? currentImgRef : null
                       }
                       onClick={() =>
                         dispatch(

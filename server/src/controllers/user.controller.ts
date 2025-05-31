@@ -386,8 +386,9 @@ const getGroupConversations = async (
       {
         $group: {
           _id: "$_id",
-          groupName: { $first: "$title" },
-          groupImage: { $first: "$avatar" },
+          name: { $first: "$title" },
+          avatar: { $first: "$avatar" },
+          about: { $first: "$about" },
           admin: { $first: "$admin" },
           participants: { $first: "$participants" },
           messages: { $push: "$messages" },

@@ -50,7 +50,7 @@ const Friends = () => {
               <ul className="space-y-2">
                 <AnimatePresence>
                   {friends.map((friend, index: number) => {
-                    const online = friend.status === "Online";
+                    const isOnline = friend.status === "Online";
                     return (
                       <motion.li
                         key={friend._id || index} // Prefer using a unique id if available
@@ -67,7 +67,7 @@ const Friends = () => {
                             className="w-full h-full rounded-full object-cover"
                             alt=""
                           />
-                          {online && (
+                          {isOnline && (
                             <span className="w-2 h-2 absolute bottom-0 right-0 bg-green-600 rounded-full"></span>
                           )}
                         </div>
@@ -76,7 +76,7 @@ const Friends = () => {
                             {friend.userName}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {online ? "Online" : "Offline"}
+                            {isOnline ? "Online" : "Offline"}
                           </p>
                         </div>
                         <div className="ml-auto flex gap-1">

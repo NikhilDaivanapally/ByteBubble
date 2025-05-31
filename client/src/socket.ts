@@ -1,18 +1,22 @@
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
-let socket: any;
+let socket: Socket;
 
-const connectSocket = (auth_id: string) => {
+const connectSocket = (auth_id: string): Promise<Socket> => {
   return new Promise((resolve, reject) => {
+    if (socket && socket.connected) {
+      return resolve(socket); // Already connected
+    }
+
     socket = io("http://localhost:8000", {
       query: { auth_id },
     });
 
-    socket.on("connect", () => {
+    socket.once("connect", () => {
       resolve(socket);
     });
 
-    socket.on("connect_error", (err: Error) => {
+    socket.once("connect_error", (err: Error) => {
       reject(err);
     });
   });

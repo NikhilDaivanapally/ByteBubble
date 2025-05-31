@@ -6,12 +6,12 @@ import {
   ResetGroupChat,
 } from "../../store/slices/conversation";
 import { selectConversation } from "../../store/slices/appSlice";
-import { useEffect, useState } from "react";
-import { socket } from "../../socket";
+import { UserProps } from "../../types";
+import React from "react";
 
 const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
   const dispatch = useDispatch();
-  const [istyping, setIstyping] = useState("");
+  const { isTyping } = useSelector((state: RootState) => state.app);
   const { user } = useSelector((state: RootState) => state.auth);
   const { chatType } = useSelector((state: RootState) => state.app);
   const { direct_chat, group_chat } = useSelector(
@@ -22,10 +22,11 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
   const imageSrc = isIndividual
     ? direct_chat?.current_direct_conversation?.avatar
     : isGroup
-    ? group_chat?.current_group_conversation?.groupImage
+    ? group_chat?.current_group_conversation?.avatar
     : null;
 
-  const FallbackIcon = isIndividual ? Icons.UserIcon : Icons.UsersIcon;
+  const FallbackIcon = isIndividual ? Icons?.UserIcon : Icons?.UsersIcon;
+  console.log(direct_chat?.current_direct_conversation);
 
   const handleGoBack = () => {
     dispatch(selectConversation(null));
@@ -40,20 +41,6 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
     }
   };
 
-  useEffect(() => {
-    socket.on("userTyping", (data: { userName: string }) => {
-      const { userName } = data;
-      setIstyping(userName);
-    });
-    socket.on("userStoppedTyping", () => {
-      setIstyping("");
-    });
-
-    return () => {
-      socket.off("userTyping");
-      socket.off("userStoppedTyping");
-    };
-  }, [socket]);
   return (
     <nav className="h-15 w-full flex gap-4 items-center p-2 bg-white rounded-xl">
       <Icons.ArrowLeftIcon
@@ -75,7 +62,7 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
           ) : (
             <FallbackIcon className="w-8" />
           )}
-          {direct_chat?.current_direct_conversation?.online && (
+          {direct_chat?.current_direct_conversation?.isOnline && (
             <span className="w-2 h-2 absolute bottom-0 right-0 bg-green-600 rounded-full" />
           )}
         </div>
@@ -85,11 +72,11 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
             <p className="text-base font-medium text-gray-900">
               {direct_chat?.current_direct_conversation?.name}
             </p>
-            {istyping ? (
+            {isTyping ? (
               <p className="text-sm text-green-500">Typing ...</p>
             ) : (
               <p className="text-sm text-gray-500">
-                {direct_chat?.current_direct_conversation?.online
+                {direct_chat?.current_direct_conversation?.isOnline
                   ? "Online"
                   : "Offline"}
               </p>
@@ -98,14 +85,15 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
         ) : (
           <div>
             <p className="text-base font-medium text-gray-900">
-              {group_chat?.current_group_conversation?.groupName}
+              {group_chat?.current_group_conversation?.name}
             </p>
-            {istyping ? (
-              <p className="text-sm text-green-500">{istyping} is typing</p>
+            {isTyping ? (
+              <p className="text-sm text-green-500">{isTyping} is typing</p>
             ) : (
               <p className="text-sm text-gray-500">
                 {[
-                  ...group_chat?.current_group_conversation?.users,
+                  ...(group_chat?.current_group_conversation
+                    ?.users as UserProps[]),
                   group_chat?.current_group_conversation?.admin,
                 ]
                   .map((el, i, arr) => {

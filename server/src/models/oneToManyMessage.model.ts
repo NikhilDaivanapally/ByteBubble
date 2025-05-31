@@ -16,6 +16,9 @@ const oneToManyMessageSchema = new mongoose.Schema(
     avatar: {
       type: String,
     },
+    about: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

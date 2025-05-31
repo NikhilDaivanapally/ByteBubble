@@ -1,33 +1,38 @@
-const formatDirectMessages = (messages: any, authUserId: string) => {
+import { Message } from "../types/message.type";
+
+const formatDirectMessages = (messages: Message[], authUserId: string) => {
   return messages?.map((el: any) => {
     return {
-      id: el?._id,
-      type: el?.messageType,
+      _id: el?._id,
+      messageType: el?.messageType,
       message: el?.message,
       createdAt: el?.createdAt,
-      updateAt: el?.updateAt,
-      incoming: el?.recipients == authUserId,
-      outgoing: el?.sender == authUserId,
+      updatedAt: el?.updatedAt,
+      isIncoming: el?.recipients == authUserId,
+      isOutgoing: el?.sender == authUserId,
       status: "sent",
-      seen: el?.isRead,
+      isSeen: el?.isRead,
+      conversationType: el?.conversationType,
+      conversationId: el?.conversationId,
     };
   });
 };
 
-const formatGroupMessages = (messages: any, authUserId: string) => {
+const formatGroupMessages = (messages: Message[], authUserId: string) => {
   return messages?.map((el: any) => {
     return {
-      id: el?._id,
-      type: el?.messageType,
+      _id: el?._id,
+      messageType: el?.messageType,
       message: el?.message,
       createdAt: el?.createdAt,
-      updateAt: el?.updateAt,
-      incoming: el?.recipients.includes(authUserId),
-      outgoing: el?.sender == authUserId,
+      updatedAt: el?.updatedAt,
+      isIncoming: el?.recipients.includes(authUserId),
+      isOutgoing: el?.sender == authUserId,
       from: el?.sender,
       status: "sent",
+      isSeen: el?.isRead,
+      conversationType: el?.conversationType,
       conversationId: el?.conversationId,
-      seen: el?.isRead,
     };
   });
 };

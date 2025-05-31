@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { Icons } from "../icons";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import SortMessages from "../utils/sort-messages";
 import { RootState } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,6 +13,7 @@ type ShowMediaProps = {
 
 const Media = () => {
   const dispatch = useDispatch();
+
   const { chatType } = useSelector((state: RootState) => state.app);
   const { direct_chat, group_chat } = useSelector(
     (state: RootState) => state.conversation
@@ -20,8 +21,8 @@ const Media = () => {
 
   const messages =
     chatType == "individual"
-      ? direct_chat?.current_direct_messages
-      : group_chat?.current_group_messages;
+      ? direct_chat?.current_direct_messages ?? []
+      : group_chat?.current_group_messages ?? [];
   console.log(messages);
 
   const { DatesArray, MessagesObject } = SortMessages({
@@ -29,6 +30,7 @@ const Media = () => {
     filter: "photo",
     sort: "Desc",
   });
+
   return (
     <>
       {DatesArray.length ? (
@@ -179,9 +181,10 @@ const Docs = () => {
 
 const ShowMedia = ({ showAllMedia, handleCloseAllMedia }: ShowMediaProps) => {
   const [currentTab, setCurrentTab] = useState("media");
-  const handleChangeTab = (tab: string) => {
+
+  const handleChangeTab = useCallback((tab: string) => {
     setCurrentTab(tab);
-  };
+  }, []);
 
   const Tabs = ["media", "audio", "links", "docs"];
 
@@ -200,7 +203,10 @@ const ShowMedia = ({ showAllMedia, handleCloseAllMedia }: ShowMediaProps) => {
     }
   }, [currentTab]);
 
-  const currentIndex = Tabs.findIndex((tab) => tab === currentTab);
+  const currentIndex = useMemo(
+    () => Tabs.findIndex((tab) => tab === currentTab),
+    [currentTab]
+  );
 
   return (
     <>

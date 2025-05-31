@@ -34,7 +34,7 @@ const ConnectUsers = () => {
             <ul className="space-y-2">
               <AnimatePresence>
                 {users.map((user, index: number) => {
-                  const online = user.status == "Online";
+                  const isOnline = user.status == "Online";
                   return (
                     <motion.li
                       key={user._id || index} // Prefer using a unique id if available
@@ -51,7 +51,7 @@ const ConnectUsers = () => {
                           className="w-full h-full rounded-full object-cover"
                           alt=""
                         />
-                        {online && (
+                        {isOnline && (
                           <span className="w-2 h-2 absolute bottom-0 right-0 bg-green-600 rounded-full"></span>
                         )}
                       </div>
@@ -60,7 +60,7 @@ const ConnectUsers = () => {
                           {user.userName}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {online ? "Online" : "Offline"}
+                          {isOnline ? "Online" : "Offline"}
                         </p>
                       </div>
                       <Button

@@ -1,31 +1,20 @@
+import { DirectMessageProps, GroupMessageProps } from "../types";
 import formatDate from "./format-date";
-
-type Message = {
-  id: string;
-  type: string;
-  message: string | {};
-  createdAt: string;
-  updateAt: string;
-  incoming: boolean;
-  outgoing: boolean;
-  status: string;
-  seen: boolean;
-};
 
 type SortMessageProps = {
   filter?: string | null;
   sort?: string;
-  messages?: Message[];
+  messages?: DirectMessageProps[] | GroupMessageProps[];
 };
 
 const SortMessages = (Props: SortMessageProps) => {
   const { messages, filter = null, sort = "Asc" } = Props;
-  const MessagesObject:any = {};
+  const MessagesObject: any = {};
   const Media_messages = filter
-    ? messages?.filter((el) => el.type == filter)
+    ? messages?.filter((el) => el.messageType == filter)
     : messages;
 
-  Media_messages?.forEach((Msg:Message) => {
+  Media_messages?.forEach((Msg) => {
     const { FromatDate } = formatDate(Msg.createdAt); // ex wed jul 3 2024
     MessagesObject[FromatDate]
       ? MessagesObject[FromatDate].push(Msg)

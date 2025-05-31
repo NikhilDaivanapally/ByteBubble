@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { User } from "../../types";
+import { UserProps } from "../../types";
 
 type AuthProps = {
-  user: User | null;
+  user: UserProps | null;
 };
 
 const initialState: AuthProps = {

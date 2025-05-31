@@ -52,7 +52,7 @@ const SendMediaMessage = () => {
   let userList: {}[] = [];
 
   if (
-    group_chat?.current_group_conversation?.users?.length > 0 &&
+    (group_chat?.current_group_conversation?.users as [])?.length > 0 &&
     group_chat.current_group_conversation?.admin
   ) {
     userList = [
@@ -72,7 +72,7 @@ const SendMediaMessage = () => {
     group_chat?.current_group_messages,
     activeChatId,
   ]);
-  console.log(mediaPreviewUrls);
+
   // handle send message
   const handleSendMediaMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -87,35 +87,38 @@ const SendMediaMessage = () => {
     chatType === "individual"
       ? dispatch(
           addDirectMessage({
-            id: messageId,
-            type: "photo",
+            _id: messageId,
+            messageType: "photo",
             message: {
               photoUrl: mediaPreviewUrls?.slice(-1)[0].url,
               description: message,
             },
             createdAt: messageCreatedAt,
             updatedAt: messageCreatedAt,
-            incoming: false,
-            outgoing: true,
+            conversationId: activeChatId,
+            conversationType: individual,
+            isIncoming: false,
+            isOutgoing: true,
             status: "pending",
-            seen: false,
+            isSeen: false,
           })
         )
       : dispatch(
           addGroupMessage({
-            id: messageId,
-            type: "photo",
+            _id: messageId,
+            messageType: "photo",
             message: {
               photoUrl: mediaPreviewUrls?.slice(-1)[0].url,
               description: message,
             },
             conversationId: activeChatId,
+            conversationType: group,
             createdAt: messageCreatedAt,
             updatedAt: messageCreatedAt,
-            incoming: false,
-            outgoing: true,
+            isIncoming: false,
+            isOutgoing: true,
             status: "pending",
-            seen: false,
+            isSeen: false,
           })
         );
 
@@ -182,7 +185,6 @@ const SendMediaMessage = () => {
             height={370}
             width={320}
             open={isEmojiPickerActive}
-            emojiStyle="native" // or "google", "apple", etc.
             previewConfig={{
               showPreview: false,
             }}

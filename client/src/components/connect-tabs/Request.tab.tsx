@@ -49,7 +49,7 @@ const Requests = () => {
               <ul className="space-y-2">
                 <AnimatePresence>
                   {friendRequests.map((request, index: number) => {
-                    const online = request.sender.status == "Online";
+                    const isOnline = request.sender.status == "Online";
                     return (
                       <motion.li
                         key={request._id || index} // Prefer using a unique id if available
@@ -66,7 +66,7 @@ const Requests = () => {
                             className="w-full h-full rounded-full object-cover"
                             alt=""
                           />
-                          {online && (
+                          {isOnline && (
                             <span className="w-2 h-2 absolute bottom-0 right-0 bg-green-600 rounded-full"></span>
                           )}
                         </div>
@@ -75,7 +75,7 @@ const Requests = () => {
                             {request.sender.userName}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {online ? "Online" : "Offline"}
+                            {isOnline ? "Online" : "Offline"}
                           </p>
                         </div>
                         <div className="ml-auto flex gap-1">

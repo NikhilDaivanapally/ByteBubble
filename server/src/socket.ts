@@ -407,7 +407,7 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("msg_seen_byreciever", async (data) => {
-    const { messageId, conversationId, conversationType, sender } = data;
+    const { messageId, sender } = data;
     const sender_socket = await User.findById(sender).select("socket_id");
     io.to(sender_socket?.socket_id!).emit("update_msg_seen", data);
     await Message.findOneAndUpdate(

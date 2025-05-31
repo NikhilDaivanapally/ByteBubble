@@ -49,6 +49,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
   const debounce = useDebounce({ func: handleFilterConversation, delay: 300 });
 
+  console.log("groupchat");
+
   useEffect(() => {
     debounce();
   }, [filter, conversations]);

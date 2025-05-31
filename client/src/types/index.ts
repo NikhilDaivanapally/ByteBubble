@@ -1,4 +1,18 @@
-export type User = {
+export type MessageContentProps = {
+  _id?: string;
+  text?: string;
+  audioId?: string;
+  photoUrl?: string;
+  description?: string;
+};
+
+export type Message = {
+  messageType: string;
+  message: MessageContentProps;
+  createdAt: Date;
+};
+
+export type UserProps = {
   _id: string;
   userName: string;
   email: string;
@@ -12,103 +26,69 @@ export type User = {
   updatedAt: string;
 };
 
-export type FriendRequest = {
+export type FriendRequestProps = {
   _id: string;
-  sender: User;
-  recipient: User;
+  sender: UserProps;
+  recipient: UserProps;
 };
 
-// export type friend = {};
-
-// export type Conversation = {};
-
-export type DirectConversation = {
-  id: string;
+export type DirectConversationProps = {
+  _id: string;
   userId: string;
   name: string;
-  online: boolean;
   avatar?: string;
-  msg: {
-    type: string;
-    message: {
-      _id?: string;
-      text?: string;
-      audioId?: string;
-      photoUrl?: string;
-      description?: string;
-    };
-    createdAt: Date;
-  };
-  unread: number;
-  seen: boolean;
-  outgoing: boolean;
+  isOnline: boolean;
+  message: Message;
+  unreadMessagesCount: number;
+  isSeen: boolean;
+  isOutgoing: boolean;
   time: Date;
-  pinned: boolean;
   about?: string;
 };
 
-export type DirectMessage = {
-  id: string;
-  type: string;
+export type DirectMessageProps = {
+  _id: string;
+  messageType: string;
   sender: string;
-  message: {
-    _id?: string;
-    text?: string;
-    audioId?: string;
-    photoUrl?: string;
-    description?: string;
-  };
+  message: MessageContentProps;
   createdAt: string;
-  updateAt: string;
-  incoming: boolean;
-  outgoing: boolean;
+  updatedAt: string;
+  isIncoming: boolean;
+  isOutgoing: boolean;
   status: string;
-  seen: boolean;
+  isSeen: boolean;
+  conversationType: string;
+  conversationId: string;
 };
 
-export type GroupConversation = {
-  id: string;
-  groupName: string;
-  groupImage: string;
-  users: User[];
-  admin?: User;
-  msg: {
-    type: string;
-    message: {
-      _id: string;
-      text?: string;
-      audioId?: string;
-      photoUrl?: string;
-      description?: string;
-    };
-    createdAt: Date;
-  };
-  from: string;
-  unread: number;
-  seen: boolean;
-  outgoing: boolean;
-  time: Date;
+export type GroupConversationProps = {
+  _id: string;
+  name: string;
+  avatar: string;
   about?: string;
+  users: UserProps[];
+  admin?: UserProps;
+  message: Message;
+  from: { _id: string; userName: string; avatar: string };
+  isOutgoing: boolean;
+  unreadMessagesCount: number;
+  isSeen: boolean;
+  time: Date;
 };
 
-export type GroupMessage = {
-  id: string;
-  type: string;
-  message: {
-    _id: string;
-    text?: string;
-    audioId?: string;
-    photoUrl?: string;
-    description?: string;
-  };
+export type GroupMessageProps = {
+  _id: string;
+  messageType: string;
+  message: MessageContentProps;
   createdAt: string;
-  updateAt: string;
-  incoming: boolean;
-  outgoing: boolean;
+  updatedAt: string;
+  isIncoming: boolean;
+  isOutgoing: boolean;
   status: string;
-  seen: boolean;
+  isSeen: boolean;
   from: string;
-  conversationId?: string;
+  conversationType: string;
+  conversationId: string;
 };
 
 // type for appSlice
@@ -122,28 +102,30 @@ export type previewObj = {
 
 export type appSliceProps = {
   onlineStatus: boolean;
-  friends: User[] | [];
-  friendRequests: FriendRequest[] | [];
-  users: User[] | [];
+  friends: UserProps[] | [];
+  users: UserProps[] | [];
+  friendRequests: FriendRequestProps[] | [];
   activeChatId: string | null;
   chatType: string | null;
   isCameraOpen: boolean;
   mediaFiles: File[] | File | null;
   mediaPreviewUrls: previewObj[] | null;
+  isTyping: string;
+  isTypingRoomId: string | null;
 };
 
 // type for conversationSlice
 
 export type conversationSliceProps = {
   direct_chat: {
-    DirectConversations: DirectConversation[] | null;
-    current_direct_conversation: DirectConversation | null;
-    current_direct_messages: DirectMessage[] | [];
+    DirectConversations: DirectConversationProps[] | null;
+    current_direct_conversation: DirectConversationProps | null;
+    current_direct_messages: DirectMessageProps[] | [];
   };
   group_chat: {
-    GroupConversations: GroupConversation[] | null;
-    current_group_conversation: GroupConversation | null;
-    current_group_messages: GroupMessage[] | [];
+    GroupConversations: GroupConversationProps[] | null;
+    current_group_conversation: GroupConversationProps | null;
+    current_group_messages: GroupMessageProps[] | [];
   };
-  fullImagePreview: DirectMessage | GroupMessage | null;
+  fullImagePreview: DirectMessageProps | GroupMessageProps | null;
 };

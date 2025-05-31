@@ -1,26 +1,15 @@
 import { ReactNode } from "react";
 import { Icons } from "../icons";
-
-type MessageType = "text" | "photo" | "audio" | "link";
-
-type MessageContent = {
-  text?: string;
-  description?: string;
-};
-
-type MessageInput = {
-  type?: MessageType;
-  message?: MessageContent;
-};
+import { Message } from "../types";
 
 type FormattedMessage = {
   message: ReactNode;
 };
 
-const getFormattedMessage = (msg: MessageInput): FormattedMessage => {
+const getFormattedMessage = (msg: Message): FormattedMessage => {
   let message: ReactNode = null;
 
-  switch (msg?.type) {
+  switch (msg?.messageType) {
     case "photo":
       message = (
         <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
