@@ -122,7 +122,7 @@ const SendMediaMessage = () => {
           })
         );
 
-    socket.emit("media_message", {
+    socket.emit("message:send", {
       _id: messageId,
       sender: auth_id,
       recipients: to,

@@ -95,7 +95,7 @@ const Chat = () => {
         );
         if (currentDirectChat) {
           socket.emit(
-            "get_messages",
+            "messages:get",
             {
               conversationId: currentDirectChat?._id,
               chatType,
@@ -118,7 +118,7 @@ const Chat = () => {
           (el: GroupConversationProps) => el?._id === activeChatId
         );
         socket.emit(
-          "get_messages",
+          "messages:get",
           {
             conversationId: currentGroupChat?._id,
             chatType,

@@ -13,6 +13,7 @@ import {
   formatGroupConversations,
 } from "../utils/formatConversations";
 import { individual } from "../utils/conversationTypes";
+import { userSelectFields } from "../constants";
 
 interface updateProfileRequest extends Request {
   user?: {
@@ -47,7 +48,7 @@ const updateProfile = async (req: updateProfileRequest, res: Response) => {
 const getUsers = async (req: updateProfileRequest, res: Response) => {
   const currentUserId = req.user?._id;
   const all_users = await User.find({ verified: true }).select(
-    "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
+    userSelectFields
   );
 
   // Fetch friendships where the current user is either sender or recipient
@@ -168,7 +169,7 @@ const getFriendrequest = async (req: updateProfileRequest, res: Response) => {
     .populate({
       path: "sender recipient",
       select:
-        "_id email userName avatar about gender socket_id status verified createdAt updatedAt",
+        userSelectFields,
     });
   res.status(200).json({
     status: "success",

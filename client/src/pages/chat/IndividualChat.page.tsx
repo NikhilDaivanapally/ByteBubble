@@ -46,7 +46,7 @@ const IndividualChat = () => {
         ...current_direct_conversation,
         outgoing: lastMsg.isOutgoing,
         message: {
-          type: lastMsg.messageType,
+          messageType: lastMsg.messageType,
           message: lastMsg.message,
           createdAt: lastMsg.createdAt,
         },
@@ -54,12 +54,16 @@ const IndividualChat = () => {
         seen: lastMsg.isSeen,
       })
     );
-  }, [current_direct_messages, current_direct_conversation, dispatch]);
+  }, [current_direct_messages, dispatch]);
 
   useEffect(() => {
     return () => {
-      dispatch(selectConversation(null));
-      dispatch(ResetDirectChat());
+      if (activeChatId) {
+        dispatch(selectConversation(null));
+      }
+      if (current_direct_conversation && current_direct_messages.length) {
+        dispatch(ResetDirectChat());
+      }
     };
   }, []);
 

@@ -25,9 +25,9 @@ export const useChatEvents = (enabled: boolean) => {
       dispatch(selectConversation({ chatId: data._id }));
     };
 
-    socket.on("start_chat", handleStartChat);
+    socket.on("chat:start", handleStartChat);
     return () => {
-      socket.off("start_chat", handleStartChat);
+      socket.off("chat:start", handleStartChat);
     };
   }, [enabled, DirectConversations]);
 };

@@ -3,7 +3,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { User as UserType } from "../types/user.type";
 import User from "../models/user.model";
-
+import { userSelectFields } from "../constants";
 // Local Strategy
 
 passport.use(
@@ -74,7 +74,7 @@ passport.serializeUser((user: any, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id).select(
-      "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
+      userSelectFields
     );
     done(null, user);
   } catch (error) {

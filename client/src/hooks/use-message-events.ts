@@ -20,10 +20,12 @@ import { useGetConversationMutation } from "../store/slices/apiSlice";
 
 export const useMessageEvents = (enabled: boolean) => {
   const dispatch = useDispatch();
+
   const user = useSelector((state: RootState) => state.auth.user);
   const { direct_chat, group_chat } = useSelector(
     (state: RootState) => state.conversation
   );
+
   const [getConversation, { data: conversationData }] =
     useGetConversationMutation();
 
@@ -61,8 +63,8 @@ export const useMessageEvents = (enabled: boolean) => {
             message?.conversationId.toString() ===
             direct_chat.current_direct_conversation?._id.toString()
           ) {
-            socket.emit("msg_seen_byreciever", {
-              messageId: message?._id,
+            socket.emit("message:seen", {
+              _id: message?._id,
               sender: message?.sender,
             });
             dispatch(
@@ -81,7 +83,7 @@ export const useMessageEvents = (enabled: boolean) => {
               })
             );
           } else {
-            socket.emit("update_unreadMsgs", message);
+            socket.emit("message:unread:update", message);
           }
           break;
 
@@ -106,7 +108,7 @@ export const useMessageEvents = (enabled: boolean) => {
               })
             );
           } else {
-            socket.emit("update_unreadMsgs", message);
+            socket.emit("message:unread:update", message);
           }
           break;
 
@@ -153,11 +155,12 @@ export const useMessageEvents = (enabled: boolean) => {
         (conv) => conv?._id === conversationId
       );
       if (!conversation) return;
-      dispatch(updateDirectConversation({ ...conversation, seen: true }));
+      dispatch(updateDirectConversation({ ...conversation, isSeen: true }));
       dispatch(updateDirectMessagesSeen({}));
     };
 
     const handleUnreadMsgs = async (message: any) => {
+      console.log(message);
       switch (message?.conversationType) {
         case individual:
           const update_Direct_Conversation =
@@ -169,7 +172,7 @@ export const useMessageEvents = (enabled: boolean) => {
               updateDirectConversation({
                 ...update_Direct_Conversation,
                 message: {
-                  type: message?.messageType,
+                  messageType: message?.messageType,
                   message: message?.message,
                   createdAt: message?.createdAt,
                 },
@@ -197,7 +200,7 @@ export const useMessageEvents = (enabled: boolean) => {
                 ...update_Group_Conversation,
                 isOutgoing: message?.sender === user?._id,
                 message: {
-                  type: message?.messageType,
+                  messageType: message?.messageType,
                   message: message?.message,
                   createdAt: message?.createdAt,
                 },
@@ -218,18 +221,18 @@ export const useMessageEvents = (enabled: boolean) => {
           break;
       }
     };
-    socket.on("new_message", handleNewMsg);
-    socket.on("update_msg_status", handleUpdateMsgStatus);
-    socket.on("update_msg_seen", handleUpdateMsgSeen);
-    socket.on("all_msg_seen", handleUpdateAllMsgSeenTrue);
-    socket.on("on_update_unreadMsg", handleUnreadMsgs);
+    socket.on("message:new", handleNewMsg);
+    socket.on("message:status:sent", handleUpdateMsgStatus);
+    socket.on("message:status:seen", handleUpdateMsgSeen);
+    socket.on("messages:status:seen", handleUpdateAllMsgSeenTrue);
+    socket.on("messages:unread:count", handleUnreadMsgs);
 
     return () => {
-      socket.off("new_message", handleNewMsg);
-      socket.off("update_msg_status", handleUpdateMsgStatus);
-      socket.off("update_msg_seen", handleUpdateMsgSeen);
-      socket.off("all_msg_seen", handleUpdateAllMsgSeenTrue);
-      socket.off("on_update_unreadMsg", handleUnreadMsgs);
+      socket.off("message:new", handleNewMsg);
+      socket.off("message:status:sent", handleUpdateMsgStatus);
+      socket.off("message:status:seen", handleUpdateMsgSeen);
+      socket.off("messages:status:seen", handleUpdateAllMsgSeenTrue);
+      socket.off("messages:unread:count", handleUnreadMsgs);
     };
   }, [
     enabled,

@@ -54,7 +54,7 @@ export const DirectConversation = React.memo(
           (el) => el._id == _id
         );
         if (updateConversation?.unreadMessagesCount) {
-          socket.emit("clear_unread", {
+          socket.emit("messages:unread:clear", {
             conversationId: _id,
             recipients: auth?._id,
             sender: userId,
@@ -62,7 +62,7 @@ export const DirectConversation = React.memo(
           dispatch(
             updateDirectConversation({
               ...updateConversation,
-              unread: 0,
+              unreadMessagesCount: 0,
             })
           );
         }
@@ -70,7 +70,6 @@ export const DirectConversation = React.memo(
     }, [DirectConversations, activeChatId, dispatch, _id]);
     const isActive = activeChatId === _id;
     const istyping = isTypingRoomId === _id;
-    console.log(istyping);
     return (
       <motion.li
         role="button"

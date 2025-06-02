@@ -21,7 +21,7 @@ const Friends = () => {
   }, [data]);
 
   const handleStartConversation = (_id: string) => {
-    socket.emit("start_conversation", {
+    socket.emit("start:conversation", {
       to: _id,
       from: authUser?._id,
     });

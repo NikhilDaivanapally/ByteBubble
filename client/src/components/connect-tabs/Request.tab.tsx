@@ -20,7 +20,7 @@ const Requests = () => {
   }, [data]);
   const handleAcceptFriendRequest = useCallback(
     (_id: string) => {
-      socket.emit("accept_friendrequest", { request_id: _id });
+      socket.emit("friend:request:accept", { request_id: _id });
     },
     [socket]
   );

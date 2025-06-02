@@ -15,7 +15,7 @@ function useTypingStatus(
   const handleTyping = () => {
     if (!isTyping.current) {
       isTyping.current = true;
-      socket.emit("typing", { roomId, user, chatType, currentConversation });
+      socket.emit("typing:start", { roomId, user, chatType, currentConversation });
     }
 
     if (typingTimeout.current) {
@@ -24,7 +24,7 @@ function useTypingStatus(
 
     typingTimeout.current = setTimeout(() => {
       isTyping.current = false;
-      socket.emit("stopTyping", {
+      socket.emit("typing:stop", {
         roomId,
         user,
         chatType,

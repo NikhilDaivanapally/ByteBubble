@@ -151,7 +151,7 @@ const SendText_AudioMessageInput = () => {
         break;
     }
 
-    socket.emit("text_message", {
+    socket.emit("message:send", {
       _id: messageId,
       sender: auth_id,
       recipients: to,
@@ -429,7 +429,7 @@ const SendText_AudioMessageInput = () => {
         ? direct_chat.current_direct_conversation?.userId
         : userList;
 
-    socket.emit("audio_message", {
+    socket.emit("message:send", {
       _id: messageId,
       sender: auth_id,
       recipients: to,

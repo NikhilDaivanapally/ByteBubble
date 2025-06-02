@@ -14,9 +14,10 @@ import { updateChatType, updateFriends } from "../../store/slices/appSlice";
 import LayoutNavbar from "../../components/layout-navbar/LayoutNavbar";
 import { useSocketConnection } from "../../hooks/use-socket-connection";
 import { useFriendRequestEvents } from "../../hooks/use-friendrequest-events";
-import { useTypingEvents } from "../../hooks/user-typing-events";
+import { useTypingEvents } from "../../hooks/use-typing-events";
 import { useMessageEvents } from "../../hooks/use-message-events";
 import { useChatEvents } from "../../hooks/use-chat-events";
+import { useUsersStatusEvents } from "../../hooks/use-users-status-events";
 
 const ChatLayout = () => {
   const dispatch = useDispatch();
@@ -52,6 +53,7 @@ const ChatLayout = () => {
   useTypingEvents(isSocketConnected);
   useMessageEvents(isSocketConnected);
   useChatEvents(isSocketConnected);
+  useUsersStatusEvents(isSocketConnected);
 
   useEffect(() => {
     if (!friends.length) return;

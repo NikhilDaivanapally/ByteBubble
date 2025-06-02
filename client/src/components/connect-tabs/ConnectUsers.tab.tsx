@@ -19,7 +19,7 @@ const ConnectUsers = () => {
   }, [data]);
   const handleSendFriendRequest = useCallback(
     (_id: string) => {
-      socket.emit("friend_request", {
+      socket.emit("friend:request", {
         recipient: _id,
         sender: authUser?._id,
       });

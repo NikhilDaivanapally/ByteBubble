@@ -13,11 +13,11 @@ export const useTypingEvents = (enabled: boolean) => {
     const handleStopTyping = () => {
       dispatch(setIsTyping({ userName: "", roomId: null }));
     };
-    socket.on("userTyping", handleTyping);
-    socket.on("userStoppedTyping", handleStopTyping);
+    socket.on("user:typing:start", handleTyping);
+    socket.on("user:typing:stop", handleStopTyping);
     return () => {
-      socket.off("userTyping");
-      socket.off("userStoppedTyping");
+      socket.off("user:typing:start");
+      socket.off("user:typing:stop");
     };
   }, [enabled]);
 };

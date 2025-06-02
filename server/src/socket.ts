@@ -6,17 +6,17 @@ import OneToOneMessage from "./models/oneToOneMessage.model";
 import { v2 as cloudinary, v2 } from "cloudinary";
 import { gridFSBucket } from "./db/connectDB";
 import { Readable } from "stream";
-import streamifier from "streamifier";
 import Friendship from "./models/friendship.model";
 import { Message } from "./models/message.mode";
 import {
   formatDirectMessages,
   formatGroupMessages,
 } from "./utils/formatMessages";
-import { individual } from "./utils/conversationTypes";
+import { group, individual } from "./utils/conversationTypes";
 import mongoose from "mongoose";
 import { formatDirectConversations } from "./utils/formatConversations";
 import OneToManyMessage from "./models/oneToManyMessage.model";
+import { userSelectFields } from "./constants";
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -97,9 +97,8 @@ io.on("connection", async (socket) => {
         if (socketId) {
           const socketExists = io.sockets.sockets.get(socketId);
           if (socketExists) {
-            io.to(socketId).emit("user_status_update", {
+            io.to(socketId).emit("user:online", {
               id: user_id,
-              status: "Online",
             });
           }
         }
@@ -109,84 +108,84 @@ io.on("connection", async (socket) => {
     }
   }
 
-  // socket event listeners
+  socket.on("friend:request", async ({ sender, recipient }) => {
+    try {
+      const [senderUser, recipientUser] = await Promise.all([
+        User.findById(sender).select(userSelectFields),
+        User.findById(recipient).select(userSelectFields),
+      ]);
+      if (!senderUser || !recipientUser) return;
+      const newRequest = await Friendship.create({ sender, recipient });
 
-  // (Requests)
-  socket.on("friend_request", async (data) => {
-    const { sender, recipient } = data;
-    // sender
-    const Sender = await User.findById(sender).select(
-      "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
-    );
-    // recipient
-    const Recipient = await User.findById(recipient).select(
-      "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
-    );
+      const friendRequest = await Friendship.findById(newRequest._id)
+        .select("_id sender recipient status")
+        .populate([
+          { path: "sender", select: userSelectFields },
+          { path: "recipient", select: userSelectFields },
+        ]);
 
-    const friendship = await Friendship.create({
-      sender: sender,
-      recipient: recipient,
-    });
+      // Notify recipient
+      if (recipientUser.socket_id) {
+        io.to(recipientUser.socket_id).emit("friend:request:received", {
+          message: "You received a new friend request",
+          friendRequest,
+          from: senderUser,
+        });
+      }
 
-    const FriendRequestData = await Friendship.findById(friendship._id)
-      .select("_id sender recipient")
-      .populate({
-        path: "sender recipient",
-        select:
-          "_id email userName avatar about gender socket_id status verified createdAt updatedAt",
-      });
-
-    io.to(Recipient?.socket_id!).emit("new_friendrequest", {
-      message: "New friend request received",
-      friendRequest: FriendRequestData,
-      user: Sender,
-    });
-    io.to(Sender?.socket_id!).emit("friendrequest_sent", {
-      message: "Request Sent successfully",
-      friendRequest: FriendRequestData,
-      user: Recipient,
-    });
+      // Notify sender
+      if (senderUser.socket_id) {
+        io.to(senderUser.socket_id).emit("friend:request:sent", {
+          message: "Friend request sent successfully",
+          friendRequest,
+          to: recipientUser,
+        });
+      }
+    } catch (error) {
+      console.error("Error in friend:request :", error);
+    }
   });
-  interface AcceptFriendRequestPayload {
-    request_id: string;
-  }
+
   socket.on(
-    "accept_friendrequest",
-    async (data: AcceptFriendRequestPayload) => {
+    "friend:request:accept",
+    async ({ request_id }: { request_id: string }) => {
       try {
-        const request_doc = await Friendship.findById(data.request_id);
-        if (!request_doc) return;
+        const request = await Friendship.findById(request_id);
+        if (!request) return;
+        const [senderUser, receiverUser] = await Promise.all([
+          User.findById(request.sender).select(userSelectFields),
+          User.findById(request.recipient).select(userSelectFields),
+        ]);
 
-        const sender = await User.findById(request_doc.sender).select(
-          "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
-        );
-        const receiver = await User.findById(request_doc.recipient).select(
-          "_id email userName avatar about gender socket_id status verified createdAt updatedAt"
-        );
+        if (!senderUser || !receiverUser) return;
 
-        if (!sender || !receiver) return;
+        request.status = "accepted";
+        await request.save({ validateModifiedOnly: true });
 
-        request_doc.status = "accepted";
-        await request_doc.save({ validateModifiedOnly: true });
+        // Notify sender
+        if (senderUser.socket_id) {
+          io.to(senderUser.socket_id).emit("friend:request:accepted", {
+            message: `${receiverUser.userName} accepted your friend request`,
+            request,
+            friend: receiverUser,
+          });
+        }
 
-        io.to(sender.socket_id!).emit("friendrequest_accepted", {
-          message: `${receiver.userName} accepted your friend request`,
-          data: request_doc,
-          friend: receiver,
-        });
-
-        io.to(receiver.socket_id!).emit("friendrequest_accepted", {
-          message: `You accepted ${sender.userName}'s friend request`,
-          data: request_doc,
-          friend: sender,
-        });
+        // Notify receiver
+        if (receiverUser.socket_id) {
+          io.to(receiverUser.socket_id).emit("friend:request:accepted", {
+            message: `You accepted ${senderUser.userName}'s friend request`,
+            request,
+            friend: senderUser,
+          });
+        }
       } catch (error) {
-        console.error("Error in accept_friendrequest:", error);
+        console.error("Error in friend:request:accept:", error);
       }
     }
   );
 
-  socket.on("start_conversation", async ({ to, from }) => {
+  socket.on("start:conversation", async ({ to, from }) => {
     try {
       if (!to || !from) {
         return socket.emit("error", {
@@ -288,7 +287,7 @@ io.on("connection", async (socket) => {
         from
       );
 
-      socket.emit("start_chat", formattedConversations[0]);
+      socket.emit("chat:start", formattedConversations[0]);
     } catch (error) {
       socket.emit("error", { message: "Failed to initiate chat." });
     }
@@ -303,20 +302,50 @@ io.on("connection", async (socket) => {
     }
   });
 
-  socket.on("group_created", async (data) => {
-    const { participants, admin } = data;
+  socket.on("group:create", async (data) => {
+    const { title, image, participants, admin } = data;
+    const avatar = await v2.uploader.upload(image);
+    const document = await OneToManyMessage.create({
+      title,
+      avatar: avatar?.secure_url,
+      participants,
+      admin,
+    });
+
+    // Populate references and convert to plain JS object
+    let groupCreated = await OneToManyMessage.findById(document?._id)
+      .populate(["admin", "participants"])
+      .lean();
+
+    const formattedConversation = {
+      _id: groupCreated?._id,
+      name: groupCreated?.title,
+      avatar: groupCreated?.avatar,
+      admin: groupCreated?.admin,
+      users: groupCreated?.participants,
+      message: {
+        messageType: null,
+        message: null,
+        createdAt: null,
+      },
+      from: null,
+      isOutgoing: null,
+      time: "",
+      isSeen: null,
+      unreadMessagesCount: 0,
+    };
     const socket_ids = participants.map((el: any) => el?.socket_id);
-    io.to(admin?.socket_id).emit("new_groupChat_admin", data);
+    io.to(admin?.socket_id).emit("group:new:admin", formattedConversation);
     socket_ids.forEach((socketId: any) => {
       if (socketId) {
-        io.to(socketId).emit("new_groupChat", data);
+        io.to(socketId).emit("group:new", formattedConversation);
       } else {
         console.error("Encountered a null or undefined socket ID.");
       }
     });
   });
 
-  socket.on("get_messages", async (data, callback) => {
+  socket.on("messages:get", async (data, callback) => {
     const messages = await Message.find({
       conversationId: data.conversationId,
     });
@@ -329,433 +358,232 @@ io.on("connection", async (socket) => {
     callback(formatted);
   });
 
-  //  (Messages)
-  //  text and link msg event
-  socket.on("text_message", async (data) => {
-    const {
-      _id,
-      sender,
-      recipients,
-      messageType,
-      message,
-      conversationType,
-      conversationId,
-      createdAt,
-      updatedAt,
-    } = data;
-    switch (conversationType) {
-      case individual:
-        const msg_receiver = await User.findById(recipients);
-        const msg_sender = await User.findById(sender);
-        const _Message = {
-          _id,
-          sender,
-          recipients,
-          messageType,
-          message,
-          conversationType,
-          conversationId,
-          createdAt,
-          updatedAt,
-        };
-        await Message.create(_Message);
-        // emit incoming_message -> to user
-        io.to(msg_receiver?.socket_id!).emit("new_message", _Message);
-        // emit outgoing_message -> from user
-        io.to(msg_sender?.socket_id!).emit("update_msg_status", _Message);
+  socket.on("message:send", async (messagePayload) => {
+    switch (messagePayload.messageType) {
+      case "text":
+        if (messagePayload.conversationType === individual) {
+          const sender = await User.findById(messagePayload.sender).select(
+            "socket_id -_id"
+          );
+          const recipient = await User.findById(
+            messagePayload.recipients
+          ).select("socket_id -_id");
+          if (sender?.socket_id) {
+            io.to(sender?.socket_id).emit(
+              "message:status:sent",
+              messagePayload
+            );
+          }
+          if (recipient?.socket_id) {
+            io.to(recipient?.socket_id).emit("message:new", messagePayload);
+          }
+          await Message.create(messagePayload);
+        } else if (messagePayload.conversationType === group) {
+          const sender = await User.findById(messagePayload.sender).select(
+            "socket_id -_id"
+          );
+          if (sender?.socket_id) {
+            io.to(sender?.socket_id).emit(
+              "message:status:sent",
+              messagePayload
+            );
+          }
+          const recipientsSocketIds = messagePayload.recipients.map(
+            async (id: string) => {
+              const { socket_id }: any =
+                await User.findById(id).select("socket_id -_id");
+              return socket_id;
+            }
+          );
+          if (recipientsSocketIds?.length) {
+            Promise.all(recipientsSocketIds).then((socketIds) => {
+              socketIds.forEach((socketId) => {
+                if (socketId) {
+                  io.to(socketId).emit("message:new", messagePayload);
+                }
+              });
+            });
+          }
+          await Message.create(messagePayload);
+        }
+
         break;
-      case "OneToManyMessage":
-        const from_user_group = await User.findById(sender);
-        const _GroupMessage = {
-          _id,
-          sender,
-          recipients,
-          messageType,
-          message,
-          conversationType,
-          conversationId,
-          createdAt,
-          updatedAt,
+
+      case "photo":
+        const { file, text } = messagePayload?.message;
+        const image = await v2.uploader.upload(file[0].blob);
+        const message = {
+          ...messagePayload,
+          message: { photoUrl: image?.secure_url, description: text || "" },
         };
-        await Message.create(_GroupMessage);
-        io.to(from_user_group?.socket_id!).emit(
-          "update_msg_status",
-          _GroupMessage
-        );
-        const socket_ids = recipients.map(async (id: string) => {
-          const { socket_id }: any =
-            await User.findById(id).select("socket_id -_id");
-          return socket_id;
+
+        if (messagePayload.conversationType === individual) {
+          const sender = await User.findById(messagePayload.sender).select(
+            "socket_id -_id"
+          );
+          const recipient = await User.findById(
+            messagePayload.recipients
+          ).select("socket_id -_id");
+
+          if (sender?.socket_id) {
+            io.to(sender?.socket_id).emit("message:status:sent", message);
+          }
+
+          if (recipient?.socket_id) {
+            io.to(recipient?.socket_id).emit("message:new", message);
+          }
+          await Message.create(message);
+        } else if (messagePayload.conversationType === group) {
+          const sender = await User.findById(messagePayload.sender).select(
+            "socket_id -_id"
+          );
+          if (sender?.socket_id) {
+            io.to(sender?.socket_id).emit("message:status:sent", message);
+          }
+          const recipientsSocketIds = messagePayload.recipients.map(
+            async (id: string) => {
+              const { socket_id }: any =
+                await User.findById(id).select("socket_id -_id");
+              return socket_id;
+            }
+          );
+          if (recipientsSocketIds?.length) {
+            Promise.all(recipientsSocketIds).then((socketIds) => {
+              socketIds.forEach((socketId) => {
+                if (socketId) {
+                  io.to(socketId).emit("message:new", message);
+                }
+              });
+            });
+          }
+          await Message.create(message);
+        }
+
+        break;
+
+      case "audio":
+        // Convert the Blob to a readable stream
+        const readableStream = new Readable();
+        readableStream.push(Buffer.from(messagePayload.message));
+        readableStream.push(null);
+
+        // Upload to GridFS
+        const uploadStream = gridFSBucket.openUploadStream(crypto.randomUUID());
+        readableStream.pipe(uploadStream);
+
+        uploadStream.on("finish", async () => {
+          const message = {
+            ...messagePayload,
+            message: { audioId: uploadStream.id },
+          };
+
+          if (messagePayload.conversationType === individual) {
+            const sender = await User.findById(messagePayload.sender).select(
+              "socket_id -_id"
+            );
+            const recipient = await User.findById(
+              messagePayload.recipients
+            ).select("socket_id -_id");
+
+            if (sender?.socket_id) {
+              io.to(sender?.socket_id).emit("message:status:sent", message);
+            }
+
+            if (recipient?.socket_id) {
+              io.to(recipient?.socket_id).emit("message:new", message);
+            }
+            await Message.create(message);
+          } else if (messagePayload.conversationType === group) {
+            const sender = await User.findById(messagePayload.sender).select(
+              "socket_id -_id"
+            );
+            if (sender?.socket_id) {
+              io.to(sender?.socket_id).emit("message:status:sent", message);
+            }
+            const recipientsSocketIds = messagePayload.recipients.map(
+              async (id: string) => {
+                const { socket_id }: any =
+                  await User.findById(id).select("socket_id -_id");
+                return socket_id;
+              }
+            );
+            if (recipientsSocketIds?.length) {
+              Promise.all(recipientsSocketIds).then((socketIds) => {
+                socketIds.forEach((socketId) => {
+                  if (socketId) {
+                    io.to(socketId).emit("message:new", message);
+                  }
+                });
+              });
+            }
+            await Message.create(message);
+          }
         });
 
-        Promise.all(socket_ids)
-          .then((Sockets) => {
-            Sockets.forEach((socketId) => {
-              if (socketId) {
-                io.to(socketId).emit("new_message", _GroupMessage);
-              } else {
-                console.error("Encountered a null or undefined socket ID.");
-              }
-            });
-          })
-          .catch(() => console.log("error will finding scoket ids"));
-
         break;
+
       default:
         break;
     }
   });
 
-  socket.on("msg_seen_byreciever", async (data) => {
-    const { messageId, sender } = data;
-    const sender_socket = await User.findById(sender).select("socket_id");
-    io.to(sender_socket?.socket_id!).emit("update_msg_seen", data);
+  socket.on("message:seen", async (messagePayload) => {
+    const sender = await User.findById(messagePayload?.sender).select(
+      "socket_id -_id"
+    );
+    if (sender?.socket_id) {
+      io.to(sender?.socket_id!).emit("message:status:seen", messagePayload);
+    }
     await Message.findOneAndUpdate(
-      { _id: messageId },
+      { _id: messagePayload?._id },
       { $set: { isRead: true } }
     );
   });
 
-  socket.on("audio_message", async (data) => {
-    const {
-      _id,
-      sender,
-      recipients,
-      messageType,
-      message,
-      conversationType,
-      conversationId,
-      createdAt,
-      updatedAt,
-    } = data;
-    // Convert the Blob to a readable stream
-    const readableStream = new Readable();
-    readableStream.push(Buffer.from(message));
-    readableStream.push(null);
-
-    // Upload to GridFS
-    const uploadStream = gridFSBucket.openUploadStream(crypto.randomUUID());
-    readableStream.pipe(uploadStream);
-
-    uploadStream.on("finish", async () => {
-      // console.log("Audio uploaded with ID:", uploadStream.id);
-      switch (conversationType) {
-        case individual:
-          const msg_receiver = await User.findById(recipients);
-          const msg_sender = await User.findById(sender);
-          const _Message = {
-            _id,
-            sender,
-            recipients,
-            messageType,
-            message: {
-              audioId: uploadStream.id,
-            },
-            conversationType,
-            conversationId,
-            createdAt,
-            updatedAt,
-          };
-
-          await Message.create(_Message);
-
-          // emit incoming_message -> to user
-          io.to(msg_receiver?.socket_id!).emit("new_message", _Message);
-
-          // emit outgoing_message -> from user
-          io.to(msg_sender?.socket_id!).emit("update_msg_status", _Message);
-          break;
-        case "OneToManyMessage":
-          const from_user_group = await User.findById(sender);
-
-          const _GroupMessage = {
-            _id,
-            sender,
-            recipients,
-            messageType,
-            message: {
-              audioId: uploadStream.id,
-            },
-            conversationType,
-            conversationId,
-            createdAt,
-            updatedAt,
-          };
-          await Message.create(_GroupMessage);
-          io.to(from_user_group?.socket_id!).emit("update_msg_status", {
-            messageId: _GroupMessage?._id,
-            conversationId,
-            conversationType,
-          });
-
-          const socket_ids = recipients.map(async (id: string) => {
+  socket.on("message:unread:update", async (messagePayload) => {
+    switch (messagePayload?.conversationType) {
+      case individual:
+        const recipient = await User.findById(messagePayload.recipients);
+        if (recipient?.socket_id) {
+          io.to(recipient?.socket_id).emit(
+            "messages:unread:count",
+            messagePayload
+          );
+        }
+        break;
+      case group:
+        const recipientsSocketIds = messagePayload.recipients.map(
+          async (id: string) => {
             const { socket_id }: any =
               await User.findById(id).select("socket_id -_id");
             return socket_id;
-          });
-
-          Promise.all(socket_ids)
-            .then((Sockets) => {
-              Sockets.forEach((socketId) => {
-                if (socketId) {
-                  io.to(socketId).emit("new_message", _GroupMessage);
-                } else {
-                  console.error("Encountered a null or undefined socket ID.");
-                }
-              });
-            })
-            .catch(() => console.log("error will finding scoket ids"));
-
-          break;
-        default:
-          break;
-      }
-
-      socket.emit("uploadSuccess", { id: uploadStream.id });
-    });
-
-    uploadStream.on("error", () => {
-      socket.emit("uploadError", "Error storing audio");
-    });
-  });
-
-  socket.on("media_message", async (data) => {
-    const {
-      _id,
-      sender,
-      recipients,
-      messageType,
-      message,
-      conversationType,
-      conversationId,
-      createdAt,
-      updatedAt,
-    } = data;
-    const { file, text } = message;
-    // upload file to cloudinary
-    const img = await v2.uploader.upload(file[0].blob);
-
-    switch (conversationType) {
-      case individual:
-        const msg_receiver = await User.findById(recipients);
-        const msg_sender = await User.findById(sender);
-        const _Message = {
-          _id,
-          sender,
-          recipients,
-          messageType,
-          message: {
-            photoUrl: img?.secure_url,
-            description: text || "",
-          },
-          conversationType,
-          conversationId,
-          createdAt,
-          updatedAt,
-        };
-        await Message.create(_Message);
-
-        // emit incoming_message -> to user
-        io.to(msg_receiver?.socket_id!).emit("new_message", _Message);
-        // emit outgoing_message -> from user
-        io.to(msg_sender?.socket_id!).emit("update_msg_status", _Message);
-        break;
-      case "OneToManyMessage":
-        const from_user_group = await User.findById(sender);
-
-        const _GroupMessage = {
-          _id,
-          sender,
-          recipients,
-          messageType,
-          message: {
-            photoUrl: img?.secure_url,
-            description: text || "",
-          },
-          conversationType,
-          conversationId,
-          createdAt,
-          updatedAt,
-        };
-        await Message.create(_GroupMessage);
-        io.to(from_user_group?.socket_id!).emit(
-          "update_msg_status",
-          _GroupMessage
+          }
         );
-
-        const socket_ids = recipients.map(async (id: string) => {
-          const { socket_id }: any =
-            await User.findById(id).select("socket_id -_id");
-          return socket_id;
-        });
-
-        Promise.all(socket_ids)
-          .then((Sockets) => {
-            Sockets.forEach((socketId) => {
+        if (recipientsSocketIds?.length) {
+          Promise.all(recipientsSocketIds).then((socketIds) => {
+            socketIds.forEach((socketId) => {
               if (socketId) {
-                io.to(socketId).emit("new_message", _GroupMessage);
-              } else {
-                console.error("Encountered a null or undefined socket ID.");
+                io.to(socketId).emit("messages:unread:count", messagePayload);
               }
             });
-          })
-          .catch(() => console.log("error will finding scoket ids"));
+          });
+        }
         break;
       default:
         break;
     }
   });
 
-  //  direct 'upload_camera_picture' msg event
-  socket.on("upload_camera_picture", async (data) => {
-    const {
-      _id,
-      sender,
-      recipients,
-      messageType,
-      message,
-      conversationType,
-      conversationId,
-      createdAt,
-      updatedAt,
-    } = data;
-    const { file, text } = message;
-    try {
-      // Upload file to Cloudinary
-      const result: any = await new Promise((resolve, reject) => {
-        const uploadStream = v2.uploader.upload_stream((error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        });
-
-        streamifier.createReadStream(file).pipe(uploadStream);
-      });
-
-      switch (conversationType) {
-        case individual:
-          const msg_receiver = await User.findById(recipients);
-          const msg_sender = await User.findById(sender);
-          const _Message = {
-            _id,
-            sender,
-            recipients,
-            messageType,
-            message: {
-              photoUrl: result?.secure_url,
-              description: text || "",
-            },
-            conversationType,
-            conversationId,
-            createdAt,
-            updatedAt,
-          };
-          await Message.create(_Message);
-
-          // emit incoming_message -> to user
-          io.to(msg_receiver?.socket_id!).emit("new_message", _Message);
-          // emit outgoing_message -> from user
-          io.to(msg_sender?.socket_id!).emit("update_msg_status", {
-            messageId: _Message?._id,
-            conversationId,
-            conversationType,
-          });
-          break;
-        case "OneToManyMessage":
-          const from_user_group = await User.findById(sender);
-
-          const _GroupMessage = {
-            _id,
-            sender,
-            recipients,
-            messageType,
-            message: {
-              photoUrl: result?.secure_url,
-              description: text || "",
-            },
-            conversationType,
-            conversationId,
-            createdAt,
-            updatedAt,
-          };
-          await Message.create(_GroupMessage);
-
-          io.to(from_user_group?.socket_id!).emit("update_msg_status", {
-            messageId: _GroupMessage?._id,
-            conversationId,
-            conversationType,
-          });
-
-          const socket_ids = recipients.map(async (id: string) => {
-            const { socket_id }: any =
-              await User.findById(id).select("socket_id -_id");
-            return socket_id;
-          });
-
-          Promise.all(socket_ids)
-            .then((Sockets) => {
-              Sockets.forEach((socketId) => {
-                if (socketId) {
-                  io.to(socketId).emit("new_message", _GroupMessage);
-                } else {
-                  console.error("Encountered a null or undefined socket ID.");
-                }
-              });
-            })
-            .catch(() => console.log("error will finding scoket ids"));
-          break;
-        default:
-          break;
-      }
-    } catch (error) {
-      console.error("Upload failed:", error);
-
-      // Emit an error message to the client
-      // socket.emit("upload_error", "Failed to upload image");
-    }
-  });
-
-  // update unreadMsgs to db event
-  socket.on("update_unreadMsgs", async (message) => {
-    switch (message?.conversationType) {
-      case individual:
-        const to_user = await User.findById(message.recipients);
-        io.to(to_user?.socket_id!).emit("on_update_unreadMsg", message);
-        break;
-      case "OneToManyMessage":
-        const socket_ids = message.recipients.map(async (id: string) => {
-          const { socket_id }: any =
-            await User.findById(id).select("socket_id -_id");
-          return socket_id;
-        });
-        Promise.all(socket_ids)
-          .then((Sockets) => {
-            Sockets.forEach((socketId) => {
-              if (socketId) {
-                io.to(socketId).emit("on_update_unreadMsg", message);
-              } else {
-                console.error("Encountered a null or undefined socket ID.");
-              }
-            });
-          })
-          .catch(() => console.log("error will finding scoket ids"));
-        break;
-      default:
-        break;
-    }
-  });
-
-  // clear unread messages event
-  socket.on("clear_unread", async (data) => {
+  socket.on("messages:unread:clear", async (data) => {
     const { conversationId, recipients, sender } = data;
-    const recordsfound = await Message.updateMany(
+    const Sender = await User.findById(sender);
+    if (Sender?.socket_id) {
+      io.to(Sender?.socket_id!).emit("messages:status:seen", conversationId);
+    }
+    await Message.updateMany(
       { conversationId, recipients },
       { $set: { isRead: true } }
     );
-
-    const from_user = await User.findById(sender);
-    console.log(from_user);
-
-    io.to(from_user?.socket_id!).emit("all_msg_seen", conversationId);
   });
 
   interface TypingData {
@@ -773,7 +601,7 @@ io.on("connection", async (socket) => {
   }
 
   // show typing - stopTyping status event
-  socket.on("typing", async (data: TypingData) => {
+  socket.on("typing:start", async (data: TypingData) => {
     const { roomId, user, chatType, currentConversation } = data;
 
     try {
@@ -784,7 +612,7 @@ io.on("connection", async (socket) => {
             .lean<UserSocketInfo | null>();
 
           if (recipient?.socket_id) {
-            io.to(recipient.socket_id).emit("userTyping", {
+            io.to(recipient.socket_id).emit("user:typing:start", {
               userName: user.userName,
               roomId,
             });
@@ -813,7 +641,7 @@ io.on("connection", async (socket) => {
 
           recipients.forEach((socketId) => {
             if (socketId && io.sockets.sockets.get(socketId)) {
-              io.to(socketId).emit("userTyping", {
+              io.to(socketId).emit("user:typing:start", {
                 userName: user.userName,
                 roomId,
               });
@@ -832,7 +660,7 @@ io.on("connection", async (socket) => {
     }
   });
 
-  socket.on("stopTyping", async (data: TypingData) => {
+  socket.on("typing:stop", async (data: TypingData) => {
     const { roomId, user, chatType, currentConversation } = data;
 
     try {
@@ -843,7 +671,7 @@ io.on("connection", async (socket) => {
             .lean<UserSocketInfo | null>();
 
           if (recipient?.socket_id) {
-            io.to(recipient.socket_id).emit("userStoppedTyping", {
+            io.to(recipient.socket_id).emit("user:typing:stop", {
               userName: user.userName,
               roomId,
             });
@@ -875,7 +703,7 @@ io.on("connection", async (socket) => {
 
           recipients.forEach((socketId) => {
             if (socketId && io.sockets.sockets.get(socketId)) {
-              io.to(socketId).emit("userStoppedTyping", {
+              io.to(socketId).emit("user:typing:stop", {
                 userName: user.userName,
                 roomId,
               });
@@ -892,59 +720,47 @@ io.on("connection", async (socket) => {
       }
     } catch (error: any) {
       console.error(
-        "Error handling userStoppedTyping event:",
+        "Error handling user:typing:stop event:",
         error.message || error
       );
     }
   });
 
-  // msg has read by the recipient
-
-  // exit event
   socket.on("exit", async (data) => {
     const { user_id, friends } = data;
-    if (user_id) {
-      const user = await User.findByIdAndUpdate(
-        user_id, // user id
-        {
-          socket_id: socket.id, // update
-          status: "Offline",
-        },
-        { new: true } // return updated doc
-      );
+    if (!user_id || !friends) return;
+    await User.findByIdAndUpdate(
+      user_id, // user id
+      {
+        socket_id: socket.id, // update
+        status: "Offline",
+      },
+      { new: true } // return updated doc
+    );
+    const socket_ids = friends?.map(async (id: string) => {
+      const { socket_id }: any =
+        await User.findById(id).select("socket_id -_id");
+      return socket_id;
+    });
 
-      const socket_ids = friends?.map(async (id: string) => {
-        const { socket_id }: any =
-          await User.findById(id).select("socket_id -_id");
-        return socket_id;
-      });
-      const EmmitStatusTo = await Promise.all(socket_ids);
-      EmmitStatusTo.forEach((socketId) => {
-        if (socketId) {
-          const socketExists = io.sockets.sockets.get(socketId);
-          if (socketExists) {
-            io.to(socketId).emit("user_status_update", {
-              id: user_id,
-              status: "Offline",
-            });
-          } else {
-            console.error(`Socket ID not connected: ${socketId}`);
-          }
+    const EmmitStatusTo = await Promise.all(socket_ids);
+    EmmitStatusTo.forEach((socketId) => {
+      if (socketId) {
+        const socketExists = io.sockets.sockets.get(socketId);
+        if (socketExists) {
+          io.to(socketId).emit("user:offline", {
+            id: user_id,
+          });
         } else {
-          console.error("Encountered a null or undefined socket ID.");
+          console.error(`Socket ID not connected: ${socketId}`);
         }
-      });
-    }
+      } else {
+        console.error("Encountered a null or undefined socket ID.");
+      }
+    });
 
-    // Todo broadcast user disconnection;
-
-    // console.log("closing connection");
     socket.disconnect(true);
   });
-
-  // socket.on("disconnect", (socket) => {
-  //   console.log("user disconnected",socket.id);
-  // });
 });
 
 export { server };
