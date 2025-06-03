@@ -1,70 +1,68 @@
 import clsx from "clsx";
-import { useState } from "react";
+import { useState, ReactNode, useEffect } from "react";
 import { Icons } from "../../icons";
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   className?: string;
-  url?: string | null; // For avatar preview
   label?: string;
+  startIcon?: ReactNode;
 };
 
 const Input: React.FC<InputProps> = ({
   type = "text",
   className,
-  url,
   label,
+  startIcon,
+  value,
+  onChange,
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [inputValue, setInputValue] = useState<string>("");
+
+  // Sync internal state with controlled value
+  useEffect(() => {
+    if (value !== undefined) setInputValue(String(value));
+  }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    onChange?.(e);
+  };
+
+  const clearInput = () => {
+    const syntheticEvent = {
+      target: { value: "" },
+    } as React.ChangeEvent<HTMLInputElement>;
+    setInputValue("");
+    onChange?.(syntheticEvent);
+  };
 
   const baseStyles =
     "w-full p-2.5 border sm:text-sm border-gray-300 rounded-md outline-none focus:ring-1 focus:ring-btn-primary transition";
-  const inputClass = clsx(baseStyles, className);
+  const inputClass = clsx(
+    baseStyles,
+    {
+      "pl-10": startIcon,
+      "pr-10": type === "password" || (startIcon && inputValue), // space for clear or eye
+    },
+    className
+  );
 
-  // FILE INPUT
-  if (type === "file") {
-    return (
-      <div className={clsx("space-y-1", className)}>
-        {label && <label htmlFor="avatar" className="block text-sm font-medium text-gray-700">{label}</label>}
-
-        <div className="relative flex items-center gap-3">
-          {!url ? (
-            <label
-              htmlFor="avatar"
-              className="p-1 px-3 cursor-pointer bg-gray-100 ring-1 ring-gray-200 rounded-md text-sm"
-            >
-              Choose File
-            </label>
-          ) : (
-            <>
-              <img
-                src={url}
-                alt="Avatar"
-                className="w-14 aspect-square object-cover rounded-full z-10"
-              />
-              <label
-                htmlFor="avatar"
-                className="absolute top-2/3 right-0 z-20"
-              >
-                <Icons.PencilIcon className="w-6 h-6 p-1 bg-white rounded-full shadow cursor-pointer" />
-              </label>
-            </>
-          )}
-        </div>
-
-        <input id="avatar" type="file" {...props} hidden />
-      </div>
-    );
-  }
-
-  // PASSWORD INPUT
+  // PASSWORD
   if (type === "password") {
     return (
-      <div className="relative">
-        {label && <label className="block mb-1 text-sm font-medium text-gray-700">{label}</label>}
+      <div className="relative w-full">
+        {label && (
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            {label}
+          </label>
+        )}
         <input
           type={showPassword ? "text" : "password"}
-          className={clsx(inputClass, "pr-10")}
+          className={inputClass}
+          value={value}
+          onChange={onChange}
           {...props}
         />
         <button
@@ -84,11 +82,54 @@ const Input: React.FC<InputProps> = ({
     );
   }
 
-  // DEFAULT INPUT
+  // SEARCH-STYLE INPUT (icon + clear)
+  if (startIcon) {
+    return (
+      <div className="relative w-full">
+        {label && (
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            {label}
+          </label>
+        )}
+        <div className="absolute top-1/2 left-2 -translate-y-1/2 text-gray-500">
+          {startIcon}
+        </div>
+        <input
+          type={type}
+          className={inputClass}
+          value={inputValue}
+          onChange={handleChange}
+          {...props}
+        />
+        {inputValue && (
+          <button
+            type="button"
+            onClick={clearInput}
+            className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+            aria-label="Clear input"
+          >
+            <Icons.XMarkIcon className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  // DEFAULT
   return (
     <div className="w-full">
-      {label && <label className="block mb-1 text-sm font-medium text-gray-700">{label}</label>}
-      <input type={type} className={inputClass} {...props} />
+      {label && (
+        <label className="block mb-1 text-sm font-medium text-gray-700">
+          {label}
+        </label>
+      )}
+      <input
+        type={type}
+        className={inputClass}
+        value={value}
+        onChange={onChange}
+        {...props}
+      />
     </div>
   );
 };

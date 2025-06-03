@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "./ui/Button";
+import { Button } from "./ui/Button";
 import { Icons } from "../icons";
 
 const GoogleAuth: React.FC = () => {
@@ -13,11 +13,13 @@ const GoogleAuth: React.FC = () => {
   };
   return (
     <Button
-      kind="secondary_outline"
-      className="w-full"
+      variant="outline"
+      // shape="md"
+      fullWidth
       onClick={handleGoogleLogin}
+      icon={<Icons.GoogleIcon width="25" height="25" role="img" />}
+      iconPosition="left"
     >
-      <Icons.GoogleIcon width="30" height="30" role="img" />
       Continue with Google
     </Button>
   );

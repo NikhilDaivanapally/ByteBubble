@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "../../store/store";
 import { useCallback, useEffect } from "react";
 import { setUsers } from "../../store/slices/appSlice";
 import Loader from "../ui/Loader";
-import Button from "../ui/Button";
+import { Button } from "../ui/Button";
 import { motion, AnimatePresence } from "motion/react";
 import { socket } from "../../socket";
 
@@ -64,8 +64,9 @@ const ConnectUsers = () => {
                         </p>
                       </div>
                       <Button
-                        kind="primary"
+                        variant="primary"
                         className="ml-auto"
+                        shape="md"
                         onClick={() => handleSendFriendRequest(user._id)}
                       >
                         Send Request

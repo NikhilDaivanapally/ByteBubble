@@ -14,7 +14,7 @@ import { motion } from "motion/react";
 import { selectConversation } from "../../store/slices/appSlice";
 import { GroupConversationProps, UserProps } from "../../types";
 import ConversationSkeleton from "../../components/Loaders/ConversationSkeleton";
-import Button from "../../components/ui/Button";
+import { Button } from "../../components/ui/Button";
 import { Icons } from "../../icons";
 import Dialog from "../../components/Dialog/Dialog";
 import CreateGroup from "../../components/CreateGroup";
@@ -60,7 +60,7 @@ const GroupChat = () => {
   return (
     <div className="h-full flex">
       <div
-        className={`flex flex-col gap-4 px-4 flex-1 md:flex-none min-w-[340px] md:w-[370px]
+        className={`flex flex-col gap-3 px-4 flex-1 md:flex-none min-w-[340px] md:w-[370px]
               ${activeChatId ? "hidden md:flex" : ""}
               md:h-full overflow-y-hidden
             `}
@@ -72,14 +72,15 @@ const GroupChat = () => {
           />
         </Dialog>
 
-        <div className="py-2 flex justify-between items-center">
+        <div className="pt-4 flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Groups</h1>
           <Button
-            className=""
-            kind="primary"
+            variant="primary"
+            size="sm"
             onClick={() => setIsDialogOpen(true)}
+            icon={<Icons.PlusIcon className="w-5" />}
+            iconPosition="left"
           >
-            <Icons.PlusIcon className="w-5" />
             Create Group
           </Button>
         </div>

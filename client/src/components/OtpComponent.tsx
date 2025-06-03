@@ -1,6 +1,20 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import Button from "./ui/Button";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  FormEvent,
+  ChangeEvent,
+  KeyboardEvent,
+} from "react";
+import { Button } from "./ui/Button";
 import { useOtpsubmitMutation } from "../store/slices/apiSlice";
+import { UpdateAuthState } from "../store/slices/authSlice";
+import { useDispatch } from "react-redux";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { SerializedError } from "@reduxjs/toolkit";
 
 type OtpComponentProps = {
   email?: string;
@@ -8,8 +22,11 @@ type OtpComponentProps = {
 };
 
 const OtpComponent: React.FC<OtpComponentProps> = ({ email, length }) => {
-  const [otp, setOtp] = useState(new Array(length).fill(""));
-  const inputRefs = useRef<HTMLInputElement[] | []>([]);
+  const dispatch = useDispatch();
+  const Navigate = useNavigate();
+  const [otp, setOtp] = useState<string[]>(Array(length).fill(""));
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   const [
     otpsubmit,
     {
@@ -20,115 +37,123 @@ const OtpComponent: React.FC<OtpComponentProps> = ({ email, length }) => {
   ] = useOtpsubmitMutation();
 
   useEffect(() => {
-    if (inputRefs.current[0]) {
-      inputRefs.current[0].focus();
-    }
+    inputRefs.current[0]?.focus();
+  }, []);
+
+  useEffect(() => {
     if (otpsubmitData) {
-      // dispatch(UpdateAuthState(otpsubmitData.user));
-      localStorage.setItem("auth_id", JSON.stringify(otpsubmitData.user));
-      // toast.success(otpsubmitData.message);
-      // Navigate("/");
+      dispatch(UpdateAuthState(otpsubmitData.user));
+      toast.success(otpsubmitData.message);
+      Navigate("/");
     } else if (otpsubmitError) {
-      // toast.error(otpsubmitError.data.message);
+      let errorMessage = "Something went wrong";
+
+      if ("status" in otpsubmitError) {
+        // It's a FetchBaseQueryError
+        const err = otpsubmitError as FetchBaseQueryError;
+        if (err.data && typeof err.data === "object" && "message" in err.data) {
+          errorMessage =
+            (err.data as { message?: string }).message || errorMessage;
+        }
+      } else {
+        // It's a SerializedError
+        const err = otpsubmitError as SerializedError;
+        errorMessage = err.message || errorMessage;
+      }
+
+      toast.error(errorMessage);
     }
-  }, [otpsubmitError, otpsubmitData, inputRefs.current]);
+  }, [otpsubmitData, otpsubmitError]);
 
-  // verifyOtp code
   const handleOtpChange = useCallback(
-    (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    (index: number, e: ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      if (isNaN(value)) return;
-      const newotp = [...otp];
-      newotp[index] = value.substring(value.length - 1);
-      setOtp(newotp);
 
-      if (value && index < length - 1 && inputRefs.current[index + 1]) {
-        if (otp[index + 1]) {
-          inputRefs.current[otp.indexOf("")].focus();
-        } else {
-          inputRefs.current[index + 1].focus();
+      if (!/^\d*$/.test(value)) return; // allow only digits
+
+      const newOtp = [...otp];
+      newOtp[index] = value.slice(-1); // get only last char if pasted
+      setOtp(newOtp);
+
+      const nextIndex = otp.indexOf("");
+      if (value && index < length - 1) {
+        inputRefs.current[nextIndex >= 0 ? nextIndex : index + 1]?.focus();
+      }
+    },
+    [otp, length]
+  );
+
+  const handleKeydown = useCallback(
+    (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Backspace" && !otp[index] && index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      }
+    },
+    [otp]
+  );
+
+  const handleOtpsubmit = useCallback(
+    async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (otp.every((val) => val.trim() !== "")) {
+        await otpsubmit({ email, otp: otp.join("") });
+      } else {
+        // toast.error("All fields must be filled");
+      }
+    },
+    [otp, email, otpsubmit]
+  );
+
+  const handleClick = useCallback(
+    (index: number) => {
+      const input = inputRefs.current[index];
+      if (input) {
+        input.setSelectionRange(1, 1);
+        if (index > 0 && !otp[index - 1]) {
+          inputRefs.current[otp.indexOf("")]?.focus();
         }
       }
     },
     [otp]
   );
 
-  // handle keydown
-  const handleKeydown = useCallback(
-    (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (
-        e.key === "Backspace" &&
-        !otp[index] &&
-        index > 0 &&
-        inputRefs.current[index - 1]
-      ) {
-        inputRefs.current[index - 1].focus();
-      }
-    },
-    [otp]
-  );
-
-  // otp verify
-  const handleOtpsubmit = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      if (!otp.some((val) => val == "")) {
-        await otpsubmit({
-          email,
-          otp: otp.join(""),
-        });
-      } else {
-        // toast.error("fields should not be empty");
-      }
-    },
-    [otp]
-  );
-
-  const handleclick = useCallback((index: number) => {
-    inputRefs.current[index].setSelectionRange(1, 1);
-    if (index > 0 && !otp[index - 1]) {
-      inputRefs.current[otp.indexOf("")].focus();
-    }
-  }, []);
-
   return (
     <section className="w-full h-full flex-center flex-col gap-2">
       <h1 className="lg:hidden absolute top-4 left-4 text-xl font-semibold">
         Byte_Messenger
       </h1>
-      <h1 className="font-semibold text-2xl  text-center">Verify OTP</h1>
+      <h1 className="font-semibold text-2xl text-center">Verify OTP</h1>
       <p className="text-center text-sm text-gray-600">
-        we have sent a verification code to{" "}
+        We have sent a verification code to{" "}
         <span className="font-semibold text-black underline">
-          harry@gmail.com
           {/* {email} */}
+          harry@gmail.com
         </span>
       </p>
       <form onSubmit={handleOtpsubmit} className="w-full space-y-2">
         <div className="flex gap-2 my-8 justify-center">
-          {otp.map((value, index) => {
-            return (
-              <input
-                className="w-full h-12 sm:w-14 sm:h-14 text-xl text-center border rounded-md focus:outline-none focus:ring-2 focus:ring-btn-primary transition"
-                key={`inpt_${index}`}
-                ref={(input) => {
-                  inputRefs.current[index] = input;
-                }}
-                type="text"
-                value={value}
-                onClick={() => handleclick(index)}
-                onChange={(e) => handleOtpChange(index, e)}
-                onKeyDown={(e) => handleKeydown(index, e)}
-              />
-            );
-          })}
+          {otp.map((value, index) => (
+            <input
+              key={`input_${index}`}
+              ref={(el) => {
+                inputRefs.current[index] = el;
+              }}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={value}
+              onClick={() => handleClick(index)}
+              onChange={(e) => handleOtpChange(index, e)}
+              onKeyDown={(e) => handleKeydown(index, e)}
+              className="w-full h-12 sm:w-14 sm:h-14 text-xl text-center border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-btn-primary transition"
+            />
+          ))}
         </div>
-
         <Button
-          kind="secondary"
-          className="w-full"
+          variant="primary"
+          fullWidth
           type="submit"
-          isLoading={isOtpSubmitLoading}
+          loading={isOtpSubmitLoading}
         >
           Verify Otp
         </Button>

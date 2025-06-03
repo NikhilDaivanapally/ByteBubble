@@ -1,8 +1,8 @@
-const GoogleIcon = (props:React.SVGProps<SVGSVGElement>) => (
+const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg {...props}>
     <g id="Google-Button" stroke="none" fill="none">
-      <rect x="0" y="0" width="30" height="30" rx="1"></rect>
-      <g id="logo_googleg_48dp" transform="translate(5,5) scale(1.2)">
+      <rect x="0" y="0" width="25" height="25" rx="1"></rect>
+      <g id="logo_googleg_48dp" transform="translate(4,4) scale(1)">
         <path
           d="M17.64,9.20454545 C17.64,8.56636364 17.5827273,7.95272727 17.4763636,7.36363636 L9,7.36363636 L9,10.845 L13.8436364,10.845 C13.635,11.97 13.0009091,12.9231818 12.0477273,13.5613636 L12.0477273,15.8195455 L14.9563636,15.8195455 C16.6581818,14.2527273 17.64,11.9454545 17.64,9.20454545 L17.64,9.20454545 Z"
           id="Shape"
@@ -29,4 +29,3 @@ const GoogleIcon = (props:React.SVGProps<SVGSVGElement>) => (
 );
 
 export { GoogleIcon };
-

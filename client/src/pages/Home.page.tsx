@@ -1,9 +1,7 @@
 import Navbar from "../components/Navbar";
-import Button from "../components/ui/Button";
+import { Button } from "../components/ui/Button";
 import {
   ArrowRightIcon,
-  ArrowUpRightIcon,
-  EnvelopeIcon,
   PlayIcon,
   UserCircleIcon,
 } from "@heroicons/react/16/solid";
@@ -20,7 +18,9 @@ const Home = () => {
       <main>
         {/* Hero Section */}
         <section className="text-center mt-8">
-          <Button className="mx-auto">Stay Connected. Anytime. Anywhere</Button>
+          <div className="text-sm px-3 py-1.5  border border-btn-primary rounded-full w-fit mx-auto font-semibold">
+            Stay Connected. Anytime. Anywhere
+          </div>
           <h1 className="mt-6 text-2xl md:text-4xl font-semibold md:w-2/3 mx-auto">
             Your personal hub for instant, secure, and real-time communication.
           </h1>
@@ -49,15 +49,22 @@ const Home = () => {
                 src="https://images.unsplash.com/photo-1746061641845-0825bf320bf1?q=80&w=2070&auto=format&fit=crop"
                 alt="Preview"
               />
-              <button className="absolute left-5 -bottom-4 bg-gray-200 w-8 h-8 rounded-full">
+              <div className="absolute left-5 -bottom-4 bg-gray-200 w-8 h-8 rounded-full flex-center">
                 😍
-              </button>
+              </div>
             </div>
           </div>
 
-          <Button kind="primary_outline" className="mx-auto mt-6">
+          <Button
+            href="/signin"
+            variant="outline"
+            shape="pill"
+            icon={<ArrowRightIcon className="w-4" />}
+            iconPosition="right"
+            className="mx-auto mt-6"
+            size="sm"
+          >
             Try Now
-            <ArrowRightIcon className="w-4" />
           </Button>
         </section>
 
@@ -179,8 +186,6 @@ const Home = () => {
           </div>
         </section>
       </main>
-      {/* <Button>Signin</Button>
-      <Button kind="secondary" className="w-full">Signin</Button> */}
     </div>
   );
 };

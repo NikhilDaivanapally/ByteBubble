@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { UserProps } from "../types";
 import { Icons } from "../icons";
+import Input from "./ui/Input";
 
 type MembersSelectionProps = {
   availableMembers: UserProps[];
@@ -82,26 +83,18 @@ const MembersSelection = ({
       )}
 
       {/* Search input */}
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icons.MagnifyingGlassIcon className="text-gray-400 w-5" />
-        </div>
 
-        <input
-          type="text"
-          className={`block w-full pl-10 pr-3 py-2.5 sm:text-sm
-    border transition-all duration-200
-    rounded-md focus:outline-none ring-1 ring-transparent
-   focus:ring-btn-primary
-    ${error ? "border-red-300" : "border-gray-300"}
-    ${isExpanded ? "rounded-b-none" : ""}
-  `}
-          placeholder="Search members"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => setIsExpanded(true)}
-        />
-      </div>
+      <Input
+        type="text"
+        name="search"
+        className={` ${error ? "border-red-300" : "border-gray-300"}
+        ${isExpanded ? "rounded-b-none" : ""}`}
+        startIcon={<Icons.MagnifyingGlassIcon className="w-5 text-gray-500" />}
+        placeholder="Search members"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        onFocus={() => setIsExpanded(true)}
+      />
 
       {error && (
         <p className="mt-1 text-sm text-red-600" id="members-error">

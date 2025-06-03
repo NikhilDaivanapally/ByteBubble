@@ -6,6 +6,7 @@ import MembersSelection from "./MembersSelection";
 import { socket } from "../socket";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
+import { Button } from "./ui/Button";
 
 type CreateGroupProps = {
   onClose: () => void;
@@ -56,7 +57,9 @@ const CreateGroup = ({ onClose, availableMembers }: CreateGroupProps) => {
     <form onSubmit={handleSubmit} className="space-y-3">
       <ImageUpload
         value={groupImage}
-        onChange={(value) => setGroupImage(value)}
+        onChange={(_, blobUrl) => {
+          setGroupImage(blobUrl);
+        }}
         name="Upload Group Image"
       />
       <Input
@@ -70,18 +73,12 @@ const CreateGroup = ({ onClose, availableMembers }: CreateGroupProps) => {
         error={errors.name}
       />
       <div className="flex gap-3 w-fit ml-auto">
-        <button
-          onClick={onClose}
-          className="bg-gray-100 hover:bg-gray-200 transition cursor-pointer p-2 rounded-md text-sm"
-        >
+        <Button variant="ghost" size="sm" shape="md">
           Cancel
-        </button>
-        <button
-          type="submit"
-          className="p-2 bg-btn-primary rounded-md text-white text-sm cursor-pointer hover:bg-btn-primary/90"
-        >
+        </Button>
+        <Button variant="primary" size="sm" shape="md">
           Create Group
-        </button>
+        </Button>
       </div>
     </form>
   );

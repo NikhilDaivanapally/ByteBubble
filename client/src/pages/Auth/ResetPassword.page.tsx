@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
+import { Button } from "../../components/ui/Button";
 import { useResetpassMutation } from "../../store/slices/apiSlice";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
@@ -16,7 +16,6 @@ const ResetPassword = () => {
     newPassword: "",
     confirmNewPassword: "",
   });
-  console.log(resetFormData);
 
   const [resetpass, { isLoading, error, data }] = useResetpassMutation();
 
@@ -82,10 +81,10 @@ const ResetPassword = () => {
               required={true}
             />
             <Button
-              kind="secondary"
+              variant="primary"
               type="submit"
-              className="w-full"
-              isLoading={isLoading}
+              fullWidth
+              loading={isLoading}
             >
               Reset password
             </Button>

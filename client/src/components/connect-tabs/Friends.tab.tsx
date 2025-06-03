@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "../../store/store";
 import { useEffect } from "react";
 import { setFriends } from "../../store/slices/appSlice";
 import Loader from "../ui/Loader";
-import Button from "../ui/Button";
+import { Button } from "../ui/Button";
 import { Icons } from "../../icons";
 import { AnimatePresence, motion } from "motion/react";
 import { socket } from "../../socket";
@@ -81,13 +81,15 @@ const Friends = () => {
                         </div>
                         <div className="ml-auto flex gap-1">
                           <Button
-                            kind="primary"
+                            variant="primary"
+                            shape="pill"
                             onClick={() => handleStartConversation(friend._id)}
                           >
                             <Icons.ChatBubbleLeftRightIcon className="w-5" />
                           </Button>
                           <Button
-                            kind="primary"
+                            variant="primary"
+                            shape="pill"
                             onClick={() => handleRemoveFriend(friend._id)}
                           >
                             <Icons.XMarkIcon className="w-5" />

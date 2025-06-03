@@ -75,7 +75,7 @@ const IndividualChat = () => {
         ${activeChatId ? "hidden md:flex" : ""}
         md:h-full overflow-y-hidden`}
       >
-        <h1 className="text-2xl font-semibold py-2">Chats</h1>
+        <h1 className="text-2xl font-semibold pt-4">Chats</h1>
 
         <SearchInput
           conversations={DirectConversations || []}

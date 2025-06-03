@@ -4,7 +4,7 @@ import { AppDispatch, RootState } from "../../store/store";
 import { useCallback, useEffect } from "react";
 import { setFriendRequests } from "../../store/slices/appSlice";
 import Loader from "../ui/Loader";
-import Button from "../ui/Button";
+import { Button } from "../ui/Button";
 import { motion, AnimatePresence } from "motion/react";
 import { socket } from "../../socket";
 import { Icons } from "../../icons";
@@ -82,27 +82,33 @@ const Requests = () => {
                           {request.sender?._id !== authUser?._id ? (
                             <>
                               <Button
-                                kind="primary"
+                                variant="primary"
                                 onClick={() =>
                                   handleAcceptFriendRequest(request._id)
                                 }
+                                icon={<Icons.CheckIcon className="w-4" />}
+                                iconPosition="left"
                               >
-                                <Icons.CheckIcon className="w-4" />
                                 Accept
                               </Button>
                               <Button
-                                kind="primary"
+                                variant="primary"
                                 onClick={() =>
                                   handleRejectFriendRequest(request._id)
                                 }
+                                icon={<Icons.XMarkIcon className="w-4" />}
+                                iconPosition="left"
                               >
-                                <Icons.XMarkIcon className="w-4" />
                                 Decline
                               </Button>
                             </>
                           ) : (
-                            <Button kind="primary" onClick={() => {}}>
-                              <Icons.CheckIcon className="w-4" />
+                            <Button
+                              variant="primary"
+                              icon={<Icons.CheckIcon className="w-4" />}
+                              iconPosition="left"
+                              onClick={() => {}}
+                            >
                               Request Sent
                             </Button>
                           )}

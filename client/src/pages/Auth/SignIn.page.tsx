@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import Button from "../../components/ui/Button";
+import { Button } from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -102,12 +102,7 @@ const SignIn = () => {
         >
           Forgot password
         </Link>
-        <Button
-          kind="secondary"
-          type="submit"
-          className="w-full"
-          isLoading={isLoading}
-        >
+        <Button variant="primary" type="submit" fullWidth loading={isLoading}>
           Sign in
         </Button>
       </form>

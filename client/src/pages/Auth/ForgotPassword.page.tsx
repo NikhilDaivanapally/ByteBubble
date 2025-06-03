@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import Button from "../../components/ui/Button";
+import { Button } from "../../components/ui/Button";
 import { useCallback, useEffect, useState } from "react";
 import Input from "../../components/ui/Input";
 import { EnvelopeIcon, KeyIcon } from "@heroicons/react/16/solid";
@@ -68,12 +68,14 @@ const ForgotPassword = () => {
               required={true}
             />
             <Button
-              kind="secondary"
+              variant="primary"
               type="submit"
-              className="w-full"
-              isLoading={isLoading}
+              fullWidth
+              loading={isLoading}
+              icon={<EnvelopeIcon className="w-5" />}
+              iconPosition="left"
             >
-              <EnvelopeIcon className="w-5" /> Send Email
+              Send Email
             </Button>
           </form>
         </>
