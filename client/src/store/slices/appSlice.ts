@@ -13,6 +13,7 @@ const initialState: appSliceProps = {
   mediaPreviewUrls: null,
   isTyping: "",
   isTypingRoomId: null,
+  messageInfo: null,
 };
 
 const slice = createSlice({
@@ -73,6 +74,9 @@ const slice = createSlice({
       state.isTyping = userName;
       state.isTypingRoomId = roomId;
     },
+    setMessageInfo(state, action) {
+      state.messageInfo = action.payload;
+    },
   },
 });
 export const {
@@ -91,6 +95,7 @@ export const {
   removeUserFromUsers,
   removeRequestFromFriendRequests,
   setIsTyping,
+  setMessageInfo,
 } = slice.actions;
 
 export default slice.reducer;

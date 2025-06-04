@@ -7,7 +7,6 @@ import {
 } from "../../store/slices/conversation";
 import { selectConversation } from "../../store/slices/appSlice";
 import { UserProps } from "../../types";
-import React from "react";
 
 const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
   const dispatch = useDispatch();
@@ -26,7 +25,6 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
     : null;
 
   const FallbackIcon = isIndividual ? Icons?.UserIcon : Icons?.UsersIcon;
-  console.log(direct_chat?.current_direct_conversation);
 
   const handleGoBack = () => {
     dispatch(selectConversation(null));

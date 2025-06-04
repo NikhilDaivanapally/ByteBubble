@@ -9,7 +9,7 @@ import { DirectMessageProps, GroupMessageProps } from "../types";
 import { setfullImagePreview } from "../store/slices/conversation";
 import Loader from "./ui/Loader";
 import { Icons } from "../icons";
-
+import { MessageDropdown } from "./MessageDropdown";
 type senderProps = { avatar: string; userName: string };
 
 export const TextMsg = React.memo(
@@ -18,6 +18,7 @@ export const TextMsg = React.memo(
     const { GroupConversations } = useSelector(
       (state: RootState) => state.conversation.group_chat
     );
+
     let sender: senderProps = { avatar: "", userName: "" };
     if (chatType == "group") {
       sender = getSenderFromGroup(
@@ -31,12 +32,13 @@ export const TextMsg = React.memo(
 
     return (
       <div
-        className={`Text_msg w-fit flex gap-4 ${
+        className={`Text_msg relative w-fit flex group items-start ${
           !el.isIncoming ? "ml-auto" : ""
         }`}
       >
+        {!el.isIncoming && <MessageDropdown el={el} />}
         {chatType !== "individual" && el.isIncoming && (
-          <div className="user_profile w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
+          <div className="user_profile mr-2 w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
             <img
               className="w-full h-full object-cover"
               src={sender?.avatar}
@@ -44,10 +46,10 @@ export const TextMsg = React.memo(
             />
           </div>
         )}
+
         <div className="space-y-1">
-          {" "}
           <div
-            className={`px-2 py-1 rounded-xl  ${
+            className={`px-2 py-1 rounded-xl ${
               !el.isIncoming
                 ? "bg-gray-300 rounded-br-none"
                 : "bg-white rounded-bl-none"
@@ -60,6 +62,7 @@ export const TextMsg = React.memo(
             )}
             <p>{el.message?.text}</p>
           </div>
+
           <div className="w-fit ml-auto flex gap-2">
             {!el?.isIncoming ? (
               el?.status === "pending" ? (
@@ -67,20 +70,18 @@ export const TextMsg = React.memo(
               ) : (
                 <div className="flex-center gap-1">
                   <div
-                    className={`w-2 h-2  rounded-full ${
+                    className={`w-2 h-2 rounded-full ${
                       el.isSeen ? "bg-green-600" : "bg-gray-300"
                     }`}
-                  ></div>
+                  />
                   <div
                     className={`w-2 h-2 rounded-full ${
                       el.isSeen ? "bg-green-600" : "bg-gray-300"
                     }`}
-                  ></div>
+                  />
                 </div>
               )
-            ) : (
-              ""
-            )}
+            ) : null}
             <p className="text-xs text-black/60">{Time}</p>
           </div>
         </div>
@@ -367,8 +368,8 @@ export const Timeline = React.memo(({ date }: { date: string }) => {
   const formatTime: string = formatTime2(date);
 
   return (
-    <div className="w-full relative before:absolute before:content-[''] before:w-full before:left-0 before:h-[0.1px] flex-center before:bg-black/60 text-center">
-      <p className="text-sm text-black/60 px-2 py-1 z-2 bg-gray-200">
+    <div className="w-full relative flex-center text-center ">
+      <p className="text-xs text-black/60 px-2 py-1 z-2 bg-gray-300 rounded-md">
         {formatTime}
       </p>
     </div>

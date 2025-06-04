@@ -23,6 +23,7 @@ import UploadedFileModule from "./UploadedFileModule";
 import NoChat from "./ui/NoChat";
 import ChatHeader from "./chat-header/ChatHeader";
 import ProfileDetails from "./ProfileDetails";
+import GroupMessageInfo from "./GroupMessageInfo";
 
 const Chat = () => {
   const dispatch = useDispatch();
@@ -139,7 +140,7 @@ const Chat = () => {
   return (
     <div
       className={`
-          flex-1 bg-gray-200 rounded-2xl p-2
+          flex-1 bg-gray-200 dark:bg-[#1E1E1E] rounded-2xl p-2
           ${activeChatId ? "block" : "hidden"}
           md:block overflow-hidden
         `}
@@ -155,7 +156,7 @@ const Chat = () => {
                 {/* send image preview */}
                 <UploadedFileModule />
                 {/* Header */}
-                <ChatHeader handleOpenShowDetails={handleOpenShowDetails}  />
+                <ChatHeader handleOpenShowDetails={handleOpenShowDetails} />
                 <ul
                   ref={messagesListRef}
                   className="flex-1 overflow-x-hidden mt-1 scrollbar-custom px-4 space-y-2"
@@ -233,6 +234,12 @@ const Chat = () => {
                 showDetails={showDetails}
                 handleCloseShowDetails={handleCloseShowDetails}
               />
+              {/* Right: Expandable Message Info Panel */}
+              {/* <ProfileDetails
+                showDetails={messageInfo}
+                handleCloseShowDetails={()  => set}
+              /> */}
+              <GroupMessageInfo />
             </div>
           ) : (
             <div className="w-full h-full flex-center">

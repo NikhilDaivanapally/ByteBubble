@@ -86,7 +86,7 @@ const MembersSelection = ({
 
       <Input
         type="text"
-        name="search"
+        name="search members"
         className={` ${error ? "border-red-300" : "border-gray-300"}
         ${isExpanded ? "rounded-b-none" : ""}`}
         startIcon={<Icons.MagnifyingGlassIcon className="w-5 text-gray-500" />}

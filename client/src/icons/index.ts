@@ -30,6 +30,11 @@ import {
   VideoCameraIcon,
   EllipsisVerticalIcon,
   Cog6ToothIcon,
+  ChevronDownIcon,
+  ClipboardIcon,
+  ArrowUturnLeftIcon,
+  FaceSmileIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/16/solid";
 import { LuClock4, LuSend, LuSmile } from "react-icons/lu";
 import { RiAttachment2 } from "react-icons/ri";
@@ -70,6 +75,10 @@ export const Icons = {
   VideoCameraIcon,
   EllipsisVerticalIcon,
   Cog6ToothIcon,
+  ChevronDownIcon,
+  ClipboardIcon,
+  ArrowUturnLeftIcon,
+  InformationCircleIcon,
   ClockIcon: LuClock4,
   SendIcon: LuSend,
   SmileIcon: LuSmile,
