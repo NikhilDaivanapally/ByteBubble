@@ -4,6 +4,7 @@ import { useLazyFetchGroupConversationsQuery } from "../../store/slices/apiSlice
 import {
   ResetGroupChat,
   setGroupConversations,
+  updateGroupConversation,
 } from "../../store/slices/conversation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -12,8 +13,8 @@ import Chat from "../../components/Chat";
 import SearchInput from "../../components/ui/SearchInput";
 import { motion } from "motion/react";
 import { selectConversation } from "../../store/slices/appSlice";
-import { GroupConversationProps, UserProps } from "../../types";
-import ConversationSkeleton from "../../components/Loaders/ConversationSkeleton";
+import { GroupConversationProps } from "../../types";
+import ConversationSkeleton from "../../components/Loaders/SkeletonLoaders/ConversationSkeleton";
 import { Button } from "../../components/ui/Button";
 import { Icons } from "../../icons";
 import Dialog from "../../components/Dialog/Dialog";
@@ -26,9 +27,11 @@ const GroupChat = () => {
   const { activeChatId, friends } = useSelector(
     (state: RootState) => state.app
   );
-  const { GroupConversations } = useSelector(
-    (state: RootState) => state.conversation.group_chat
-  );
+  const {
+    GroupConversations,
+    current_group_messages,
+    current_group_conversation,
+  } = useSelector((state: RootState) => state.conversation.group_chat);
   const [filteredConversations, setFilteredConversations] = useState<
     GroupConversationProps[]
   >(GroupConversations || []);
@@ -50,6 +53,36 @@ const GroupChat = () => {
     if (GroupConversations) return;
     fetchGroupConversations({});
   }, [GroupConversations]);
+
+  // Update conversation preview when new message arrives
+  useEffect(() => {
+    if (!current_group_messages?.length || !current_group_conversation) return;
+
+    const lastMsg = current_group_messages[current_group_messages.length - 1];
+    const foundUser = [
+      ...current_group_conversation?.users,
+      current_group_conversation?.admin,
+    ].find((user) => user?._id === lastMsg.from);
+    dispatch(
+      updateGroupConversation({
+        ...current_group_conversation,
+        from: {
+          _id: foundUser?._id,
+          avatar: foundUser?.avatar,
+          userName: foundUser?.userName,
+        },
+        isOutgoing: lastMsg.isOutgoing,
+        message: {
+          messageType: lastMsg.messageType,
+          message: lastMsg.message,
+          createdAt: lastMsg.createdAt,
+        },
+        time: lastMsg.createdAt,
+        isSeen: lastMsg.isSeen,
+      })
+    );
+  }, [current_group_messages, dispatch]);
+
   useEffect(() => {
     return () => {
       dispatch(selectConversation(null));
@@ -91,27 +124,32 @@ const GroupChat = () => {
         <ShowOfflineStatus />
         <h3 className="">Last Chats</h3>
         <ul className="overflow-y-auto scrollbar-custom flex-1 flex flex-col gap-4">
-          {filteredConversations?.length > 0
-            ? filteredConversations?.map(
-                (conversation: GroupConversationProps, i: number) => (
-                  <motion.div
-                    key={conversation._id ?? i} // Prefer using a unique id if available
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ delay: i * 0.02, duration: 0.3 }}
-                  >
-                    <GroupConversation conversation={conversation} index={i} />
-                  </motion.div>
-                )
-              )
-            : [...Array(5)].map((_, i: number) => {
-                return (
-                  <li key={i}>
-                    <ConversationSkeleton />
-                  </li>
-                );
-              })}
+          {GroupConversations === null ? (
+            // Still loading
+            [...Array(5)].map((_, i) => (
+              <li key={i}>
+                <ConversationSkeleton />
+              </li>
+            ))
+          ) : filteredConversations?.length > 0 ? (
+            // Loaded and has results
+            filteredConversations?.map((conversation, i) => (
+              <motion.div
+                key={conversation._id ?? i}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ delay: i * 0.02, duration: 0.3 }}
+              >
+                <GroupConversation conversation={conversation} index={i} />
+              </motion.div>
+            ))
+          ) : (
+            // Loaded but empty
+            <div className="w-full h-1/2 flex justify-center items-end text-center text-sm text-gray-500 py-8">
+              No conversations found.
+            </div>
+          )}
         </ul>
       </div>
       <Chat />

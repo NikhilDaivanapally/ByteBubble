@@ -1,43 +1,34 @@
+import { useDispatch, useSelector } from "react-redux";
+import { useLazySuccessQuery } from "../../store/slices/apiSlice";
+import { RootState } from "../../store/store";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { UpdateAuthState } from "../../store/slices/authSlice";
-import Loader from "../../components/ui/Loader";
+import { setUser } from "../../store/slices/authSlice";
+import { Navigate } from "react-router-dom";
+import PageLoader from "../../components/Loaders/PageLoader";
 
 export function ProtectedPage({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+
+  const [me, { isLoading, data, isError }] = useLazySuccessQuery();
+  const [called, setCalled] = useState(false);
 
   useEffect(() => {
-    const verifyUser = async () => {
-      try {
-        const res = await fetch(
-          "http://localhost:8000/api/v1/auth/login/success",
-          { credentials: "include" }
-        );
-        if (!res.ok) throw new Error("Not authenticated");
-        const data = await res.json();
-        setIsAuthenticated(true);
-        dispatch(UpdateAuthState(data.user));
-      } catch (err) {
-        navigate("/signin", { replace: true });
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!isAuthenticated && !called) {
+      me({});
+      setCalled(true);
+    }
+  }, [isAuthenticated, called, me]);
 
-    verifyUser();
-  }, [navigate]);
+  useEffect(() => {
+    if (data) {
+      dispatch(setUser(data.user));
+    }
+  }, [data, dispatch]);
 
-  if (loading)
-    return (
-      <div className="w-full h-full flex-center">
-        <Loader customColor={true} />
-      </div>
-    );
-  if (!isAuthenticated) return null; // Or a fallback
+  if (!called || isLoading) return <PageLoader />;
+
+  if (!isAuthenticated && isError) return <Navigate to="/signin" replace />;
 
   return <>{children}</>;
 }

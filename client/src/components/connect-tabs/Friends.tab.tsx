@@ -3,12 +3,12 @@ import { useFetchFriendsQuery } from "../../store/slices/apiSlice";
 import { AppDispatch, RootState } from "../../store/store";
 import { useEffect } from "react";
 import { setFriends } from "../../store/slices/appSlice";
-import Loader from "../ui/Loader";
 import { Button } from "../ui/Button";
 import { Icons } from "../../icons";
 import { AnimatePresence, motion } from "motion/react";
 import { socket } from "../../socket";
 import { useNavigate } from "react-router-dom";
+import PageLoader from "../Loaders/PageLoader";
 const Friends = () => {
   const Navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
@@ -36,7 +36,7 @@ const Friends = () => {
     <div className="w-full h-full space-y-2 pt-5">
       {!isLoading ? (
         <>
-          {friends.length ? (
+          {friends?.length ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -108,9 +108,7 @@ const Friends = () => {
           )}
         </>
       ) : (
-        <div className="w-full h-full flex-center">
-          <Loader customColor={true} />
-        </div>
+       <PageLoader />
       )}
     </div>
   );

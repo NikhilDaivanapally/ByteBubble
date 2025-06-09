@@ -12,7 +12,7 @@ import Chat from "../../components/Chat";
 import { motion } from "motion/react";
 import { DirectConversationProps } from "../../types";
 import { DirectConversation } from "../../components/Conversation";
-import ConversationSkeleton from "../../components/Loaders/ConversationSkeleton";
+import ConversationSkeleton from "../../components/Loaders/SkeletonLoaders/ConversationSkeleton";
 
 const IndividualChat = () => {
   const dispatch = useDispatch();
@@ -44,14 +44,14 @@ const IndividualChat = () => {
     dispatch(
       updateDirectConversation({
         ...current_direct_conversation,
-        outgoing: lastMsg.isOutgoing,
+        isOutgoing: lastMsg.isOutgoing,
         message: {
           messageType: lastMsg.messageType,
           message: lastMsg.message,
           createdAt: lastMsg.createdAt,
         },
         time: lastMsg.createdAt,
-        seen: lastMsg.isSeen,
+        isSeen: lastMsg.isSeen,
       })
     );
   }, [current_direct_messages, dispatch]);
@@ -65,7 +65,7 @@ const IndividualChat = () => {
         dispatch(ResetDirectChat());
       }
     };
-  }, []);
+  }, [current_direct_conversation, current_direct_messages]);
 
   return (
     <div className="h-full flex">
@@ -84,23 +84,32 @@ const IndividualChat = () => {
         <ShowOfflineStatus />
         <h3 className="">Last Chats</h3>
         <ul className="overflow-y-auto scrollbar-custom flex-1 flex flex-col gap-4">
-          {filteredConversations?.length > 0
-            ? filteredConversations.map((conversation, i) => (
-                <motion.div
-                  key={conversation._id ?? i} // Prefer using a unique id if available
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: i * 0.02, duration: 0.3 }}
-                >
-                  <DirectConversation conversation={conversation} index={i} />
-                </motion.div>
-              ))
-            : [...Array(5)].map((_, i) => (
-                <li key={i}>
-                  <ConversationSkeleton />
-                </li>
-              ))}
+          {DirectConversations === null ? (
+            // Still loading
+            [...Array(5)].map((_, i) => (
+              <li key={i}>
+                <ConversationSkeleton />
+              </li>
+            ))
+          ) : filteredConversations.length > 0 ? (
+            // Loaded and has results
+            filteredConversations.map((conversation, i) => (
+              <motion.div
+                key={conversation._id ?? i}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ delay: i * 0.02, duration: 0.3 }}
+              >
+                <DirectConversation conversation={conversation} index={i} />
+              </motion.div>
+            ))
+          ) : (
+            // Loaded but empty
+            <div className="w-full h-1/2 flex justify-center items-end text-center text-sm text-gray-500 py-8">
+              No conversations found.
+            </div>
+          )}
         </ul>
       </div>
 

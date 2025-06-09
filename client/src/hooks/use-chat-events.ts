@@ -16,6 +16,7 @@ export const useChatEvents = (enabled: boolean) => {
   useEffect(() => {
     if (!enabled) return;
     const handleStartChat = (data: DirectConversationProps) => {
+      console.log(data);
       const existing = DirectConversations?.find((el) => el._id === data._id);
       if (existing) {
         dispatch(updateDirectConversation(data));

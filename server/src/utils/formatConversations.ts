@@ -46,13 +46,13 @@ type User = {
   status: "Online" | "Offline" | string;
 };
 
-type DirectConversationInput = {
+export type DirectConversationInput = {
   _id: string;
   user: User;
   messages: DirectMessageProps[];
 };
 
-type GroupConversationInput = {
+export type GroupConversationInput = {
   _id: string;
   name: string;
   avatar: string;
@@ -71,15 +71,13 @@ const formatDirectConversations = (
   if (!Array.isArray(conversations)) return [];
 
   const formatted = conversations.map((el) => {
-    const messages = el.messages || [];
-    const lastMessage = messages.slice(-1)[0];
-    const unreadMessages = messages.filter(
+    const messages = el?.messages || [];
+    const lastMessage = messages?.slice(-1)[0];
+    const unreadMessages = messages?.filter(
       (msg) =>
-        msg.recipients?.toString() === authUserId.toString() &&
-        msg.isRead === false
+        msg?.recipients?.toString() === authUserId?.toString() &&
+        msg?.isRead === false
     );
-
-    if (!lastMessage) return null;
 
     return {
       _id: el._id,
@@ -88,11 +86,11 @@ const formatDirectConversations = (
       avatar: el.user?.avatar,
       isOnline: el.user?.status === "Online",
       message: {
-        messageType: lastMessage.messageType || "",
-        message: lastMessage.message || "",
-        createdAt: lastMessage.createdAt || "",
+        messageType: lastMessage?.messageType || "",
+        message: lastMessage?.message || "",
+        createdAt: lastMessage?.createdAt || "",
       },
-      unreadMessagesCount: unreadMessages.length || 0,
+      unreadMessagesCount: unreadMessages?.length || 0,
       isSeen: lastMessage?.isRead || "",
       isOutgoing:
         lastMessage?.sender?.toString() === authUserId.toString() || "",
@@ -100,7 +98,6 @@ const formatDirectConversations = (
       about: el.user?.about,
     };
   });
-
   return formatted
     .filter(Boolean)
     .sort(

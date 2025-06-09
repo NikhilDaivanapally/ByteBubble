@@ -56,7 +56,7 @@ export const DirectConversation = React.memo(
         if (updateConversation?.unreadMessagesCount) {
           socket.emit("messages:unread:clear", {
             conversationId: _id,
-            recipients: auth?._id,
+            recipient: auth?._id,
             sender: userId,
           });
           dispatch(
@@ -180,6 +180,7 @@ export const GroupConversation = React.memo(
     const { GroupConversations } = useSelector(
       (state: RootState) => state.conversation.group_chat
     );
+    const auth = useSelector((state: RootState) => state.auth.user);
 
     const { activeChatId, isTyping, isTypingRoomId } = useSelector(
       (state: RootState) => state.app
@@ -193,10 +194,20 @@ export const GroupConversation = React.memo(
           (el) => el._id == _id
         );
         if (updateConversation?.unreadMessagesCount) {
+          socket.emit("group:messages:unread:clear", {
+            conversationId: _id,
+            recipient: auth?._id,
+            sender: from?._id,
+            user: {
+              userId: auth?._id,
+              isSeen: true,
+              seenAt: new Date().toISOString(),
+            },
+          });
           dispatch(
             updateGroupConversation({
               ...updateConversation,
-              unread: 0,
+              unreadMessagesCount: 0,
             })
           );
         }
@@ -244,15 +255,15 @@ export const GroupConversation = React.memo(
         <div className="info flex-1 min-w-0">
           <p className="friend_name">{name}</p>
           {istyping ? (
-            <p className="text-sm text-green-500">{isTyping} is typing ...</p>
+            <p className="text-sm text-green-500 truncate">
+              {isTyping} is typing ...
+            </p>
           ) : (
             from &&
             message?.message && (
-              <div className="text-black/60 text-sm flex items-center overflow-hidden whitespace-nowrap text-ellipsis">
+              <div className="text-black/60 text-sm flex items-center truncate">
                 {isOutgoing ? "You - " : `${from?.userName} - `}
-                <span className="overflow-hidden whitespace-nowrap text-ellipsis block">
-                  {message.message}
-                </span>
+                <span className="block truncate">{message.message}</span>
               </div>
             )
           )}

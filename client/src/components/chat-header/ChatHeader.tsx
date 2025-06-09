@@ -6,7 +6,6 @@ import {
   ResetGroupChat,
 } from "../../store/slices/conversation";
 import { selectConversation } from "../../store/slices/appSlice";
-import { UserProps } from "../../types";
 
 const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
   const dispatch = useDispatch();
@@ -40,14 +39,14 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
   };
 
   return (
-    <nav className="h-15 w-full flex gap-4 items-center p-2 bg-white rounded-xl">
+    <nav className="h-15 w-full flex sm:gap-4 items-center p-2 bg-white rounded-xl">
       <Icons.ArrowLeftIcon
         className="w-8 p-1 md:hidden hover:bg-gray-200 rounded-full cursor-pointer"
         onClick={handleGoBack}
       />
 
       <div
-        className="flex gap-4 items-center cursor-pointer select-none active:bg-gray-100 px-2 rounded-lg"
+        className="flex gap-4 items-center cursor-pointer select-none active:bg-gray-100 px-2 rounded-lg min-w-0"
         onClick={handleOpenShowDetails}
       >
         <div className="w-10 h-10 relative flex-center shrink-0">
@@ -65,47 +64,53 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
           )}
         </div>
 
-        {isIndividual ? (
-          <div>
-            <p className="text-base font-medium text-gray-900">
-              {direct_chat?.current_direct_conversation?.name}
-            </p>
-            {isTyping ? (
-              <p className="text-sm text-green-500">Typing ...</p>
-            ) : (
-              <p className="text-sm text-gray-500">
-                {direct_chat?.current_direct_conversation?.isOnline
-                  ? "Online"
-                  : "Offline"}
+        {/* START OF TEXT BLOCK */}
+        <div className="min-w-0">
+          {isIndividual ? (
+            <div className="min-w-0">
+              <p className="text-base font-medium text-gray-900 truncate">
+                {direct_chat?.current_direct_conversation?.name}
               </p>
-            )}
-          </div>
-        ) : (
-          <div>
-            <p className="text-base font-medium text-gray-900">
-              {group_chat?.current_group_conversation?.name}
-            </p>
-            {isTyping ? (
-              <p className="text-sm text-green-500">{isTyping} is typing</p>
-            ) : (
-              <p className="text-sm text-gray-500">
-                {[
-                  ...(group_chat?.current_group_conversation
-                    ?.users as UserProps[]),
-                  group_chat?.current_group_conversation?.admin,
-                ]
-                  .map((el, i, arr) => {
-                    const name = el?._id === user?._id ? "you" : el?.userName;
-                    return `${name}${i < arr.length - 1 ? ", " : ""}`;
-                  })
-                  .join("")}
+              {isTyping ? (
+                <p className="text-sm text-green-500 truncate">Typing ...</p>
+              ) : (
+                <p className="text-sm text-gray-500 truncate">
+                  {direct_chat?.current_direct_conversation?.isOnline
+                    ? "Online"
+                    : "Offline"}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="min-w-0">
+              <p className="text-base font-medium text-gray-900 truncate">
+                {group_chat?.current_group_conversation?.name}
               </p>
-            )}
-          </div>
-        )}
+              {isTyping ? (
+                <p className="text-sm text-green-500 truncate">
+                  {isTyping} is typing
+                </p>
+              ) : (
+                <p className="text-sm text-gray-500 truncate">
+                  {[
+                    ...(group_chat?.current_group_conversation?.users || []),
+                    group_chat?.current_group_conversation?.admin,
+                  ]
+                    .filter(Boolean)
+                    .map((el, i, arr) => {
+                      const name = el?._id === user?._id ? "you" : el?.userName;
+                      return `${name}${i < arr.length - 1 ? ", " : ""}`;
+                    })
+                    .join("")}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+        {/* END OF TEXT BLOCK */}
       </div>
 
-      <div className="ml-auto mr-2 md:mr-8 flex gap-6 md:gap-10 items-center">
+      <div className="ml-auto mr-2 md:mr-8 flex gap-2 sm:gap-10 items-center">
         <Icons.PhoneIcon className="w-8 p-1 rounded-full cursor-pointer hover:bg-gray-200 transition" />
         <Icons.VideoCameraIcon className="w-8 p-1 rounded-full cursor-pointer hover:bg-gray-200 transition" />
         <Icons.EllipsisVerticalIcon className="w-7 p-1 rounded-full cursor-pointer hover:bg-gray-200 transition" />

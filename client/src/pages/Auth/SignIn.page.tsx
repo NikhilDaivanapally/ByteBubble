@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLoginMutation } from "../../store/slices/apiSlice";
 import GoogleAuth from "../../components/GoogleAuth";
-import { UpdateAuthState } from "../../store/slices/authSlice";
+import { setUser } from "../../store/slices/authSlice";
 import toast from "react-hot-toast";
 
 type Error = {
@@ -34,7 +34,7 @@ const SignIn = () => {
   useEffect(() => {
     if (data) {
       console.log(data);
-      dispatch(UpdateAuthState(data.user));
+      dispatch(setUser(data.user));
       toast.success(data.message);
       Navigate("/chat");
     } else if (error) {

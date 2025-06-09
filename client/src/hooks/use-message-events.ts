@@ -1,8 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { socket } from "../socket";
 import { useDispatch, useSelector } from "react-redux";
-import { GroupMessageProps } from "../types";
-import { group, individual } from "../utils/conversation-types";
 import { RootState } from "../store/store";
 import {
   addDirectConversation,
@@ -15,230 +13,375 @@ import {
   updateExistingDirectMessage,
   updateExistingGroupMessage,
   updateGroupConversation,
+  updateGroupMessageSeenStatus,
+  updateGroupMessagesSeen,
 } from "../store/slices/conversation";
 import { useGetConversationMutation } from "../store/slices/apiSlice";
+import { GroupMessageProps } from "../types";
+import { individual, group } from "../utils/conversation-types";
 
+// Private message events
 export const useMessageEvents = (enabled: boolean) => {
   const dispatch = useDispatch();
-
   const user = useSelector((state: RootState) => state.auth.user);
   const { direct_chat, group_chat } = useSelector(
     (state: RootState) => state.conversation
   );
-
   const [getConversation, { data: conversationData }] =
     useGetConversationMutation();
 
+  // Update Redux when a new conversation is fetched
   useEffect(() => {
     if (!conversationData) return;
-    switch (conversationData?.data.messages[0]?.conversationType) {
-      case individual:
-        dispatch(
-          addDirectConversation({
-            auth: user,
-            conversation: conversationData?.data,
-          })
-        );
-        break;
-      case group:
-        dispatch(
-          addGroupConversation({
-            auth: user,
-            conversation: conversationData?.data,
-          })
-        );
-        break;
-      default:
-        break;
+    const { conversationType, conversation } = conversationData.data;
+
+    if (conversationType === individual) {
+      dispatch(addDirectConversation(conversation));
+    } else if (conversationType === group) {
+      dispatch(addGroupConversation(conversation));
     }
-  }, [conversationData]);
+  }, [conversationData, dispatch]);
 
-  useEffect(() => {
-    if (!enabled) return;
+  const isCurrentConversation = useCallback(
+    (conversationId: string, type: string) => {
+      const current =
+        type === individual
+          ? direct_chat.current_direct_conversation
+          : group_chat.current_group_conversation;
+      return current?._id?.toString() === conversationId.toString();
+    },
+    [direct_chat, group_chat]
+  );
 
-    const handleNewMsg = (message: any) => {
-      switch (message?.conversationType) {
-        case individual:
-          if (
-            message?.conversationId.toString() ===
-            direct_chat.current_direct_conversation?._id.toString()
-          ) {
-            socket.emit("message:seen", {
-              _id: message?._id,
-              sender: message?.sender,
-            });
-            dispatch(
-              addDirectMessage({
-                _id: message?._id,
-                messageType: message?.messageType,
-                message: message?.message,
-                createdAt: message?.createdAt,
-                updatedAt: message?.updatedAt,
-                isIncoming: message?.recipients === user?._id,
-                isOutgoing: message?.sender === user?._id,
-                status: "sent",
-                isSeen: true,
-                conversationId: message?.conversationId,
-                conversationType: message?.conversationType,
-              })
-            );
-          } else {
-            socket.emit("message:unread:update", message);
-          }
-          break;
+  const handleNewMsg = useCallback(
+    (message: any) => {
+      const {
+        _id,
+        senderId,
+        recipientId,
+        conversationId,
+        conversationType,
+        message: msgContent,
+        messageType,
+        createdAt,
+        updatedAt,
+      } = message;
 
-        case group:
-          if (
-            message?.conversationId.toString() ===
-            group_chat.current_group_conversation?._id.toString()
-          ) {
-            dispatch(
-              addGroupMessage({
-                _id: message?._id,
-                messageType: message?.messageType,
-                message: message?.message,
-                createdAt: message?.createdAt,
-                updatedAt: message?.updatedAt,
-                isIncoming: message?.recipients.includes(user?._id),
-                isOutgoing: message?.sender === user?._id,
-                from: message?.sender,
-                status: "sent",
-                conversationId: message?.conversationId,
-                conversationType: message?.conversationType,
-              })
-            );
-          } else {
-            socket.emit("message:unread:update", message);
-          }
-          break;
-
-        default:
-          console.log("Unknown chat type");
-          break;
+      if (isCurrentConversation(conversationId, individual)) {
+        socket.emit("message:seen", { _id, senderId });
+        dispatch(
+          addDirectMessage({
+            _id,
+            message: msgContent,
+            messageType,
+            createdAt,
+            updatedAt,
+            isIncoming: true,
+            isOutgoing: false,
+            isSeen: true,
+            status: "sent",
+            conversationId,
+            conversationType,
+          })
+        );
+      } else {
+        socket.emit("message:unread:update", message);
       }
-    };
+    },
+    [dispatch, isCurrentConversation, user]
+  );
 
-    const handleUpdateMsgStatus = (
-      message: GroupMessageProps & { conversationType: string }
-    ) => {
-      switch (message?.conversationType) {
-        case individual:
-          if (
-            message?.conversationId?.toString() ===
-            direct_chat.current_direct_conversation?._id.toString()
-          ) {
-            dispatch(updateExistingDirectMessage(message));
-          }
-          break;
-
-        case group:
-          if (
-            message?.conversationId?.toString() ===
-            group_chat.current_group_conversation?._id.toString()
-          ) {
-            dispatch(updateExistingGroupMessage(message));
-          }
-          break;
-
-        default:
-          console.log("Unknown chat type");
-          break;
+  const handleMarkMessageAsSent = useCallback(
+    (message: GroupMessageProps & { conversationType: string }) => {
+      const { conversationId, conversationType } = message;
+      if (
+        conversationType === individual &&
+        isCurrentConversation(conversationId, individual)
+      ) {
+        dispatch(updateExistingDirectMessage(message));
       }
-    };
+    },
+    [dispatch, isCurrentConversation]
+  );
 
-    const handleUpdateMsgSeen = (data: { messageId: string }) => {
+  const handleMarkMessageAsSeen = useCallback(
+    (data: { messageId: string }) => {
       dispatch(updateDirectMessageSeenStatus(data));
-    };
+    },
+    [dispatch]
+  );
 
-    const handleUpdateAllMsgSeenTrue = (conversationId: string) => {
+  const handleMarkAllMessagesAsSeen = useCallback(
+    (conversationId: string) => {
       const conversation = direct_chat?.DirectConversations?.find(
         (conv) => conv?._id === conversationId
       );
       if (!conversation) return;
+
       dispatch(updateDirectConversation({ ...conversation, isSeen: true }));
       dispatch(updateDirectMessagesSeen({}));
-    };
+    },
+    [dispatch, direct_chat]
+  );
 
-    const handleUnreadMsgs = async (message: any) => {
+  const handleMarkMessageAsUnread = useCallback(
+    async (message: any) => {
       console.log(message);
-      switch (message?.conversationType) {
-        case individual:
-          const update_Direct_Conversation =
-            direct_chat?.DirectConversations?.find(
-              (el) => el._id == message?.conversationId
-            );
-          if (update_Direct_Conversation) {
-            dispatch(
-              updateDirectConversation({
-                ...update_Direct_Conversation,
-                message: {
-                  messageType: message?.messageType,
-                  message: message?.message,
-                  createdAt: message?.createdAt,
-                },
-                isOutgoing: message?.sender === user?._id,
-                time: message?.createdAt,
-                unreadMessagesCount:
-                  (update_Direct_Conversation?.unreadMessagesCount || 0) + 1,
-              })
-            );
-          } else {
-            await getConversation({
-              conversationId: message?.conversationId,
-              conversationType: message?.conversationType,
-            });
-          }
-          break;
-        case group:
-          const update_Group_Conversation =
-            group_chat?.GroupConversations?.find(
-              (el) => el._id == message?.conversationId
-            );
-          if (update_Group_Conversation) {
-            dispatch(
-              updateGroupConversation({
-                ...update_Group_Conversation,
-                isOutgoing: message?.sender === user?._id,
-                message: {
-                  messageType: message?.messageType,
-                  message: message?.message,
-                  createdAt: message?.createdAt,
-                },
-                from: message?.sender,
-                time: message?.createdAt,
-                unreadMessagesCount:
-                  (update_Group_Conversation?.unreadMessagesCount || 0) + 1,
-              })
-            );
-          } else {
-            await getConversation({
-              conversationId: message?.conversationId,
-              conversationType: message?.conversationType,
-            });
-          }
-          break;
-        default:
-          break;
+      const { conversationId, conversationType } = message;
+
+      const existingConversation = direct_chat?.DirectConversations?.find(
+        (conv) => conv?._id === conversationId
+      );
+      if (!existingConversation) {
+        try {
+          await getConversation({ conversationId, conversationType });
+        } catch (err) {
+          console.error("Failed to fetch missing conversation", err);
+        }
+      } else {
+        dispatch(
+          updateDirectConversation({
+            ...existingConversation,
+            message: {
+              messageType: message?.messageType,
+              message: message?.message,
+              createdAt: message?.createdAt,
+            },
+            isOutgoing: message?.senderId === user?._id,
+            time: message?.createdAt,
+            unreadMessagesCount:
+              (existingConversation?.unreadMessagesCount || 0) + 1,
+          })
+        );
       }
-    };
+    },
+    [direct_chat, getConversation]
+  );
+
+  useEffect(() => {
+    if (!enabled) return;
+    // private message events
     socket.on("message:new", handleNewMsg);
-    socket.on("message:status:sent", handleUpdateMsgStatus);
-    socket.on("message:status:seen", handleUpdateMsgSeen);
-    socket.on("messages:status:seen", handleUpdateAllMsgSeenTrue);
-    socket.on("messages:unread:count", handleUnreadMsgs);
+    socket.on("message:status:sent", handleMarkMessageAsSent);
+    socket.on("message:status:seen", handleMarkMessageAsSeen);
+    socket.on("messages:status:seen", handleMarkAllMessagesAsSeen);
+    socket.on("messages:unread:count", handleMarkMessageAsUnread);
 
     return () => {
       socket.off("message:new", handleNewMsg);
-      socket.off("message:status:sent", handleUpdateMsgStatus);
-      socket.off("message:status:seen", handleUpdateMsgSeen);
-      socket.off("messages:status:seen", handleUpdateAllMsgSeenTrue);
-      socket.off("messages:unread:count", handleUnreadMsgs);
+      socket.off("message:status:sent", handleMarkMessageAsSent);
+      socket.off("message:status:seen", handleMarkMessageAsSeen);
+      socket.off("messages:status:seen", handleMarkAllMessagesAsSeen);
+      socket.off("messages:unread:count", handleMarkMessageAsUnread);
     };
   }, [
     enabled,
-    direct_chat.DirectConversations,
-    group_chat.GroupConversations,
-    direct_chat.current_direct_conversation,
-    group_chat.current_group_conversation,
+    handleNewMsg,
+    handleMarkMessageAsSent,
+    handleMarkMessageAsSeen,
+    handleMarkAllMessagesAsSeen,
+    handleMarkMessageAsUnread,
+  ]);
+};
+
+// Group message events
+export const useGroupMessageEvents = (enabled: boolean) => {
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.auth.user);
+  const { direct_chat, group_chat } = useSelector(
+    (state: RootState) => state.conversation
+  );
+  const [getConversation, { data: conversationData }] =
+    useGetConversationMutation();
+
+  // Update Redux when a new conversation is fetched
+  useEffect(() => {
+    if (!conversationData) return;
+    const { conversationType, conversation } = conversationData.data;
+
+    if (conversationType === individual) {
+      dispatch(addDirectConversation(conversation));
+    } else if (conversationType === group) {
+      dispatch(addGroupConversation(conversation));
+    }
+  }, [conversationData, dispatch]);
+
+  const isCurrentConversation = useCallback(
+    (conversationId: string, type: string) => {
+      const current =
+        type === individual
+          ? direct_chat.current_direct_conversation
+          : group_chat.current_group_conversation;
+      return current?._id?.toString() === conversationId.toString();
+    },
+    [direct_chat, group_chat]
+  );
+
+  const handleNewGroupMessage = useCallback(
+    (message: any) => {
+      const {
+        _id,
+        senderId,
+        recipientsIds,
+        conversationId,
+        conversationType,
+        message: msgContent,
+        messageType,
+        createdAt,
+        updatedAt,
+      } = message;
+
+      const isIncoming = Array.isArray(recipientsIds)
+        ? recipientsIds.includes(user?._id)
+        : recipientsIds === user?._id;
+
+      const isOutgoing = senderId === user?._id;
+
+      if (isCurrentConversation(conversationId, group)) {
+        socket.emit("group:message:seen", {
+          messageId: _id,
+          senderId,
+          user: {
+            userId: user?._id,
+            isSeen: true,
+            seenAt: new Date().toISOString(),
+          },
+        });
+        dispatch(
+          addGroupMessage({
+            _id,
+            message: msgContent,
+            messageType,
+            createdAt,
+            updatedAt,
+            isIncoming,
+            isOutgoing,
+            status: "sent",
+            from: senderId,
+            conversationId,
+            conversationType,
+          })
+        );
+      } else {
+        socket.emit("group:message:unread:update", message);
+      }
+    },
+    [dispatch, isCurrentConversation, user]
+  );
+  const handleMarkGroupMessageAsSent = useCallback(
+    (message: GroupMessageProps & { conversationType: string }) => {
+      const { conversationId, conversationType } = message;
+      if (
+        conversationType === group &&
+        isCurrentConversation(conversationId, group)
+      ) {
+        dispatch(updateExistingGroupMessage(message));
+      }
+    },
+    [dispatch, isCurrentConversation]
+  );
+
+  const handleMarkGroupMessageAsSeen = useCallback(
+    (data: any) => {
+      dispatch(updateGroupMessageSeenStatus(data));
+    },
+    [dispatch]
+  );
+
+  const handleMarkAllGroupMessagesAsSeen = useCallback(
+    ({ conversationId, user }: any) => {
+      console.log(conversationId, user);
+      const conversation = group_chat?.GroupConversations?.find(
+        (conv) => conv?._id === conversationId
+      );
+      if (!conversation) return;
+      console.log(conversationId, conversation, user);
+      const seenList = conversation.isSeen || [];
+
+      const alreadySeen = seenList?.some(
+        (u: { userId: string }) => u?.userId === user?.userId
+      );
+      if (!alreadySeen) {
+        dispatch(
+          updateGroupConversation({
+            ...conversation,
+            isSeen: [...(conversation?.isSeen || []), user],
+          })
+        );
+      }
+      dispatch(updateGroupMessagesSeen({ user }));
+    },
+    [dispatch, group_chat]
+  );
+
+  const handleMarkGroupMessageAsUnread = useCallback(
+    async (message: any) => {
+      console.log(message);
+      const { conversationId, conversationType } = message;
+
+      const existingConversation = group_chat?.GroupConversations?.find(
+        (conv) => conv?._id === conversationId
+      );
+      if (!existingConversation) {
+        try {
+          await getConversation({ conversationId, conversationType });
+        } catch (err) {
+          console.error("Failed to fetch missing conversation", err);
+        }
+      } else {
+        const foundUser = [
+          ...existingConversation.users,
+          existingConversation.admin,
+        ].find((user) => user?._id == message?.senderId);
+
+        dispatch(
+          updateGroupConversation({
+            ...existingConversation,
+            isOutgoing: message?.sender === user?._id,
+            message: {
+              messageType: message?.messageType,
+              message: message?.message,
+              createdAt: message?.createdAt,
+            },
+            from: {
+              _id: foundUser?._id,
+              avatar: foundUser?.avatar,
+              userName: foundUser?.userName,
+            },
+            time: message?.createdAt,
+            unreadMessagesCount:
+              (existingConversation?.unreadMessagesCount || 0) + 1,
+          })
+        );
+      }
+    },
+    [group_chat, getConversation]
+  );
+
+  useEffect(() => {
+    if (!enabled) return;
+    // group message events
+    socket.on("group:message:new", handleNewGroupMessage);
+    socket.on("group:message:status:sent", handleMarkGroupMessageAsSent);
+    socket.on("group:message:status:seen", handleMarkGroupMessageAsSeen);
+    socket.on("group:messages:status:seen", handleMarkAllGroupMessagesAsSeen);
+    socket.on("group:messages:unread:count", handleMarkGroupMessageAsUnread);
+    return () => {
+      socket.off("group:message:new", handleNewGroupMessage);
+      socket.off("group:message:status:sent", handleMarkGroupMessageAsSent);
+      socket.off("group:message:status:seen", handleMarkGroupMessageAsSeen);
+      socket.off(
+        "group:messages:status:seen",
+        handleMarkAllGroupMessagesAsSeen
+      );
+      socket.off("group:messages:unread:count", handleMarkGroupMessageAsUnread);
+    };
+  }, [
+    enabled,
+    handleNewGroupMessage,
+    handleMarkGroupMessageAsSent,
+    handleMarkGroupMessageAsSeen,
+    handleMarkAllGroupMessagesAsSeen,
+    handleMarkGroupMessageAsUnread,
   ]);
 };

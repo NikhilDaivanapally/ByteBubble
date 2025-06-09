@@ -20,16 +20,16 @@ const MembersSelection = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const toggleMember = (member: UserProps) => {
-    const isSelected = selectedMembers.some((m) => m._id === member._id);
+    const isSelected = selectedMembers?.some((m) => m._id === member._id);
 
     if (isSelected) {
-      onChange(selectedMembers.filter((m) => m._id !== member._id));
+      onChange(selectedMembers?.filter((m) => m._id !== member._id));
     } else {
       onChange([...selectedMembers, member]);
     }
   };
 
-  const filteredMembers = availableMembers.filter((member) =>
+  const filteredMembers = availableMembers?.filter((member) =>
     member.userName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -106,7 +106,7 @@ const MembersSelection = ({
       {isExpanded && (
         <div className="relative -mt-2">
           <div className="max-h-46 overflow-auto z-10 bg-white border border-t-0 border-gray-300 rounded-b-md shadow-md">
-            {filteredMembers.length > 0 ? (
+            {filteredMembers?.length > 0 ? (
               <ul className="py-1">
                 {filteredMembers.map((member) => {
                   const isSelected = selectedMembers.some(

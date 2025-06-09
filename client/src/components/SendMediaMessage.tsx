@@ -76,16 +76,13 @@ const SendMediaMessage = () => {
   // handle send message
   const handleSendMediaMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const to =
-      chatType === "individual"
-        ? direct_chat?.current_direct_conversation?.userId
-        : userList;
 
     const messageId = crypto.randomUUID();
     const messageCreatedAt = new Date().toISOString();
 
-    chatType === "individual"
-      ? dispatch(
+    switch (chatType) {
+      case "individual":
+        dispatch(
           addDirectMessage({
             _id: messageId,
             messageType: "photo",
@@ -102,8 +99,26 @@ const SendMediaMessage = () => {
             status: "pending",
             isSeen: false,
           })
-        )
-      : dispatch(
+        );
+
+        socket.emit("message:send", {
+          _id: messageId,
+          senderId: auth_id,
+          recipientId: direct_chat?.current_direct_conversation?.userId,
+          messageType: "photo",
+          message: {
+            file: mediaPreviewUrls,
+            text: message,
+          },
+          conversationType: group,
+          conversationId: activeChatId,
+          createdAt: messageCreatedAt,
+          updatedAt: messageCreatedAt,
+        });
+
+        break;
+      case "group":
+        dispatch(
           addGroupMessage({
             _id: messageId,
             messageType: "photo",
@@ -121,21 +136,23 @@ const SendMediaMessage = () => {
             isSeen: false,
           })
         );
+        socket.emit("group:message:send", {
+          _id: messageId,
+          senderId: auth_id,
+          recipientsIds: userList,
+          messageType: "photo",
+          message: {
+            file: mediaPreviewUrls,
+            text: message,
+          },
+          conversationType: group,
+          conversationId: activeChatId,
+          createdAt: messageCreatedAt,
+          updatedAt: messageCreatedAt,
+        });
+        break;
+    }
 
-    socket.emit("message:send", {
-      _id: messageId,
-      sender: auth_id,
-      recipients: to,
-      messageType: "photo",
-      message: {
-        file: mediaPreviewUrls,
-        text: message,
-      },
-      conversationType: chatType == "individual" ? individual : group,
-      conversationId: activeChatId,
-      createdAt: messageCreatedAt,
-      updatedAt: messageCreatedAt,
-    });
     setMessage("");
     dispatch(updateMediaFiles(null));
     dispatch(updateMediaPreviewUrls(null));

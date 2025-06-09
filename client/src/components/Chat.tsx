@@ -2,7 +2,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
-import Loader from "./ui/Loader";
 import {
   setCurrentDirectMessages,
   setCurrentGroupMessages,
@@ -24,6 +23,7 @@ import NoChat from "./ui/NoChat";
 import ChatHeader from "./chat-header/ChatHeader";
 import ProfileDetails from "./ProfileDetails";
 import GroupMessageInfo from "./GroupMessageInfo";
+import PageLoader from "./Loaders/PageLoader";
 
 const Chat = () => {
   const dispatch = useDispatch();
@@ -53,16 +53,15 @@ const Chat = () => {
     sort: "Asc",
   });
 
-  // Scroll to the bottom when messages change
-  const scrollToBottomSmooth = useCallback(() => {
-    if (messagesListRef.current) {
-      messagesListRef?.current?.scrollTo({
-        top: messagesListRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [messagesListRef]);
-
+  // // Scroll to the bottom when messages change
+  // const scrollToBottomSmooth = useCallback(() => {
+  //   if (messagesListRef.current) {
+  //     messagesListRef?.current?.scrollTo({
+  //       top: messagesListRef.current.scrollHeight,
+  //       behavior: "smooth",
+  //     });
+  //   }
+  // }, [messagesListRef]);
   // Scroll to the bottom when messages change
   const scrollToBottomQuick = useCallback(() => {
     if (messagesListRef?.current) {
@@ -119,7 +118,7 @@ const Chat = () => {
           (el: GroupConversationProps) => el?._id === activeChatId
         );
         socket.emit(
-          "messages:get",
+          "group:messages:get",
           {
             conversationId: currentGroupChat?._id,
             chatType,
@@ -179,7 +178,7 @@ const Chat = () => {
                                     <MediaMsg
                                       el={el}
                                       key={index}
-                                      scrollToBottom={scrollToBottomSmooth}
+                                      scrollToBottom={scrollToBottomQuick}
                                     />
                                   );
                                 case "audio":
@@ -210,7 +209,7 @@ const Chat = () => {
                                     <MediaMsg
                                       el={el}
                                       key={index}
-                                      scrollToBottom={scrollToBottomSmooth}
+                                      scrollToBottom={scrollToBottomQuick}
                                     />
                                   );
                                 case "audio":
@@ -242,9 +241,7 @@ const Chat = () => {
               <GroupMessageInfo />
             </div>
           ) : (
-            <div className="w-full h-full flex-center">
-              <Loader customColor={true} />
-            </div>
+            <PageLoader />
           )}
         </>
       ) : (

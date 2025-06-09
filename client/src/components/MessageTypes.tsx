@@ -10,12 +10,13 @@ import { setfullImagePreview } from "../store/slices/conversation";
 import Loader from "./ui/Loader";
 import { Icons } from "../icons";
 import { MessageDropdown } from "./MessageDropdown";
+import { individual } from "../utils/conversation-types";
 type senderProps = { avatar: string; userName: string };
 
 export const TextMsg = React.memo(
   ({ el }: { el: DirectMessageProps | GroupMessageProps }) => {
     const { chatType } = useSelector((state: RootState) => state.app);
-    const { GroupConversations } = useSelector(
+    const { GroupConversations, current_group_conversation } = useSelector(
       (state: RootState) => state.conversation.group_chat
     );
 
@@ -28,6 +29,10 @@ export const TextMsg = React.memo(
       );
     }
 
+    const seen =
+      el.conversationType == individual
+        ? el.isSeen
+        : (el?.isSeen as [])?.length === current_group_conversation?.users.length;
     const { Time } = formatTime(el.createdAt);
 
     return (
@@ -71,12 +76,12 @@ export const TextMsg = React.memo(
                 <div className="flex-center gap-1">
                   <div
                     className={`w-2 h-2 rounded-full ${
-                      el.isSeen ? "bg-green-600" : "bg-gray-300"
+                      seen ? "bg-green-600" : "bg-gray-300"
                     }`}
                   />
                   <div
                     className={`w-2 h-2 rounded-full ${
-                      el.isSeen ? "bg-green-600" : "bg-gray-300"
+                      seen ? "bg-green-600" : "bg-gray-300"
                     }`}
                   />
                 </div>

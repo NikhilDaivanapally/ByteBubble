@@ -3,10 +3,10 @@ import { useFetchUsersQuery } from "../../store/slices/apiSlice";
 import { AppDispatch, RootState } from "../../store/store";
 import { useCallback, useEffect } from "react";
 import { setUsers } from "../../store/slices/appSlice";
-import Loader from "../ui/Loader";
 import { Button } from "../ui/Button";
 import { motion, AnimatePresence } from "motion/react";
 import { socket } from "../../socket";
+import PageLoader from "../Loaders/PageLoader";
 
 const ConnectUsers = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -27,11 +27,11 @@ const ConnectUsers = () => {
     [socket, authUser]
   );
   return (
-    <div className="w-full h-full flex-center">
+    <div className="w-full h-full flex justify-center">
       {!isLoading ? (
         <>
           {users.length ? (
-            <ul className="space-y-2">
+            <ul className="space-y-2 mt-2">
               <AnimatePresence>
                 {users.map((user, index: number) => {
                   const isOnline = user.status == "Online";
@@ -83,9 +83,7 @@ const ConnectUsers = () => {
           )}
         </>
       ) : (
-        <div className="w-full h-full flex-center">
-          <Loader customColor={true} />
-        </div>
+        <PageLoader />
       )}
     </div>
   );

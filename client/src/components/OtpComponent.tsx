@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { Button } from "./ui/Button";
 import { useOtpsubmitMutation } from "../store/slices/apiSlice";
-import { UpdateAuthState } from "../store/slices/authSlice";
+import { setUser } from "../store/slices/authSlice";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -42,9 +42,9 @@ const OtpComponent: React.FC<OtpComponentProps> = ({ email, length }) => {
 
   useEffect(() => {
     if (otpsubmitData) {
-      dispatch(UpdateAuthState(otpsubmitData.user));
+      dispatch(setUser(otpsubmitData.user));
       toast.success(otpsubmitData.message);
-      Navigate("/");
+      Navigate("/chat");
     } else if (otpsubmitError) {
       let errorMessage = "Something went wrong";
 

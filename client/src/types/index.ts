@@ -72,7 +72,7 @@ export type GroupConversationProps = {
   from: { _id: string; userName: string; avatar: string };
   isOutgoing: boolean;
   unreadMessagesCount: number;
-  isSeen: boolean;
+  isSeen: [];
   time: Date;
 };
 
@@ -85,7 +85,7 @@ export type GroupMessageProps = {
   isIncoming: boolean;
   isOutgoing: boolean;
   status: string;
-  isSeen: boolean;
+  isSeen: any[];
   from: string;
   conversationType: string;
   conversationId: string;

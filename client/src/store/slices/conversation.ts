@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { conversationSliceProps } from "../../types";
+import { conversationSliceProps, GroupMessageProps } from "../../types";
 
 const initialState: conversationSliceProps = {
   direct_chat: {
@@ -49,55 +49,27 @@ const slice = createSlice({
       state.direct_chat.DirectConversations = updatedList;
     },
     updateGroupConversation(state, action) {
-      const list = state.group_chat.GroupConversations?.map((el) => {
-        if (el?._id !== action.payload?.id) {
-          return el;
-        } else {
-          return action.payload;
-        }
-      });
-      const filterList = list?.filter((val) => val);
-      filterList?.sort((a, b) => Date.parse(b.time) - Date.parse(a.time));
-      state.group_chat.GroupConversations = filterList || [];
+      const updatedList = (state.group_chat.GroupConversations || []).map(
+        (el) => (el?._id !== action.payload?._id ? el : action.payload)
+      );
+      updatedList.sort((a, b) => Date.parse(b.time) - Date.parse(a.time));
+      state.group_chat.GroupConversations = updatedList;
     },
 
     // adding a conversation
     addDirectConversation(state, action) {
-      const this_conversation = action.payload.conversation;
-      const unreadMssLength = this_conversation?.messages?.filter(
-        (msg: any) =>
-          msg.recipients == action?.payload?.auth?._id && msg.isRead == false
-      );
-      const user = this_conversation?.user;
+      const this_conversation = action.payload;
       state.direct_chat.DirectConversations =
         state.direct_chat.DirectConversations?.filter(
           (el) => el?._id !== this_conversation._id
         ) || [];
-      state.direct_chat.DirectConversations?.push({
-        _id: this_conversation?._id,
-        userId: user?._id,
-        name: user?.userName,
-        isOnline: user?.status === "Online",
-        avatar: user?.avatar,
-        message: {
-          messageType: this_conversation?.messages?.slice(-1)[0]?.messageType,
-          message: this_conversation?.messages?.slice(-1)[0]?.message,
-          createdAt: this_conversation?.messages?.slice(-1)[0]?.createdAt,
-        },
-        unreadMessagesCount: unreadMssLength?.length,
-        isSeen: this_conversation?.messages?.slice(-1)[0]?.isRead,
-        isOutgoing:
-          this_conversation?.messages?.slice(-1)[0]?.sender?.toString() ===
-          action?.payload?.auth?._id?.toString(),
-        time: this_conversation?.messages?.slice(-1)[0]?.createdAt || "",
-        about: user?.about,
-      });
+      state.direct_chat.DirectConversations?.push(this_conversation);
     },
     addGroupConversation(state, action) {
       const this_conversation = action.payload.conversation;
       state.group_chat.GroupConversations =
         state.group_chat.GroupConversations?.filter(
-          (el) => el?._id !== this_conversation._id
+          (el) => el?._id !== this_conversation?._id
         ) || [];
       state.group_chat.GroupConversations.push(this_conversation);
     },
@@ -132,7 +104,7 @@ const slice = createSlice({
       state.group_chat.current_group_messages = [...current_messages, message];
     },
 
-    // update Message seen
+    // update All Messages seen
     updateDirectMessagesSeen(state, _) {
       let messages = state.direct_chat.current_direct_messages;
       let new_messages = messages.map((el) => {
@@ -141,6 +113,25 @@ const slice = createSlice({
 
       state.direct_chat.current_direct_messages = new_messages;
     },
+
+    // update All Group Messages seen
+    updateGroupMessagesSeen(state, action) {
+      const user = action.payload?.user;
+      const userId = user?.userId;
+      const messages = state.group_chat.current_group_messages || [];
+      state.group_chat.current_group_messages = messages.map((el) => {
+        const seenList = el.isSeen || [];
+
+        const alreadySeen = seenList.some((u) => u.userId === userId);
+
+        if (!alreadySeen) {
+          return { ...el, isSeen: [...seenList, user] };
+        }
+
+        return el;
+      });
+    },
+
     updateDirectMessageSeenStatus(state, action) {
       let messages = state.direct_chat.current_direct_messages;
       let new_messages = messages.map((el) => {
@@ -150,6 +141,20 @@ const slice = createSlice({
         return el;
       });
       state.direct_chat.current_direct_messages = new_messages;
+    },
+
+    updateGroupMessageSeenStatus(state, action) {
+      state.group_chat.current_group_messages =
+        state.group_chat.current_group_messages.map((msg) => {
+          if (msg._id !== action.payload.messageId) return msg;
+
+          const updated: GroupMessageProps = {
+            ...msg,
+            isSeen: [...(msg.isSeen || []), action.payload.user],
+          };
+
+          return updated;
+        });
     },
 
     // update Message
@@ -207,9 +212,11 @@ export const {
   ResetGroupChat,
   setfullImagePreview,
   updateDirectMessagesSeen,
+  updateGroupMessagesSeen,
   updateDirectMessageSeenStatus,
   updateExistingDirectMessage,
   updateExistingGroupMessage,
+  updateGroupMessageSeenStatus,
 } = slice.actions;
 
 export default slice.reducer;

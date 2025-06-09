@@ -18,7 +18,6 @@ import { parseFiles } from "../utils/parse-files";
 import { Icons } from "../icons";
 import { group, individual } from "../utils/conversation-types";
 import useTypingStatus from "../hooks/use-typing-status";
-import { UserProps } from "../types";
 
 const SendText_AudioMessageInput = () => {
   const dispatch = useDispatch();
@@ -39,7 +38,7 @@ const SendText_AudioMessageInput = () => {
     chatType == "individual"
       ? direct_chat.current_direct_conversation?.userId
       : [
-          ...(group_chat?.current_group_conversation?.users as UserProps[]),
+          ...(group_chat?.current_group_conversation?.users || []),
           group_chat?.current_group_conversation?.admin,
         ]
           .filter((el) => el?._id !== auth_id)
@@ -78,12 +77,12 @@ const SendText_AudioMessageInput = () => {
   let userList: {}[] = [];
 
   if (
-    (group_chat?.current_group_conversation?.users as [])?.length > 0 &&
+    (group_chat?.current_group_conversation?.users || [])?.length > 0 &&
     group_chat.current_group_conversation?.admin
   ) {
     userList = [
-      ...group_chat.current_group_conversation?.users,
-      group_chat.current_group_conversation?.admin,
+      ...(group_chat?.current_group_conversation?.users || []),
+      group_chat?.current_group_conversation?.admin,
     ]
       .filter((el) => el._id !== auth_id)
       .map((el) => el._id);
@@ -103,34 +102,11 @@ const SendText_AudioMessageInput = () => {
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!message.trim()) return;
-    const to =
-      chatType === "individual"
-        ? direct_chat?.current_direct_conversation?.userId
-        : userList;
-
     const messageId = crypto.randomUUID();
     const messageCreatedAt = new Date().toISOString();
+
     switch (chatType) {
-      case "group":
-        dispatch(
-          addGroupMessage({
-            _id: messageId,
-            messageType: containsUrl(message) ? "link" : "text",
-            message: {
-              text: message,
-            },
-            conversationId: activeChatId,
-            conversationType: group,
-            createdAt: messageCreatedAt,
-            updatedAt: messageCreatedAt,
-            isIncoming: false,
-            isOutgoing: true,
-            status: "pending",
-            isSeen: false,
-          })
-        );
-        break;
-      default:
+      case "individual":
         dispatch(
           addDirectMessage({
             _id: messageId,
@@ -148,22 +124,54 @@ const SendText_AudioMessageInput = () => {
             isSeen: false,
           })
         );
+        socket.emit("message:send", {
+          _id: messageId,
+          senderId: auth_id,
+          recipientId: direct_chat?.current_direct_conversation?.userId,
+          messageType: containsUrl(message) ? "link" : "text",
+          message: {
+            text: message,
+          },
+          conversationType: individual,
+          conversationId: activeChatId,
+          createdAt: messageCreatedAt,
+          updatedAt: messageCreatedAt,
+        });
+        break;
+      case "group":
+        dispatch(
+          addGroupMessage({
+            _id: messageId,
+            messageType: containsUrl(message) ? "link" : "text",
+            message: {
+              text: message,
+            },
+            conversationId: activeChatId,
+            conversationType: group,
+            createdAt: messageCreatedAt,
+            updatedAt: messageCreatedAt,
+            isIncoming: false,
+            isOutgoing: true,
+            status: "pending",
+            isSeen: [],
+          })
+        );
+        socket.emit("group:message:send", {
+          _id: messageId,
+          senderId: auth_id,
+          recipientsIds: userList,
+          messageType: containsUrl(message) ? "link" : "text",
+          message: {
+            text: message,
+          },
+          conversationType: group,
+          conversationId: activeChatId,
+          createdAt: messageCreatedAt,
+          updatedAt: messageCreatedAt,
+        });
         break;
     }
 
-    socket.emit("message:send", {
-      _id: messageId,
-      sender: auth_id,
-      recipients: to,
-      messageType: containsUrl(message) ? "link" : "text",
-      message: {
-        text: message,
-      },
-      conversationType: chatType == "individual" ? individual : group,
-      conversationId: activeChatId,
-      createdAt: messageCreatedAt,
-      updatedAt: messageCreatedAt,
-    });
     setMessage("");
   };
 
@@ -388,8 +396,9 @@ const SendText_AudioMessageInput = () => {
     const messageId = crypto.randomUUID();
     const messageCreatedAt = new Date().toISOString();
 
-    chatType === "individual"
-      ? dispatch(
+    switch (chatType) {
+      case "individual":
+        dispatch(
           addDirectMessage({
             _id: messageId,
             messageType: "audio",
@@ -405,8 +414,22 @@ const SendText_AudioMessageInput = () => {
             status: "pending",
             isSeen: false,
           })
-        )
-      : dispatch(
+        );
+        socket.emit("message:send", {
+          _id: messageId,
+          senderId: auth_id,
+          recipientId: direct_chat.current_direct_conversation?.userId,
+          messageType: "audio",
+          message: new Blob(AudioChucksRef.current, { type: "audio/wav" }),
+          conversationType: individual,
+          conversationId: activeChatId,
+          createdAt: messageCreatedAt,
+          updatedAt: messageCreatedAt,
+        });
+
+        break;
+      case "group":
+        dispatch(
           addGroupMessage({
             _id: messageId,
             messageType: "audio",
@@ -424,22 +447,20 @@ const SendText_AudioMessageInput = () => {
           })
         );
 
-    const to =
-      chatType === "individual"
-        ? direct_chat.current_direct_conversation?.userId
-        : userList;
+        socket.emit("group:message:send", {
+          _id: messageId,
+          senderId: auth_id,
+          recipientsIds: userList,
+          messageType: "audio",
+          message: new Blob(AudioChucksRef.current, { type: "audio/wav" }),
+          conversationType: group,
+          conversationId: activeChatId,
+          createdAt: messageCreatedAt,
+          updatedAt: messageCreatedAt,
+        });
 
-    socket.emit("message:send", {
-      _id: messageId,
-      sender: auth_id,
-      recipients: to,
-      messageType: "audio",
-      message: new Blob(AudioChucksRef.current, { type: "audio/wav" }),
-      conversationType: chatType == "individual" ? individual : group,
-      conversationId: activeChatId,
-      createdAt: messageCreatedAt,
-      updatedAt: messageCreatedAt,
-    });
+        break;
+    }
 
     mediaRecorderRef.current = null;
     audioRef.current = null;

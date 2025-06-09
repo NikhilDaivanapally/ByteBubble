@@ -37,7 +37,6 @@ const registerUser = async (
     "email",
     "password",
     "confirmPassword",
-    "about",
     "gender"
   );
   if (Object.values(filteredBody).some((field) => field?.trim() === "")) {

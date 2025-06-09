@@ -65,7 +65,7 @@ const Connect = () => {
           </button>
         ))}
       </ul>
-      <div className="flex-1 flex-center">{currentTabComponent}</div>
+      <div className="flex-1 flex justify-center">{currentTabComponent}</div>
     </div>
   );
 };

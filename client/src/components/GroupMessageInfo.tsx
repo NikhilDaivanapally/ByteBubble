@@ -8,7 +8,6 @@ import { setMessageInfo } from "../store/slices/appSlice";
 const GroupMessageInfo = () => {
   const dispatch = useDispatch();
   const { messageInfo } = useSelector((state: RootState) => state.app);
-  console.log(messageInfo);
   const handleClose = () => {
     dispatch(setMessageInfo(null));
   };

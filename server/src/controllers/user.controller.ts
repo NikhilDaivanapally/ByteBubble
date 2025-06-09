@@ -9,10 +9,12 @@ import OneToOneMessage from "../models/oneToOneMessage.model";
 import OneToManyMessage from "../models/oneToManyMessage.model";
 import { Message } from "../models/message.mode";
 import {
+  DirectConversationInput,
   formatDirectConversations,
   formatGroupConversations,
+  GroupConversationInput,
 } from "../utils/formatConversations";
-import { individual } from "../utils/conversationTypes";
+import { group, individual } from "../utils/conversationTypes";
 import { userSelectFields } from "../constants";
 
 interface updateProfileRequest extends Request {
@@ -168,8 +170,7 @@ const getFriendrequest = async (req: updateProfileRequest, res: Response) => {
     .select("_id sender recipient")
     .populate({
       path: "sender recipient",
-      select:
-        userSelectFields,
+      select: userSelectFields,
     });
   res.status(200).json({
     status: "success",
@@ -254,7 +255,6 @@ const getDirectConversations = async (
       Existing_Direct_Conversations,
       authUserId
     );
-
     res.status(200).json({
       status: "success",
       data: formatted,
@@ -262,6 +262,7 @@ const getDirectConversations = async (
     });
     return;
   } catch (error) {
+    console.log(error);
     res.status(400).json({
       status: "Error",
       data: null,
@@ -423,10 +424,11 @@ const getGroupConversations = async (
 
 const getConversation = async (req: updateProfileRequest, res: Response) => {
   const { conversationId, conversationType } = req.body;
-  let conversation;
+  const authUserId = req.user?._id || "";
+  // let conversation: DirectConversationInput | GroupConversationInput;
   switch (conversationType) {
     case individual:
-      conversation = await OneToOneMessage.aggregate([
+      const Directconversation = await OneToOneMessage.aggregate([
         {
           $match: {
             _id: new mongoose.Types.ObjectId(conversationId),
@@ -474,13 +476,49 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
           $project: {
             _id: 1,
             messages: 1, // Include messages
-            user: 1, // The user field will now contain the desired user object
+            user: {
+              _id: 1,
+              userName: 1,
+              email: 1,
+              gender: 1,
+              avatar: 1,
+              about: 1,
+              socket_id: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              status: 1,
+            }, // The user field will now contain the desired user object
           },
         },
       ]);
+      const formattedDirectConversation = formatDirectConversations(
+        Directconversation,
+        authUserId
+      );
+      const hasMessages =
+        formattedDirectConversation[0]?.message?.message ?? null;
+      if (hasMessages) {
+        res.status(200).json({
+          status: "success",
+          data: {
+            conversationType,
+            conversation: formattedDirectConversation
+              ? formattedDirectConversation[0]
+              : null,
+          },
+          message: "Conversation found successfully",
+        });
+        return;
+      }
+      res.status(200).json({
+        status: "success",
+        data: null,
+        message: "Conversation Notfound due to no Messages successfully",
+      });
+      return;
       break;
     case "OneToManyMessage":
-      conversation = await OneToManyMessage.aggregate([
+      const Groupconversation = await OneToManyMessage.aggregate([
         {
           $match: {
             _id: new mongoose.Types.ObjectId(conversationId),
@@ -511,7 +549,7 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
         {
           $unwind: {
             path: "$admin",
-            preserveNullAndEmptyArrays: true, // Optional: Keep documents without matching admins
+            preserveNullAndEmptyArrays: true,
           },
         },
         {
@@ -536,6 +574,7 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
             ],
           },
         },
+        // Lookup messages
         {
           $lookup: {
             from: "messages",
@@ -544,37 +583,85 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
             as: "messages",
           },
         },
+        // Unwind messages
+        {
+          $unwind: {
+            path: "$messages",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        // Lookup sender details
+        {
+          $lookup: {
+            from: "users",
+            localField: "messages.sender",
+            foreignField: "_id",
+            as: "messages.senderDetails",
+          },
+        },
+        // Unwind senderDetails
+        {
+          $unwind: {
+            path: "$messages.senderDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        // Replace sender with senderDetails
+        {
+          $addFields: {
+            "messages.sender": {
+              _id: "$messages.senderDetails._id",
+              userName: "$messages.senderDetails.userName",
+              avatar: "$messages.senderDetails.avatar",
+            },
+          },
+        },
+        // Remove the now redundant senderDetails
         {
           $project: {
-            _id: 1,
-            messages: 1, // Include messages
-            participants: 1, // The user field will now contain the desired user object
-            admin: 1,
+            "messages.senderDetails": 0,
+          },
+        },
+        // Regroup messages
+        {
+          $group: {
+            _id: "$_id",
+            name: { $first: "$title" },
+            avatar: { $first: "$avatar" },
+            about: { $first: "$about" },
+            admin: { $first: "$admin" },
+            participants: { $first: "$participants" },
+            messages: { $push: "$messages" },
           },
         },
       ]);
-    default:
+      const formattedGroupConversation = formatGroupConversations(
+        Groupconversation,
+        authUserId
+      );
+      const hasGroupMessage =
+        formattedGroupConversation[0]?.message?.message ?? null;
+      if (hasGroupMessage) {
+        res.status(200).json({
+          status: "success",
+          data: {
+            conversationType,
+            conversation: formattedGroupConversation
+              ? formattedGroupConversation[0]
+              : null,
+          },
+          message: "Conversation found successfully",
+        });
+        return;
+      }
+      res.status(200).json({
+        status: "success",
+        data: null,
+        message: "Conversation Notfound due to no Messages successfully",
+      });
+      return;
       break;
   }
-  // console.log(conversation);
-
-  const hasMessages = conversation
-    ? conversation[0]?.messages?.length > 0
-    : null;
-  if (hasMessages) {
-    res.status(200).json({
-      status: "success",
-      data: conversation ? conversation[0] : null,
-      message: "Conversation found successfully",
-    });
-    return;
-  }
-  res.status(200).json({
-    status: "success",
-    data: null,
-    message: "Conversation Notfound due to no Messages successfully",
-  });
-  return;
 };
 
 const createGroup = async (

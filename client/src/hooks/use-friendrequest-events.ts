@@ -28,11 +28,11 @@ export const useFriendRequestEvents = (enabled: boolean) => {
       dispatch(addFriendRequest(data?.friendRequest));
       dispatch(removeUserFromUsers(data?.user));
     };
-    socket.on("new_friendrequest", handleNewFriendRequest);
-    socket.on("friendrequest_accepted", handleRequestAccepted);
-    socket.on("friendrequest_sent", handleRequestSent);
+    socket.on("friend:request:received", handleNewFriendRequest);
+    socket.on("friend:request:accept", handleRequestAccepted);
+    socket.on("friend:request:sent", handleRequestSent);
     return () => {
-      socket?.off("new_friendrequest");
+      socket?.off("friend:request:received");
       socket?.off("friendrequest_accepted");
       socket?.off("friendrequest_sent");
     };

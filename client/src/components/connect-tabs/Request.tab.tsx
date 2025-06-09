@@ -3,11 +3,11 @@ import { useFriendrequestsQuery } from "../../store/slices/apiSlice";
 import { AppDispatch, RootState } from "../../store/store";
 import { useCallback, useEffect } from "react";
 import { setFriendRequests } from "../../store/slices/appSlice";
-import Loader from "../ui/Loader";
 import { Button } from "../ui/Button";
 import { motion, AnimatePresence } from "motion/react";
 import { socket } from "../../socket";
 import { Icons } from "../../icons";
+import PageLoader from "../Loaders/PageLoader";
 
 const Requests = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -126,9 +126,7 @@ const Requests = () => {
           )}
         </>
       ) : (
-        <div className="w-full h-full flex-center">
-          <Loader customColor={true} />
-        </div>
+        <PageLoader />
       )}
     </div>
   );
