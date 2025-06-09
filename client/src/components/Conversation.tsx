@@ -1,5 +1,4 @@
 import { useDispatch, useSelector } from "react-redux";
-import ConversationTime from "../utils/conversation-time";
 import getFormattedMessage from "../utils/Message";
 import { RootState } from "../store/store";
 import React, { useCallback, useMemo } from "react";
@@ -14,6 +13,7 @@ import {
 import { Icons } from "../icons";
 import { motion } from "motion/react";
 import { DirectConversationProps, GroupConversationProps } from "../types";
+import { getConversationTime } from "../utils/dateUtils";
 
 export const DirectConversation = React.memo(
   ({
@@ -35,8 +35,14 @@ export const DirectConversation = React.memo(
       time,
       unreadMessagesCount,
     } = conversation;
-    const Time = useMemo(() => ConversationTime(time), [time]);
-    const { message } = useMemo(() => getFormattedMessage(msg), [msg]);
+    const Time = useMemo(
+      () => (time ? getConversationTime(time.toString()) : null),
+      [time]
+    );
+    const message = useMemo(
+      () => (msg ? getFormattedMessage(msg) : null),
+      [msg]
+    );
     const dispatch = useDispatch();
     const auth = useSelector((state: RootState) => state.auth.user);
     const { DirectConversations } = useSelector(
@@ -114,7 +120,7 @@ export const DirectConversation = React.memo(
             <div className="text-black/60 text-sm flex items-center gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
               {isOutgoing ? "You - " : ""}
               <span className="overflow-hidden text-ellipsis whitespace-nowrap block">
-                {message}
+                {message?.message}
               </span>
             </div>
           )}
@@ -171,7 +177,10 @@ export const GroupConversation = React.memo(
       time,
       unreadMessagesCount,
     } = conversation;
-    const Time = useMemo(() => (time ? ConversationTime(time) : null), [time]);
+    const Time = useMemo(
+      () => (time ? getConversationTime(time.toString()) : null),
+      [time]
+    );
     const message = useMemo(
       () => (msg ? getFormattedMessage(msg) : null),
       [msg]

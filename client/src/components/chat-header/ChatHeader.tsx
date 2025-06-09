@@ -113,7 +113,10 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
       <div className="ml-auto mr-2 md:mr-8 flex gap-2 sm:gap-10 items-center">
         <Icons.PhoneIcon className="w-8 p-1 rounded-full cursor-pointer hover:bg-gray-200 transition" />
         <Icons.VideoCameraIcon className="w-8 p-1 rounded-full cursor-pointer hover:bg-gray-200 transition" />
-        <Icons.EllipsisVerticalIcon className="w-7 p-1 rounded-full cursor-pointer hover:bg-gray-200 transition" />
+        <Icons.EllipsisVerticalIcon
+          className="w-7 p-1 rounded-full cursor-pointer hover:bg-gray-200 transition"
+          onClick={handleOpenShowDetails}
+        />
       </div>
     </nav>
   );

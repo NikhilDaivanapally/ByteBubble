@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import formatTime from "../utils/format-time";
-import formatTime2 from "../utils/format-time2";
 import WaveSurfer from "wavesurfer.js";
 import getSenderFromGroup from "../utils/get-sender-from-group";
 import { RootState } from "../store/store";
@@ -11,6 +9,7 @@ import Loader from "./ui/Loader";
 import { Icons } from "../icons";
 import { MessageDropdown } from "./MessageDropdown";
 import { individual } from "../utils/conversation-types";
+import { formatTo12HourTime, formatToDayLabel } from "../utils/dateUtils";
 type senderProps = { avatar: string; userName: string };
 
 export const TextMsg = React.memo(
@@ -32,8 +31,9 @@ export const TextMsg = React.memo(
     const seen =
       el.conversationType == individual
         ? el.isSeen
-        : (el?.isSeen as [])?.length === current_group_conversation?.users.length;
-    const { Time } = formatTime(el.createdAt);
+        : (el?.isSeen as [])?.length ===
+          current_group_conversation?.users.length;
+    const time = formatTo12HourTime(el.createdAt);
 
     return (
       <div
@@ -87,7 +87,7 @@ export const TextMsg = React.memo(
                 </div>
               )
             ) : null}
-            <p className="text-xs text-black/60">{Time}</p>
+            <p className="text-xs text-black/60">{time}</p>
           </div>
         </div>
       </div>
@@ -116,7 +116,7 @@ export const MediaMsg = React.memo(
       );
     }
     const dispatch = useDispatch();
-    const { Time } = formatTime(el?.createdAt);
+    const time = formatTo12HourTime(el?.createdAt);
 
     return (
       <div
@@ -187,7 +187,7 @@ export const MediaMsg = React.memo(
             ) : (
               ""
             )}
-            <p className="text-xs text-black/60">{Time}</p>
+            <p className="text-xs text-black/60">{time}</p>
           </div>
         </div>
       </div>
@@ -217,7 +217,7 @@ export const AudioMsg = React.memo(
         GroupConversations
       );
     }
-    const { Time } = formatTime(el?.createdAt);
+    const time = formatTo12HourTime(el?.createdAt);
     useEffect(() => {
       if (el.status === "sent" && el?.message?.audioId) {
         fetch(`http://localhost:8000/api/audio/${el.message.audioId}`)
@@ -352,7 +352,7 @@ export const AudioMsg = React.memo(
               ) : (
                 ""
               )}
-              <p className="text-xs text-black/60">{Time}</p>
+              <p className="text-xs text-black/60">{time}</p>
             </div>
           </div>
         )}
@@ -370,12 +370,12 @@ export const AudioMsg = React.memo(
 );
 
 export const Timeline = React.memo(({ date }: { date: string }) => {
-  const formatTime: string = formatTime2(date);
+  const label: string = formatToDayLabel(date);
 
   return (
     <div className="w-full relative flex-center text-center ">
       <p className="text-xs text-black/60 px-2 py-1 z-2 bg-gray-300 rounded-md">
-        {formatTime}
+        {label}
       </p>
     </div>
   );

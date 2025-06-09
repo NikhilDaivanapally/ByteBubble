@@ -112,7 +112,7 @@ export type appSliceProps = {
   mediaPreviewUrls: previewObj[] | null;
   isTyping: string;
   isTypingRoomId: string | null;
-  messageInfo: DirectMessageProps | GroupMessageProps | null;
+  messageInfo: GroupMessageProps | null;
 };
 
 // type for conversationSlice

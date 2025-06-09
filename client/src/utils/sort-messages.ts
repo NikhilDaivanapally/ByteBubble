@@ -1,5 +1,5 @@
 import { DirectMessageProps, GroupMessageProps } from "../types";
-import formatDate from "./format-date";
+import { formatToFullDateString } from "./dateUtils";
 
 type SortMessageProps = {
   filter?: string | null;
@@ -15,7 +15,7 @@ const SortMessages = (Props: SortMessageProps) => {
     : messages;
 
   Media_messages?.forEach((Msg) => {
-    const { FromatDate } = formatDate(Msg.createdAt); // ex wed jul 3 2024
+    const FromatDate = formatToFullDateString(Msg.createdAt); // ex wed jul 3 2024
     MessagesObject[FromatDate]
       ? MessagesObject[FromatDate].push(Msg)
       : (MessagesObject[FromatDate] = [Msg]);
