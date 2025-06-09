@@ -3,6 +3,7 @@ import { navListData } from "../../data/navigation.data";
 import { motion } from "motion/react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import { Avatar } from "../ui/Avatar";
 const LayoutNavbar = () => {
   const { pathname } = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -53,11 +54,7 @@ const LayoutNavbar = () => {
           );
         })}
       </ul>
-      <img
-        className="w-12 h-12 object-cover rounded-full"
-        src={user?.avatar}
-        alt=""
-      />
+      <Avatar size="lg" url={user?.avatar} fallBackType={"individual"} />
     </nav>
   );
 };

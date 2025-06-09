@@ -5,6 +5,7 @@ import { RootState } from "../store/store";
 import { setfullImagePreview } from "../store/slices/conversation";
 import React, { useMemo, useState, useCallback } from "react";
 import ShowMedia from "./ShowMedia";
+import { Avatar } from "./ui/Avatar";
 
 type ProfileDetailsProps = {
   showDetails: boolean;
@@ -42,8 +43,6 @@ const ProfileDetails = ({
     isIndividual && currentConversation && "isOnline" in currentConversation
       ? currentConversation.isOnline ?? false
       : false;
-
-  const FallbackIcon = isIndividual ? Icons.UserIcon : Icons.UsersIcon;
 
   const AllMediaImgs = useMemo(() => {
     return (
@@ -83,20 +82,12 @@ const ProfileDetails = ({
           <div className="space-y-4">
             {/* Profile Image and Detail section */}
             <div className="flex flex-col items-center gap-4">
-              <div className="w-24 h-24 relative">
-                {imageSrc ? (
-                  <img
-                    src={imageSrc}
-                    className="w-full h-full rounded-full object-cover"
-                    alt="Profile"
-                  />
-                ) : (
-                  <FallbackIcon className="w-8" />
-                )}
-                {isOnline && (
-                  <span className="w-2 h-2 absolute bottom-0 right-0 bg-green-600 rounded-full" />
-                )}
-              </div>
+              <Avatar
+                size="xl"
+                url={imageSrc}
+                online={isOnline}
+                fallBackType={chatType}
+              />
               <div className="text-center">
                 <p className="font-semibold">{name}</p>
                 <p className="text-black/60 text-sm">Example@gmail.com</p>

@@ -14,6 +14,7 @@ import { Icons } from "../icons";
 import { motion } from "motion/react";
 import { DirectConversationProps, GroupConversationProps } from "../types";
 import { getConversationTime } from "../utils/dateUtils";
+import { Avatar } from "./ui/Avatar";
 
 export const DirectConversation = React.memo(
   ({
@@ -100,16 +101,8 @@ export const DirectConversation = React.memo(
         )}
 
         {/* Avatar */}
-        <div className="w-10 h-10 relative shrink-0 z-10">
-          <img
-            src={avatar}
-            className="w-full h-full rounded-full object-cover"
-            alt=""
-          />
-          {isOnline && (
-            <span className="w-2 h-2 absolute bottom-0 right-0 bg-green-600 rounded-full"></span>
-          )}
-        </div>
+
+        <Avatar size="md" url={avatar} online={isOnline} />
 
         {/* Name and message */}
         <div className="info flex-1 min-w-0 z-10">

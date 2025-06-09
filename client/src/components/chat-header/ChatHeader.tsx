@@ -6,6 +6,7 @@ import {
   ResetGroupChat,
 } from "../../store/slices/conversation";
 import { selectConversation } from "../../store/slices/appSlice";
+import { Avatar } from "../ui/Avatar";
 
 const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
   const dispatch = useDispatch();
@@ -22,8 +23,6 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
     : isGroup
     ? group_chat?.current_group_conversation?.avatar
     : null;
-
-  const FallbackIcon = isIndividual ? Icons?.UserIcon : Icons?.UsersIcon;
 
   const handleGoBack = () => {
     dispatch(selectConversation(null));
@@ -49,20 +48,12 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
         className="flex gap-4 items-center cursor-pointer select-none active:bg-gray-100 px-2 rounded-lg min-w-0"
         onClick={handleOpenShowDetails}
       >
-        <div className="w-10 h-10 relative flex-center shrink-0">
-          {imageSrc ? (
-            <img
-              src={imageSrc}
-              className="w-full h-full rounded-full object-cover"
-              alt=""
-            />
-          ) : (
-            <FallbackIcon className="w-8" />
-          )}
-          {direct_chat?.current_direct_conversation?.isOnline && (
-            <span className="w-2 h-2 absolute bottom-0 right-0 bg-green-600 rounded-full" />
-          )}
-        </div>
+        <Avatar
+          size="md"
+          url={imageSrc}
+          fallBackType={chatType}
+          online={direct_chat?.current_direct_conversation?.isOnline}
+        />
 
         {/* START OF TEXT BLOCK */}
         <div className="min-w-0">
