@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { socket } from "../../socket";
 import { useNavigate } from "react-router-dom";
 import PageLoader from "../Loaders/PageLoader";
+import { Avatar } from "../ui/Avatar";
 const Friends = () => {
   const Navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
@@ -61,16 +62,11 @@ const Friends = () => {
                         className="w-full max-w-md mx-auto border border-purple-200 rounded-xl shadow-sm hover:shadow-md transition flex items-center gap-x-4 py-3 px-3 cursor-pointer"
                       >
                         {/* Avatar */}
-                        <div className="w-10 h-10 relative shrink-0">
-                          <img
-                            src={friend.avatar}
-                            className="w-full h-full rounded-full object-cover"
-                            alt=""
-                          />
-                          {isOnline && (
-                            <span className="w-2 h-2 absolute bottom-0 right-0 bg-green-600 rounded-full"></span>
-                          )}
-                        </div>
+                        <Avatar
+                          size="md"
+                          url={friend.avatar}
+                          online={isOnline}
+                        />
                         <div>
                           <p className="text-base font-medium text-gray-900">
                             {friend.userName}
@@ -108,7 +104,7 @@ const Friends = () => {
           )}
         </>
       ) : (
-       <PageLoader />
+        <PageLoader />
       )}
     </div>
   );
