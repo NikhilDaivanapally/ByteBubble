@@ -35,7 +35,7 @@ const GroupChat = () => {
   const [filteredConversations, setFilteredConversations] = useState<
     GroupConversationProps[]
   >(GroupConversations || []);
-
+  console.log(GroupConversations);
   const [fetchGroupConversations, { data }] =
     useLazyFetchGroupConversationsQuery({});
 

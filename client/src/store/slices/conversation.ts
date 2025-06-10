@@ -66,7 +66,7 @@ const slice = createSlice({
       state.direct_chat.DirectConversations?.push(this_conversation);
     },
     addGroupConversation(state, action) {
-      const this_conversation = action.payload.conversation;
+      const this_conversation = action.payload;
       state.group_chat.GroupConversations =
         state.group_chat.GroupConversations?.filter(
           (el) => el?._id !== this_conversation?._id

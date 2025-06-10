@@ -639,9 +639,9 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
         Groupconversation,
         authUserId
       );
-      const hasGroupMessage =
-        formattedGroupConversation[0]?.message?.message ?? null;
-      if (hasGroupMessage) {
+      // const hasGroupMessage =
+      // formattedGroupConversation[0]?.message?.message ?? null;
+      if (formattedGroupConversation.length) {
         res.status(200).json({
           status: "success",
           data: {

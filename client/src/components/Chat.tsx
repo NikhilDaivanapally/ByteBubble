@@ -52,7 +52,7 @@ const Chat = () => {
     messages: group_chat?.current_group_messages,
     sort: "Asc",
   });
-
+  console.log(group_chat?.current_group_messages);
   // // Scroll to the bottom when messages change
   // const scrollToBottomSmooth = useCallback(() => {
   //   if (messagesListRef.current) {
@@ -65,7 +65,7 @@ const Chat = () => {
   // Scroll to the bottom when messages change
   const scrollToBottomQuick = useCallback(() => {
     if (messagesListRef?.current) {
-      messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
+      messagesListRef.current.scrollTop = messagesListRef.current?.scrollHeight;
     }
   }, [messagesListRef]);
 

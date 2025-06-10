@@ -38,7 +38,7 @@ const CreateGroup = ({ onClose, availableMembers }: CreateGroupProps) => {
 
     // Submit form
     socket.emit("group:create", {
-      title: groupName,
+    title: groupName,
       image: groupImage,
       participants: selectedMembers,
       admin: user?._id,

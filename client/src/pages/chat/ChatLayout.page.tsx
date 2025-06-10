@@ -20,6 +20,7 @@ import {
 } from "../../hooks/use-message-events";
 import { useChatEvents } from "../../hooks/use-chat-events";
 import { useUsersStatusEvents } from "../../hooks/use-users-status-events";
+import { useGroupEvents } from "../../hooks/use-group-events";
 
 const useRegisterSocketEvents = (isConnected: boolean) => {
   useFriendRequestEvents(isConnected);
@@ -27,6 +28,7 @@ const useRegisterSocketEvents = (isConnected: boolean) => {
   useMessageEvents(isConnected);
   useGroupMessageEvents(isConnected);
   useChatEvents(isConnected);
+  useGroupEvents(isConnected);
   useUsersStatusEvents(isConnected);
 };
 

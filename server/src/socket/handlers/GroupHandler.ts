@@ -1,8 +1,11 @@
 import { v2 as cloudinary } from "cloudinary";
 import OneToManyMessage from "../../models/oneToManyMessage.model";
 import { Server } from "socket.io";
-
-export async function handleCreateGroup(data:any, io: Server) {
+import mongoose, { Types } from "mongoose";
+import User from "../../models/user.model";
+// import { ObjectId } from "mongodb";
+// import { ObjectId } from "mongodb";
+export async function handleCreateGroup(data: any, io: Server) {
   const { title, image, participants, admin } = data;
   const avatar = await cloudinary.uploader.upload(image);
   const document = await OneToManyMessage.create({
@@ -41,6 +44,47 @@ export async function handleCreateGroup(data:any, io: Server) {
       io.to(socketId).emit("group:new", formattedConversation);
     } else {
       console.error("Encountered a null or undefined socket ID.");
+    }
+  });
+}
+
+export async function handleAddMembersToGroup(data: any, io: Server) {
+  const { _id, senderId, members } = data;
+
+  const newMembers = members
+    ?.map(({ _id }: { _id: string }) => {
+      if (mongoose.Types.ObjectId.isValid(_id)) {
+        return mongoose.Types.ObjectId.createFromHexString(_id);
+      }
+    })
+    .filter((el: any) => el);
+  await OneToManyMessage.updateOne(
+    { _id },
+    {
+      $addToSet: {
+        participants: {
+          $each: newMembers,
+        },
+      },
+    }
+  );
+
+  const sender = await User.findById(senderId).select("socket_id -_id");
+  if (sender?.socket_id) {
+    io.to(sender.socket_id).emit("group:new:members", {});
+  }
+
+  const socketPromises = members.map((member: any) =>
+    User.findById(member?._id)
+      .select("socket_id -_id")
+      .then((user) => user?.socket_id)
+  );
+
+  const socketIds = await Promise.all(socketPromises);
+  console.log(socketIds);
+  socketIds.forEach((socketId) => {
+    if (socketId) {
+      io.to(socketId).emit("group:new:members", data);
     }
   });
 }

@@ -11,7 +11,7 @@ import { Avatar } from "../ui/Avatar";
 const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
   const dispatch = useDispatch();
   const { isTyping } = useSelector((state: RootState) => state.app);
-  const { user } = useSelector((state: RootState) => state.auth);
+  const auth = useSelector((state: RootState) => state.auth.user);
   const { chatType } = useSelector((state: RootState) => state.app);
   const { direct_chat, group_chat } = useSelector(
     (state: RootState) => state.conversation
@@ -83,14 +83,15 @@ const ChatHeader = ({ handleOpenShowDetails = () => {} }) => {
                 </p>
               ) : (
                 <p className="text-sm text-gray-500 truncate">
+                  you,
                   {[
-                    ...(group_chat?.current_group_conversation?.users || []),
                     group_chat?.current_group_conversation?.admin,
+                    ...(group_chat?.current_group_conversation?.users || []),
                   ]
-                    .filter(Boolean)
+                    .filter((user) => user?._id !== auth?._id)
                     .map((el, i, arr) => {
-                      const name = el?._id === user?._id ? "you" : el?.userName;
-                      return `${name}${i < arr.length - 1 ? ", " : ""}`;
+                      const name = el?._id === auth?._id ? "you" : el?.userName;
+                      return ` ${name}${i < arr.length - 1 ? ", " : ""}`;
                     })
                     .join("")}
                 </p>

@@ -133,14 +133,7 @@ const MembersSelection = ({
                           member.userName.charAt(0).toUpperCase()
                         )}
                       </div>
-
                       <span className="flex-1">{member.userName}</span>
-
-                      {/* {isSelected ? (
-                        <Icons.CheckIcon className="text-indigo-600 w-5" />
-                      ) : (
-                        <Icons.UserPlusIcon className="text-gray-400 w-5" />
-                      )} */}
                       <div
                         className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                           isSelected
