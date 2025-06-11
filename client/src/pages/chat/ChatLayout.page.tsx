@@ -40,17 +40,15 @@ const ChatLayout = () => {
   const { data: friendsData } = useFetchFriendsQuery({});
   const { pathname } = useLocation();
 
-  // Handle conversations
   useEffect(() => {
-    if (!directConversationData) return;
-    dispatch(setDirectConversations(directConversationData?.data));
-  }, [directConversationData]);
+    if (!directConversationData?.data) return;
+    dispatch(setDirectConversations(directConversationData.data));
+  }, [directConversationData?.data, dispatch]);
 
-  // Handle friends
   useEffect(() => {
-    if (!friendsData && !friendsData?.data) return;
-    dispatch(updateFriends(friendsData?.data));
-  }, [friendsData]);
+    if (!friendsData?.data) return;
+    dispatch(updateFriends(friendsData.data));
+  }, [friendsData?.data, dispatch]);
 
   // Handle chat type routing
   useEffect(() => {
@@ -75,9 +73,8 @@ const ChatLayout = () => {
 
     window.addEventListener("beforeunload", handleChangeStatus);
     return () => window.removeEventListener("beforeunload", handleChangeStatus);
-  }, [user?._id, JSON.stringify(friends)]);
+  }, [user?._id, friends.length]);
 
-  // Main layout
   return (
     <div className="h-full bg-light overflow-y-hidden dark:bg-dark flex flex-col-reverse lg:flex-row">
       <LayoutNavbar />

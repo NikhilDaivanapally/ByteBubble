@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { socket } from "../socket";
 import { useDispatch, useSelector } from "react-redux";
 import { selectConversation } from "../store/slices/appSlice";
@@ -16,12 +16,25 @@ type NewMembersProps = {
 
 export const useGroupEvents = (enabled: boolean) => {
   const dispatch = useDispatch();
+
   const { GroupConversations } = useSelector(
     (state: RootState) => state.conversation.group_chat
   );
 
   const [getConversation, { data: conversationData }] =
     useGetConversationMutation();
+
+  // Keep a ref of GroupConversations for latest access in callbacks
+  const groupConversationsRef = useRef(GroupConversations);
+  useEffect(() => {
+    groupConversationsRef.current = GroupConversations;
+  }, [GroupConversations]);
+
+  // Keep a ref for getConversation since it's a function from RTK Query
+  const getConversationRef = useRef(getConversation);
+  useEffect(() => {
+    getConversationRef.current = getConversation;
+  }, [getConversation]);
 
   // Update Redux when a new conversation is fetched
   useEffect(() => {
@@ -43,24 +56,25 @@ export const useGroupEvents = (enabled: boolean) => {
   // Handle addition of new members to an existing group
   const handleNewGroupMembers = useCallback(
     async (data: NewMembersProps) => {
-      console.log(data);
       const { _id, members } = data;
-      const existingConversation = GroupConversations?.find(
+      const existingConversation = groupConversationsRef.current?.find(
         (conversation) => conversation._id === _id
       );
 
       if (existingConversation) {
-        // Prevent direct mutation by creating a new object
         const updatedConversation = {
           ...existingConversation,
           users: [...existingConversation.users, ...members],
         };
         dispatch(addGroupConversation(updatedConversation));
       } else {
-        await getConversation({ conversationId: _id, conversationType: group });
+        await getConversationRef.current({
+          conversationId: _id,
+          conversationType: group,
+        });
       }
     },
-    [GroupConversations, getConversation, dispatch]
+    [dispatch]
   );
 
   // Attach/detach socket event listeners
