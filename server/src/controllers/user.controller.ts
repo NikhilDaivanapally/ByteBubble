@@ -397,6 +397,7 @@ const getGroupConversations = async (
         },
       },
     ]);
+    console.log(Existing_Group_Conversations);
 
     const authUserId = req.user?._id as string;
     const formatted = formatGroupConversations(

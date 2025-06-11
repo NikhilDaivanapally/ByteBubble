@@ -3,12 +3,13 @@ import { Icons } from "../icons";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { setfullImagePreview } from "../store/slices/conversation";
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useState, useCallback, useEffect } from "react";
 import ShowMedia from "./ShowMedia";
 import { Avatar } from "./ui/Avatar";
 import { UserProps } from "../types";
 import Dialog from "./Dialog/Dialog";
 import AddMembersToGroup from "./AddMembersToGroup";
+import { GroupActions } from "./Dropdowns/actions/GroupActions";
 
 type ProfileDetailsProps = {
   showDetails: boolean;
@@ -20,7 +21,7 @@ const ProfileDetails = ({
   handleCloseShowDetails,
 }: ProfileDetailsProps) => {
   const dispatch = useDispatch();
-  
+  const [isGroupAdmin, setIsGroupAdmin] = useState(false);
   const [showAllMedia, setShowAllMedia] = useState(false);
   const [isAddMember, setIsAddMember] = useState(false);
 
@@ -35,6 +36,12 @@ const ProfileDetails = ({
   const currentConversation = isIndividual
     ? direct_chat?.current_direct_conversation
     : group_chat?.current_group_conversation;
+
+  useEffect(() => {
+    if (currentConversation?.admin?._id == auth?._id) {
+      setIsGroupAdmin(true);
+    }
+  }, [currentConversation]);
 
   const messages = isIndividual
     ? direct_chat?.current_direct_messages
@@ -153,7 +160,7 @@ const ProfileDetails = ({
               </button>
 
               {/* you */}
-              <div className="flex gap-4 items-start cursor-pointer group">
+              <div className="flex gap-4 items-center p-1 cursor-pointer rounded-md hover:bg-gray-100 group">
                 <Avatar
                   url={auth?.avatar}
                   size="md"
@@ -168,6 +175,12 @@ const ProfileDetails = ({
                     Group admin
                   </span>
                 )}
+                {auth?._id !== currentConversation?.admin?._id &&
+                  isGroupAdmin && (
+                    <div className="ml-auto">
+                      <GroupActions member={auth} />
+                    </div>
+                  )}
               </div>
 
               {/*admin &&  group members */}
@@ -185,6 +198,11 @@ const ProfileDetails = ({
                       <span className="text-xs text-green-600 p-1 ml-auto px-2 bg-green-100 rounded-full">
                         Group admin
                       </span>
+                    )}
+                    {!isAdmin && isGroupAdmin && (
+                      <div className="ml-auto">
+                        <GroupActions member={member} />
+                      </div>
                     )}
                   </div>
                 );

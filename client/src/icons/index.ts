@@ -33,8 +33,8 @@ import {
   ChevronDownIcon,
   ClipboardIcon,
   ArrowUturnLeftIcon,
-  FaceSmileIcon,
   InformationCircleIcon,
+  MinusCircleIcon,
 } from "@heroicons/react/16/solid";
 import { LuClock4, LuSend, LuSmile } from "react-icons/lu";
 import { RiAttachment2 } from "react-icons/ri";
@@ -42,6 +42,7 @@ import { IoMicOutline } from "react-icons/io5";
 import { FaPause } from "react-icons/fa6";
 import { MdDelete, MdOutlineCameraAlt } from "react-icons/md";
 import { IoMic, IoPlay } from "react-icons/io5";
+import { LiaUserShieldSolid } from "react-icons/lia";
 import { GoogleIcon } from "./SvgIcons";
 export const Icons = {
   XMarkIcon,
@@ -79,6 +80,8 @@ export const Icons = {
   ClipboardIcon,
   ArrowUturnLeftIcon,
   InformationCircleIcon,
+  MinusCircleIcon,
+  UserShield: LiaUserShieldSolid,
   ClockIcon: LuClock4,
   SendIcon: LuSend,
   SmileIcon: LuSmile,

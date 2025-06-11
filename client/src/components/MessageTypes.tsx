@@ -7,9 +7,9 @@ import { DirectMessageProps, GroupMessageProps } from "../types";
 import { setfullImagePreview } from "../store/slices/conversation";
 import Loader from "./ui/Loader";
 import { Icons } from "../icons";
-import { MessageDropdown } from "./MessageDropdown";
 import { individual } from "../utils/conversation-types";
 import { formatTo12HourTime, formatToDayLabel } from "../utils/dateUtils";
+import { MessageActions } from "./Dropdowns/actions/MessageActions";
 type senderProps = { avatar: string; userName: string };
 
 export const TextMsg = React.memo(
@@ -41,7 +41,7 @@ export const TextMsg = React.memo(
           !el.isIncoming ? "ml-auto" : ""
         }`}
       >
-        {!el.isIncoming && <MessageDropdown el={el} />}
+        {!el.isIncoming && <MessageActions message={el} />}
         {chatType !== "individual" && el.isIncoming && (
           <div className="user_profile mr-2 w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
             <img

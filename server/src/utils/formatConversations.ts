@@ -120,8 +120,6 @@ const formatGroupConversations = (
         msg.isRead === false
     );
 
-    if (!lastMessage) return null;
-
     return {
       _id: el?._id,
       name: el?.name,
@@ -151,7 +149,7 @@ const formatGroupConversations = (
     );
 
   const hasNoLastMessage = formatted.filter(
-    (el) => !el?.message.message && !el?.time
+    (el) => !el?.message.message || !el?.time
   );
   return [...hasLastMessage, ...hasNoLastMessage];
 };

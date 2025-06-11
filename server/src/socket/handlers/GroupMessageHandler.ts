@@ -133,28 +133,27 @@ export async function handleGroupMessageUnreadClear(data: any, io: Server) {
   console.log("Running clear unread");
 
   const messages = await Message.find({
-  conversationId,
-  recipients: recipient,
-  'isRead.userId': { $ne: user.userId }
-});
+    conversationId,
+    recipients: recipient,
+    "isRead.userId": { $ne: user.userId },
+  });
 
-if (messages.length > 0) {
-  const bulkOps = messages.map(msg => ({
-    updateOne: {
-      filter: { _id: msg._id },
-      update: {
-        $addToSet: {
-          isRead: {
-            userId: user.userId,
-            seenAt: user.seenAt,
-            isSeen: user.isSeen
-          }
-        }
-      }
-    }
-  }));
+  if (messages.length > 0) {
+    const bulkOps = messages.map((msg) => ({
+      updateOne: {
+        filter: { _id: msg._id },
+        update: {
+          $addToSet: {
+            isRead: {
+              userId: user.userId,
+              seenAt: user.seenAt,
+              isSeen: user.isSeen,
+            },
+          },
+        },
+      },
+    }));
 
-  await Message.bulkWrite(bulkOps);
-}
-
+    await Message.bulkWrite(bulkOps);
+  }
 }
