@@ -4,7 +4,7 @@ import { formatToFullDateString } from "./dateUtils";
 type SortMessageProps = {
   filter?: string | null;
   sort?: string;
-  messages?: DirectMessageProps[] | GroupMessageProps[];
+  messages?: (DirectMessageProps | GroupMessageProps)[];
 };
 
 const SortMessages = (Props: SortMessageProps) => {

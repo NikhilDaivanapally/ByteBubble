@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { Icons } from "../icons";
-import React from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { setMessageInfo } from "../store/slices/appSlice";
@@ -17,54 +17,46 @@ const GroupMessageInfo = () => {
     dispatch(setMessageInfo(null));
   };
 
-  const recipients = [
-    ...current_group_conversation?.users,
-    current_group_conversation?.admin,
-  ].filter((user) => user?._id !== messageInfo?.from);
+  const currentGroupConversationRef = useRef(current_group_conversation);
 
-  // const seenBy = messageInfo?.isSeen.reduce(
-  //   (acc: any[], { isSeen, seenAt, userId }) => {
-  //     const user = recipients.find((user) => user?._id === userId);
-  //     if (user) {
-  //       acc.push({
-  //         _id: user?._id,
-  //         userName: user?.userName,
-  //         avatar: user?.avatar,
-  //         isSeen,
-  //         seenAt,
-  //       });
-  //     }
-  //     return acc;
-  //   },
-  //   []
-  // );
-  const { seenBy, deliveredTo } = recipients.reduce(
-    (acc: { seenBy: any[]; deliveredTo: any[] }, user) => {
-      const seen = messageInfo?.isSeen.find(
-        (seenUser) => seenUser?.userId === user?._id
-      );
-      if (seen) {
-        acc.seenBy.push({
-          _id: user?._id,
-          userName: user?.userName,
-          avatar: user?.avatar,
-          isSeen: seen.isSeen,
-          seenAt: seen.seenAt,
-        });
-      } else {
-        acc.deliveredTo.push({
-          _id: user?._id,
-          userName: user?.userName,
-          avatar: user?.avatar,
-          deliveredAt: user?.createdAt,
-        });
-      }
-      return acc;
-    },
-    { seenBy: [], deliveredTo: [] }
-  );
+  useEffect(() => {
+    currentGroupConversationRef.current = current_group_conversation;
+  }, [current_group_conversation]);
 
-  console.log(seenBy);
+  const recipients = useMemo(() => {
+    return [
+      ...(currentGroupConversationRef.current?.users || []),
+      currentGroupConversationRef.current?.admin,
+    ].filter((user) => user?._id !== messageInfo?.from);
+  }, [messageInfo?.from]);
+
+  const { seenBy, deliveredTo } = useMemo(() => {
+    return recipients.reduce(
+      (acc: { seenBy: any[]; deliveredTo: any[] }, user) => {
+        const seen = messageInfo?.isSeen.find(
+          (seenUser) => seenUser?.userId === user?._id
+        );
+        if (seen) {
+          acc.seenBy.push({
+            _id: user?._id,
+            userName: user?.userName,
+            avatar: user?.avatar,
+            isSeen: seen.isSeen,
+            seenAt: seen.seenAt,
+          });
+        } else {
+          acc.deliveredTo.push({
+            _id: user?._id,
+            userName: user?.userName,
+            avatar: user?.avatar,
+            deliveredAt: user?.createdAt,
+          });
+        }
+        return acc;
+      },
+      { seenBy: [], deliveredTo: [] }
+    );
+  }, [messageInfo, recipients]);
 
   return (
     <AnimatePresence>

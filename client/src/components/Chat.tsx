@@ -1,4 +1,3 @@
-// components/chat/Chat.tsx
 import { useState, useRef, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
@@ -6,14 +5,13 @@ import SortMessages from "../utils/sort-messages";
 import SendText_AudioMessageInput from "./SendText_AudioMessageInput";
 import CameraModule from "./CameraModule";
 import UploadedFileModule from "./UploadedFileModule";
-import NoChat from "./ui/NoChat";
 import ChatHeader from "./chat-header/ChatHeader";
-import ProfileDetails from "./ProfileDetails";
 import GroupMessageInfo from "./GroupMessageInfo";
 import PageLoader from "./Loaders/PageLoader";
 import MessageList from "./chat/MessageList";
 import useLoadChatMessages from "../hooks/use-load-chat-messages";
 import useAutoScroll from "../hooks/use-auto-scroll";
+import ProfilePanel from "./SidePanels/ProfilePanels/ProfilePanel";
 
 const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +22,7 @@ const Chat = () => {
     (state: RootState) => state.conversation
   );
   const { user } = useSelector((state: RootState) => state.auth);
-  const { activeChatId, chatType, isCameraOpen } = useSelector(
+  const { activeChatId, chatType, isCameraOpen, messageInfo } = useSelector(
     (state: RootState) => state.app
   );
   useLoadChatMessages({
@@ -88,11 +86,11 @@ const Chat = () => {
         />
         <SendText_AudioMessageInput />
       </div>
-      {/* <ProfileDetails
-              showDetails={showDetails}
-              handleCloseShowDetails={handleCloseShowDetails}
-            /> */}
-      {/* <GroupMessageInfo /> */}
+      <ProfilePanel
+        showDetails={showDetails}
+        handleCloseShowDetails={handleCloseShowDetails}
+      />
+      {chatType === "group" && messageInfo && <GroupMessageInfo />}
     </div>
   ) : (
     <PageLoader />

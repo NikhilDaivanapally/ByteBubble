@@ -6,30 +6,37 @@ import { RootState } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setfullImagePreview } from "../store/slices/conversation";
 import { AudioMsg } from "./MessageTypes";
+import { createSelector } from "@reduxjs/toolkit";
 type ShowMediaProps = {
   showAllMedia: boolean;
   handleCloseAllMedia: () => void;
 };
+const selectChatMessages = createSelector(
+  [
+    (state: RootState) => state.app.chatType,
+    (state: RootState) =>
+      state.conversation.direct_chat.current_direct_messages,
+    (state: RootState) => state.conversation.group_chat.current_group_messages,
+  ],
+  (chatType, directMessages, groupMessages) =>
+    chatType === "individual" ? directMessages : groupMessages
+);
 
 const Media = () => {
   const dispatch = useDispatch();
 
-  const { chatType } = useSelector((state: RootState) => state.app);
-  const { direct_chat, group_chat } = useSelector(
-    (state: RootState) => state.conversation
+  const selectMediaMessages = createSelector([selectChatMessages], (messages) =>
+    messages.filter((msg) => msg.message?.photoUrl)
   );
+  const mediaMessages = useSelector(selectMediaMessages);
 
-  const messages =
-    chatType == "individual"
-      ? direct_chat?.current_direct_messages ?? []
-      : group_chat?.current_group_messages ?? [];
-  console.log(messages);
-
-  const { DatesArray, MessagesObject } = SortMessages({
-    messages: messages,
-    filter: "photo",
-    sort: "Desc",
-  });
+  const { DatesArray, MessagesObject } = useMemo(() => {
+    return SortMessages({
+      messages: mediaMessages,
+      filter: "photo",
+      sort: "Desc",
+    });
+  }, [mediaMessages]);
 
   return (
     <>
@@ -63,22 +70,18 @@ const Media = () => {
   );
 };
 const Audio = () => {
-  const { chatType } = useSelector((state: RootState) => state.app);
-  const { direct_chat, group_chat } = useSelector(
-    (state: RootState) => state.conversation
+  const selectAudioMessages = createSelector([selectChatMessages], (messages) =>
+    messages.filter((msg) => msg.message?.audioId)
   );
+  const audioMessages = useSelector(selectAudioMessages);
 
-  const messages =
-    chatType == "individual"
-      ? direct_chat?.current_direct_messages
-      : group_chat?.current_group_messages;
-  console.log(messages);
-
-  const { DatesArray, MessagesObject } = SortMessages({
-    messages: messages,
-    filter: "audio",
-    sort: "Desc",
-  });
+  const { DatesArray, MessagesObject } = useMemo(() => {
+    return SortMessages({
+      messages: audioMessages,
+      filter: "audio",
+      sort: "Desc",
+    });
+  }, [audioMessages]);
   return (
     <>
       {DatesArray.length ? (
@@ -103,22 +106,18 @@ const Audio = () => {
   );
 };
 const Links = () => {
-  const { chatType } = useSelector((state: RootState) => state.app);
-  const { direct_chat, group_chat } = useSelector(
-    (state: RootState) => state.conversation
+  const selectLinkMessages = createSelector([selectChatMessages], (messages) =>
+    messages.filter((msg) => msg.message?.text)
   );
+  const linkMessages = useSelector(selectLinkMessages);
 
-  const messages =
-    chatType == "individual"
-      ? direct_chat?.current_direct_messages
-      : group_chat?.current_group_messages;
-  console.log(messages);
-
-  const { DatesArray, MessagesObject } = SortMessages({
-    messages: messages,
-    filter: "link",
-    sort: "Desc",
-  });
+  const { DatesArray, MessagesObject } = useMemo(() => {
+    return SortMessages({
+      messages: linkMessages,
+      filter: "link",
+      sort: "Desc",
+    });
+  }, [linkMessages]);
   return (
     <>
       {DatesArray.length ? (
