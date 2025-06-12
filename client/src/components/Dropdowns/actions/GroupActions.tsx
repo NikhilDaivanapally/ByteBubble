@@ -8,7 +8,7 @@ import {
 } from "../../../store/slices/conversation";
 import { UserProps } from "../../../types";
 
-export const GroupActions = ({ member }: { member: UserProps }) => {
+export const GroupActions = ({ member }: { member: UserProps | null }) => {
   const dispatch = useDispatch();
   const auth = useSelector((state: RootState) => state.auth.user);
   const { current_group_conversation } = useSelector(

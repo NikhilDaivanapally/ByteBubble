@@ -6,7 +6,7 @@ import { setfullImagePreview } from "../store/slices/conversation";
 import React, { useMemo, useState, useCallback, useEffect } from "react";
 import ShowMedia from "./ShowMedia";
 import { Avatar } from "./ui/Avatar";
-import { UserProps } from "../types";
+import { DirectConversationProps, GroupConversationProps, UserProps } from "../types";
 import Dialog from "./Dialog/Dialog";
 import AddMembersToGroup from "./AddMembersToGroup";
 import { GroupActions } from "./Dropdowns/actions/GroupActions";
@@ -21,6 +21,7 @@ const ProfileDetails = ({
   handleCloseShowDetails,
 }: ProfileDetailsProps) => {
   const dispatch = useDispatch();
+
   const [isGroupAdmin, setIsGroupAdmin] = useState(false);
   const [showAllMedia, setShowAllMedia] = useState(false);
   const [isAddMember, setIsAddMember] = useState(false);
@@ -31,11 +32,10 @@ const ProfileDetails = ({
   );
   const auth = useSelector((state: RootState) => state.auth.user);
 
-  const isIndividual = chatType === "individual";
-
-  const currentConversation = isIndividual
-    ? direct_chat?.current_direct_conversation
-    : group_chat?.current_group_conversation;
+  const currentConversation =
+    chatType === "individual"
+      ? direct_chat?.current_direct_conversation as DirectConversationProps
+      : group_chat?.current_group_conversation as GroupConversationProps;
 
   useEffect(() => {
     if (currentConversation?.admin?._id == auth?._id) {
@@ -43,9 +43,10 @@ const ProfileDetails = ({
     }
   }, [currentConversation]);
 
-  const messages = isIndividual
-    ? direct_chat?.current_direct_messages
-    : group_chat?.current_group_messages;
+  const messages =
+    chatType === "individual"
+      ? direct_chat?.current_direct_messages
+      : group_chat?.current_group_messages;
 
   const imageSrc = currentConversation?.avatar ?? null;
   const name = currentConversation?.name ?? "";
@@ -53,15 +54,17 @@ const ProfileDetails = ({
 
   // Inline narrowing for `isOnline`:
   const isOnline =
-    isIndividual && currentConversation && "isOnline" in currentConversation
+    chatType === "individual" &&
+    currentConversation &&
+    "isOnline" in currentConversation
       ? currentConversation.isOnline ?? false
       : false;
 
   const AllMediaImgs = useMemo(() => {
     return (
       messages
-        ?.filter((el) => el.messageType === "photo")
-        .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)) ?? []
+        ?.filter((el) => el?.messageType === "photo")
+        .sort((a, b) => Date.parse(b?.createdAt) - Date.parse(a?.createdAt)) ?? []
     );
   }, [messages]);
 
@@ -178,7 +181,7 @@ const ProfileDetails = ({
                 {auth?._id !== currentConversation?.admin?._id &&
                   isGroupAdmin && (
                     <div className="ml-auto">
-                      <GroupActions member={auth} />
+                      <GroupActions member={auth}  />
                     </div>
                   )}
               </div>

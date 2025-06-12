@@ -19,14 +19,15 @@ import { Button } from "../../components/ui/Button";
 import { Icons } from "../../icons";
 import Dialog from "../../components/Dialog/Dialog";
 import CreateGroup from "../../components/CreateGroup";
+import NoChat from "../../components/ui/NoChat";
 
 const GroupChat = () => {
   const dispatch = useDispatch();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
   const { activeChatId, friends } = useSelector(
     (state: RootState) => state.app
   );
+
   const {
     GroupConversations,
     current_group_messages,
@@ -35,7 +36,7 @@ const GroupChat = () => {
   const [filteredConversations, setFilteredConversations] = useState<
     GroupConversationProps[]
   >(GroupConversations || []);
-  console.log(GroupConversations);
+
   const [fetchGroupConversations, { data }] =
     useLazyFetchGroupConversationsQuery({});
 
@@ -45,9 +46,9 @@ const GroupChat = () => {
   }, [GroupConversations]);
 
   useEffect(() => {
-    if (!data) return;
+    if (!data?.data) return;
     dispatch(setGroupConversations(data.data));
-  }, [data]);
+  }, [data?.data]);
 
   useEffect(() => {
     if (GroupConversations) return;
@@ -59,10 +60,12 @@ const GroupChat = () => {
     if (!current_group_messages?.length || !current_group_conversation) return;
 
     const lastMsg = current_group_messages[current_group_messages.length - 1];
+
     const foundUser = [
       ...current_group_conversation?.users,
       current_group_conversation?.admin,
     ].find((user) => user?._id === lastMsg.from);
+
     dispatch(
       updateGroupConversation({
         ...current_group_conversation,
@@ -152,7 +155,15 @@ const GroupChat = () => {
           )}
         </ul>
       </div>
-      <Chat />
+
+      {/* Chat Window */}
+      <div
+        className={`flex-1 bg-gray-200 dark:bg-[#1E1E1E] rounded-2xl p-2 ${
+          activeChatId ? "block" : "hidden"
+        } md:block overflow-hidden`}
+      >
+        {activeChatId ? <Chat /> : <NoChat />}
+      </div>
     </div>
   );
 };

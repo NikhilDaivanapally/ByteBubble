@@ -13,10 +13,10 @@ import { motion } from "motion/react";
 import { DirectConversationProps } from "../../types";
 import { DirectConversation } from "../../components/Conversation";
 import ConversationSkeleton from "../../components/Loaders/SkeletonLoaders/ConversationSkeleton";
+import NoChat from "../../components/ui/NoChat";
 
 const IndividualChat = () => {
   const dispatch = useDispatch();
-
   const { activeChatId } = useSelector((state: RootState) => state.app);
   const {
     DirectConversations,
@@ -58,14 +58,10 @@ const IndividualChat = () => {
 
   useEffect(() => {
     return () => {
-      if (activeChatId) {
-        dispatch(selectConversation(null));
-      }
-      if (current_direct_conversation && current_direct_messages.length) {
-        dispatch(ResetDirectChat());
-      }
+      dispatch(selectConversation(null));
+      dispatch(ResetDirectChat());
     };
-  }, [current_direct_conversation, current_direct_messages]);
+  }, []);
 
   return (
     <div className="h-full flex">
@@ -114,7 +110,13 @@ const IndividualChat = () => {
       </div>
 
       {/* Chat Window */}
-      <Chat />
+      <div
+        className={`flex-1 bg-gray-200 dark:bg-[#1E1E1E] rounded-2xl p-2 ${
+          activeChatId ? "block" : "hidden"
+        } md:block overflow-hidden`}
+      >
+        {activeChatId ? <Chat /> : <NoChat />}
+      </div>
     </div>
   );
 };
