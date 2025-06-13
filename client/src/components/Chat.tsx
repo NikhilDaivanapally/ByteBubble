@@ -2,7 +2,7 @@ import { useState, useRef, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import SortMessages from "../utils/sort-messages";
-import SendText_AudioMessageInput from "./SendText_AudioMessageInput";
+import MessageInputBar from "./MessageInputBar";
 import CameraModule from "./CameraModule";
 import UploadedFileModule from "./UploadedFileModule";
 import ChatHeader from "./chat-header/ChatHeader";
@@ -84,7 +84,7 @@ const Chat = () => {
           sortedDates={MessagesByType.sortedDates}
           groupedMessages={MessagesByType.groupedMessages}
         />
-        <SendText_AudioMessageInput />
+        <MessageInputBar />
       </div>
       <ProfilePanel
         showDetails={showDetails}
