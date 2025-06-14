@@ -5,8 +5,8 @@ import User from "../models/user.model";
 import { NextFunction, Request, Response } from "express";
 import Friendship from "../models/friendship.model";
 import { User as UserType } from "../types/user.type";
-import OneToOneMessage from "../models/oneToOneMessage.model";
-import OneToManyMessage from "../models/oneToManyMessage.model";
+import DirectConversation from "../models/DirectConversation.model";
+import GroupConversation from "../models/GroupConversation.model";
 import { Message } from "../models/message.mode";
 import {
   DirectConversationInput,
@@ -122,7 +122,7 @@ const getFriends = async (
               passwordResetToken: 0,
               confirmPassword: 0,
               verified: 0,
-              otp_expiry_time: 0,
+              otpExpiryTime: 0,
               otp: 0,
               __v: 0,
             },
@@ -184,7 +184,7 @@ const getDirectConversations = async (
   res: Response
 ) => {
   try {
-    const Existing_Direct_Conversations = await OneToOneMessage.aggregate([
+    const Existing_Direct_Conversations = await DirectConversation.aggregate([
       {
         $match: {
           participants: {
@@ -211,7 +211,7 @@ const getDirectConversations = async (
                 passwordResetToken: 0,
                 confirmPassword: 0,
                 verified: 0,
-                otp_expiry_time: 0,
+                otpExpiryTime: 0,
                 otp: 0,
                 __v: 0,
               },
@@ -241,7 +241,7 @@ const getDirectConversations = async (
             gender: 1,
             avatar: 1,
             about: 1,
-            socket_id: 1,
+            socketId: 1,
             createdAt: 1,
             updatedAt: 1,
             status: 1,
@@ -277,7 +277,7 @@ const getGroupConversations = async (
   res: Response
 ) => {
   try {
-    const Existing_Group_Conversations = await OneToManyMessage.aggregate([
+    const Existing_Group_Conversations = await GroupConversation.aggregate([
       {
         $match: {
           $or: [
@@ -300,7 +300,7 @@ const getGroupConversations = async (
                 passwordResetToken: 0,
                 confirmPassword: 0,
                 verified: 0,
-                otp_expiry_time: 0,
+                otpExpiryTime: 0,
                 otp: 0,
                 __v: 0,
               },
@@ -328,7 +328,7 @@ const getGroupConversations = async (
                 passwordResetToken: 0,
                 confirmPassword: 0,
                 verified: 0,
-                otp_expiry_time: 0,
+                otpExpiryTime: 0,
                 otp: 0,
                 __v: 0,
               },
@@ -429,7 +429,7 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
   // let conversation: DirectConversationInput | GroupConversationInput;
   switch (conversationType) {
     case individual:
-      const Directconversation = await OneToOneMessage.aggregate([
+      const Directconversation = await DirectConversation.aggregate([
         {
           $match: {
             _id: new mongoose.Types.ObjectId(conversationId),
@@ -454,7 +454,7 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
                   passwordResetToken: 0,
                   confirmPassword: 0,
                   verified: 0,
-                  otp_expiry_time: 0,
+                  otpExpiryTime: 0,
                   otp: 0,
                   __v: 0,
                 },
@@ -484,7 +484,7 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
               gender: 1,
               avatar: 1,
               about: 1,
-              socket_id: 1,
+              socketId: 1,
               createdAt: 1,
               updatedAt: 1,
               status: 1,
@@ -518,8 +518,8 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
       });
       return;
       break;
-    case "OneToManyMessage":
-      const Groupconversation = await OneToManyMessage.aggregate([
+    case "GroupConversation":
+      const Groupconversation = await GroupConversation.aggregate([
         {
           $match: {
             _id: new mongoose.Types.ObjectId(conversationId),
@@ -539,7 +539,7 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
                   passwordResetToken: 0,
                   confirmPassword: 0,
                   verified: 0,
-                  otp_expiry_time: 0,
+                  otpExpiryTime: 0,
                   otp: 0,
                   __v: 0,
                 },
@@ -567,7 +567,7 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
                   passwordResetToken: 0,
                   confirmPassword: 0,
                   verified: 0,
-                  otp_expiry_time: 0,
+                  otpExpiryTime: 0,
                   otp: 0,
                   __v: 0,
                 },
@@ -699,7 +699,7 @@ const createGroup = async (
     const avatar = avatarUploadResult?.secure_url || "";
 
     // Create group
-    let group = await OneToManyMessage.create({
+    let group = await GroupConversation.create({
       title,
       participants,
       admin,
@@ -707,7 +707,7 @@ const createGroup = async (
     });
 
     // Populate references and convert to plain JS object
-    let groupDoc = await OneToManyMessage.findById(group?._id)
+    let groupDoc = await GroupConversation.findById(group?._id)
       .populate(["admin", "participants"])
       .lean();
 

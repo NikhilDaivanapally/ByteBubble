@@ -20,17 +20,11 @@ const userSchema = new Schema<User>(
               /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
             );
         },
-        // if validation fails
         message: (props: any) => `Email ${props.value} is invalid`,
       },
     },
     password: {
       type: String,
-      // required: [true, "Password is required"],
-    },
-    confirmPassword: {
-      type: String,
-      // required: [true, "Password is required"],
     },
     about: {
       type: String,
@@ -55,10 +49,10 @@ const userSchema = new Schema<User>(
     otp: {
       type: String,
     },
-    otp_expiry_time: {
+    otpExpiryTime: {
       type: Date,
     },
-    socket_id: {
+    socketId: {
       type: String,
     },
     status: {
@@ -111,7 +105,7 @@ userSchema.pre("save", async function (next) {
 });
 
 // password verification
-userSchema.methods.isPasswordCorrect = async function (password:string) {
+userSchema.methods.isPasswordCorrect = async function (password: string) {
   return await bcrypt.compare(password, this.password);
 };
 

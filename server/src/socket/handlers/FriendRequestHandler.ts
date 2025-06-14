@@ -23,8 +23,8 @@ export async function handleFriendRequest(
       ]);
 
     // Notify recipient
-    if (recipientUser.socket_id) {
-      io.to(recipientUser.socket_id).emit("friend:request:received", {
+    if (recipientUser.socketId) {
+      io.to(recipientUser.socketId).emit("friend:request:received", {
         message: "You received a new friend request",
         friendRequest,
         from: senderUser,
@@ -32,8 +32,8 @@ export async function handleFriendRequest(
     }
 
     // Notify sender
-    if (senderUser.socket_id) {
-      io.to(senderUser.socket_id).emit("friend:request:sent", {
+    if (senderUser.socketId) {
+      io.to(senderUser.socketId).emit("friend:request:sent", {
         message: "Friend request sent successfully",
         friendRequest,
         to: recipientUser,
@@ -62,8 +62,8 @@ export async function handleFriendRequestAccept(
     await request.save({ validateModifiedOnly: true });
 
     // Notify sender
-    if (senderUser.socket_id) {
-      io.to(senderUser.socket_id).emit("friend:request:accepted", {
+    if (senderUser.socketId) {
+      io.to(senderUser.socketId).emit("friend:request:accepted", {
         message: `${receiverUser.userName} accepted your friend request`,
         request,
         friend: receiverUser,
@@ -71,8 +71,8 @@ export async function handleFriendRequestAccept(
     }
 
     // Notify receiver
-    if (receiverUser.socket_id) {
-      io.to(receiverUser.socket_id).emit("friend:request:accepted", {
+    if (receiverUser.socketId) {
+      io.to(receiverUser.socketId).emit("friend:request:accepted", {
         message: `You accepted ${senderUser.userName}'s friend request`,
         request,
         friend: senderUser,

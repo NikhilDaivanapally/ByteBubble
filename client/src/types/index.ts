@@ -19,7 +19,7 @@ export type UserProps = {
   avatar: string;
   about: string;
   gender: string;
-  socket_id: string;
+  socketId: string;
   status: string;
   verified: boolean;
   createdAt: string;

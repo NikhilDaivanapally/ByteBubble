@@ -86,10 +86,10 @@ export async function handleGroupAudioMessage(messagePayload: any, io: Server) {
 
 export async function handleGroupMessageSeen(messagePayload: any, io: Server) {
   const sender = await User.findById(messagePayload?.senderId).select(
-    "socket_id -_id"
+    "socketId -_id"
   );
-  if (sender?.socket_id) {
-    io.to(sender?.socket_id!).emit("group:message:status:seen", messagePayload);
+  if (sender?.socketId) {
+    io.to(sender?.socketId!).emit("group:message:status:seen", messagePayload);
   }
   console.log("Running Messages Seen");
   await Message.findOneAndUpdate(
@@ -104,9 +104,9 @@ export async function handleGroupMessageUnreadUpdate(
 ) {
   const recipientsSocketIds = messagePayload.recipientsIds.map(
     async (id: string) => {
-      const { socket_id }: any =
-        await User.findById(id).select("socket_id -_id");
-      return socket_id;
+      const { socketId }: any =
+        await User.findById(id).select("socketId -_id");
+      return socketId;
     }
   );
   if (recipientsSocketIds?.length) {
@@ -124,8 +124,8 @@ export async function handleGroupMessageUnreadClear(data: any, io: Server) {
   const { conversationId, recipient, sender, user } = data;
   console.log(data);
   const Sender = await User.findById(sender);
-  if (Sender?.socket_id) {
-    io.to(Sender?.socket_id!).emit("group:messages:status:seen", {
+  if (Sender?.socketId) {
+    io.to(Sender?.socketId!).emit("group:messages:status:seen", {
       conversationId,
       user,
     });

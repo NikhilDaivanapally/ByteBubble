@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import OneToOneMessage from "../../models/oneToOneMessage.model";
+import DirectConversation from "../../models/DirectConversation.model";
 import mongoose from "mongoose";
 import { formatDirectConversations } from "../../utils/formatConversations";
 
@@ -15,17 +15,17 @@ export async function handleStartConversation(
     }
 
     // check if a conversation already exists
-    const exisitingConversation = await OneToOneMessage.findOne({
+    const exisitingConversation = await DirectConversation.findOne({
       participants: { $all: [to, from] },
     });
 
     // If it doesn't exist, create a new one
     if (!exisitingConversation) {
-      await OneToOneMessage.create({ participants: [from, to] });
+      await DirectConversation.create({ participants: [from, to] });
     }
 
     // Fetch the conversation and associated data
-    const conversation = await OneToOneMessage.aggregate([
+    const conversation = await DirectConversation.aggregate([
       {
         $match: {
           participants: {
@@ -58,7 +58,7 @@ export async function handleStartConversation(
                 passwordResetToken: 0,
                 confirmPassword: 0,
                 verified: 0,
-                otp_expiry_time: 0,
+                otpExpiryTime: 0,
                 otp: 0,
                 __v: 0,
               },
@@ -89,7 +89,7 @@ export async function handleStartConversation(
             gender: 1,
             avatar: 1,
             about: 1,
-            socket_id: 1,
+            socketId: 1,
             createdAt: 1,
             updatedAt: 1,
             status: 1,
@@ -114,11 +114,11 @@ export async function handleStartConversation(
     socket.emit("error", { message: "Failed to initiate chat." });
   }
 
-  const existing_conversations = await OneToOneMessage.find({
+  const existing_conversations = await DirectConversation.find({
     participants: { $all: [to, from] },
   });
   if (existing_conversations.length === 0) {
-    await OneToOneMessage.create({
+    await DirectConversation.create({
       participants: [to, from],
     });
   }

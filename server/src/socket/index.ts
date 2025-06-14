@@ -2,7 +2,7 @@ import http from "http";
 import { app } from "../app";
 import { Server } from "socket.io";
 import User from "../models/user.model";
-import OneToOneMessage from "../models/oneToOneMessage.model";
+import DirectConversation from "../models/DirectConversation.model";
 import registerPrivateEvents from "./events/PrivateEvents";
 import registerGroupEvents from "./events/GroupEvents";
 import registerGroupMessageEvents from "./events/GroupMessageEvents";
@@ -19,19 +19,19 @@ const io = new Server(server, {
 
 io.on("connection", async (socket) => {
   const user_id = socket.handshake.query["auth_id"];
-  // const socket_id = socket.id;
+  // const socketId = socket.id;
   if (user_id !== null && Boolean(user_id)) {
     try {
       const user = await User.findByIdAndUpdate(
         user_id, // user id
         {
-          socket_id: socket.id, // update
+          socketId: socket.id, // update
           status: "Online",
         },
         { new: true } // return updated doc
       );
 
-      const friends = await OneToOneMessage.aggregate([
+      const friends = await DirectConversation.aggregate([
         {
           $match: {
             participants: {
@@ -72,11 +72,11 @@ io.on("connection", async (socket) => {
           },
         },
       ]);
-      const socket_ids = friends?.map(async (friend) => {
-        return friend?.user?.socket_id;
+      const socketIds = friends?.map(async (friend) => {
+        return friend?.user?.socketId;
       });
 
-      const EmmitStatusTo = await Promise.all(socket_ids);
+      const EmmitStatusTo = await Promise.all(socketIds);
 
       EmmitStatusTo.forEach((socketId) => {
         if (socketId) {
@@ -106,18 +106,18 @@ io.on("connection", async (socket) => {
     await User.findByIdAndUpdate(
       user_id, // user id
       {
-        socket_id: socket.id, // update
+        socketId: socket.id, // update
         status: "Offline",
       },
       { new: true } // return updated doc
     );
-    const socket_ids = friends?.map(async (id: string) => {
-      const { socket_id }: any =
-        await User.findById(id).select("socket_id -_id");
-      return socket_id;
+    const socketIds = friends?.map(async (id: string) => {
+      const { socketId }: any =
+        await User.findById(id).select("socketId -_id");
+      return socketId;
     });
 
-    const EmmitStatusTo = await Promise.all(socket_ids);
+    const EmmitStatusTo = await Promise.all(socketIds);
     EmmitStatusTo.forEach((socketId) => {
       if (socketId) {
         const socketExists = io.sockets.sockets.get(socketId);

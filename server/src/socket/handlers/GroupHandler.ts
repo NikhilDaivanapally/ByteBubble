@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
-import OneToManyMessage from "../../models/oneToManyMessage.model";
+import GroupConversation from "../../models/GroupConversation.model";
 import { Server } from "socket.io";
 import mongoose, { Types } from "mongoose";
 import User from "../../models/user.model";
@@ -8,7 +8,7 @@ import User from "../../models/user.model";
 export async function handleCreateGroup(data: any, io: Server) {
   const { title, image, participants, admin } = data;
   const avatar = await cloudinary.uploader.upload(image);
-  const document = await OneToManyMessage.create({
+  const document = await GroupConversation.create({
     title,
     avatar: avatar?.secure_url,
     participants,
@@ -16,7 +16,7 @@ export async function handleCreateGroup(data: any, io: Server) {
   });
 
   // Populate references and convert to plain JS object
-  let groupCreated = await OneToManyMessage.findById(document?._id)
+  let groupCreated = await GroupConversation.findById(document?._id)
     .populate(["admin", "participants"])
     .lean();
 
@@ -37,9 +37,9 @@ export async function handleCreateGroup(data: any, io: Server) {
     isSeen: null,
     unreadMessagesCount: 0,
   };
-  const socket_ids = participants.map((el: any) => el?.socket_id);
-  io.to(admin?.socket_id).emit("group:new:admin", formattedConversation);
-  socket_ids.forEach((socketId: any) => {
+  const socketIds = participants.map((el: any) => el?.socketId);
+  io.to(admin?.socketId).emit("group:new:admin", formattedConversation);
+  socketIds.forEach((socketId: any) => {
     if (socketId) {
       io.to(socketId).emit("group:new", formattedConversation);
     } else {
@@ -58,7 +58,7 @@ export async function handleAddMembersToGroup(data: any, io: Server) {
       }
     })
     .filter((el: any) => el);
-  await OneToManyMessage.updateOne(
+  await GroupConversation.updateOne(
     { _id },
     {
       $addToSet: {
@@ -69,15 +69,15 @@ export async function handleAddMembersToGroup(data: any, io: Server) {
     }
   );
 
-  const sender = await User.findById(senderId).select("socket_id -_id");
-  if (sender?.socket_id) {
-    io.to(sender.socket_id).emit("group:new:members", {});
+  const sender = await User.findById(senderId).select("socketId -_id");
+  if (sender?.socketId) {
+    io.to(sender.socketId).emit("group:new:members", {});
   }
 
   const socketPromises = members.map((member: any) =>
     User.findById(member?._id)
-      .select("socket_id -_id")
-      .then((user) => user?.socket_id)
+      .select("socketId -_id")
+      .then((user) => user?.socketId)
   );
 
   const socketIds = await Promise.all(socketPromises);

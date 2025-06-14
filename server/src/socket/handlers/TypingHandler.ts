@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import User from "../../models/user.model";
-import OneToManyMessage from "../../models/oneToManyMessage.model";
+import GroupConversation from "../../models/GroupConversation.model";
 
 interface TypingData {
   roomId: string;
@@ -13,7 +13,7 @@ interface TypingData {
 }
 
 interface UserSocketInfo {
-  socket_id: string;
+  socketId: string;
 }
 export async function handleStartTyping(data: TypingData, io: Server) {
   const { roomId, user, chatType, currentConversation } = data;
@@ -22,11 +22,11 @@ export async function handleStartTyping(data: TypingData, io: Server) {
     switch (chatType) {
       case "individual": {
         const recipient = await User.findById(currentConversation as string)
-          .select("socket_id -_id")
+          .select("socketId -_id")
           .lean<UserSocketInfo | null>();
 
-        if (recipient?.socket_id) {
-          io.to(recipient.socket_id).emit("user:typing:start", {
+        if (recipient?.socketId) {
+          io.to(recipient.socketId).emit("user:typing:start", {
             userName: user.userName,
             roomId,
           });
@@ -35,7 +35,7 @@ export async function handleStartTyping(data: TypingData, io: Server) {
       }
 
       case "group": {
-        const groupInfo = await OneToManyMessage.findById(roomId)
+        const groupInfo = await GroupConversation.findById(roomId)
           .select("admin")
           .lean<{ admin: string } | null>();
         if (!groupInfo) {
@@ -47,8 +47,8 @@ export async function handleStartTyping(data: TypingData, io: Server) {
           admin.toString(),
         ].filter((id) => id !== user.auth_id);
         const socketInfoPromises = recipientIds.map(async (id) => {
-          const user = await User.findById(id).select("socket_id -_id");
-          return user?.socket_id;
+          const user = await User.findById(id).select("socketId -_id");
+          return user?.socketId;
         });
 
         const recipients = await Promise.all(socketInfoPromises);
@@ -78,11 +78,11 @@ export async function handleStopTyping(data: TypingData, io: Server) {
     switch (chatType) {
       case "individual": {
         const recipient = await User.findById(currentConversation as string)
-          .select("socket_id -_id")
+          .select("socketId -_id")
           .lean<UserSocketInfo | null>();
 
-        if (recipient?.socket_id) {
-          io.to(recipient.socket_id).emit("user:typing:stop", {
+        if (recipient?.socketId) {
+          io.to(recipient.socketId).emit("user:typing:stop", {
             userName: user.userName,
             roomId,
           });
@@ -91,7 +91,7 @@ export async function handleStopTyping(data: TypingData, io: Server) {
       }
 
       case "group": {
-        const messageDoc = await OneToManyMessage.findById(roomId)
+        const messageDoc = await GroupConversation.findById(roomId)
           .select("admin")
           .lean<{ admin: string } | null>();
 
@@ -106,8 +106,8 @@ export async function handleStopTyping(data: TypingData, io: Server) {
         ].filter((id) => id !== user.auth_id);
 
         const socketInfoPromises = recipientIds.map(async (id) => {
-          const user = await User.findById(id).select("socket_id -_id");
-          return user?.socket_id;
+          const user = await User.findById(id).select("socketId -_id");
+          return user?.socketId;
         });
 
         const recipients = await Promise.all(socketInfoPromises);

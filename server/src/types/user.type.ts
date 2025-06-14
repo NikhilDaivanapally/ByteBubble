@@ -12,8 +12,8 @@ export interface User extends Document {
   passwordResetExpires?: Date;
   verified?: boolean;
   otp?: string;
-  otp_expiry_time?: string;
-  socket_id?: string;
+  otpExpiryTime?: string;
+  socketId?: string;
   status?: string;
   googleId?: string;
   isPasswordCorrect(password: string): Promise<boolean>;

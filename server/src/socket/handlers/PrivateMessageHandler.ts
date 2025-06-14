@@ -91,10 +91,10 @@ export async function handleAudioMessage(messagePayload: any, io: Server) {
 
 export async function handleMessageSeen(messagePayload: any, io: Server) {
   const sender = await User.findById(messagePayload?.senderId).select(
-    "socket_id -_id"
+    "socketId -_id"
   );
-  if (sender?.socket_id) {
-    io.to(sender?.socket_id!).emit("message:status:seen", messagePayload);
+  if (sender?.socketId) {
+    io.to(sender?.socketId!).emit("message:status:seen", messagePayload);
   }
   await Message.findOneAndUpdate(
     { _id: messagePayload?._id },
@@ -107,16 +107,16 @@ export async function handleMessageUnreadUpdate(
   io: Server
 ) {
   const recipient = await User.findById(messagePayload.recipientId);
-  if (recipient?.socket_id) {
-    io.to(recipient?.socket_id).emit("messages:unread:count", messagePayload);
+  if (recipient?.socketId) {
+    io.to(recipient?.socketId).emit("messages:unread:count", messagePayload);
   }
 }
 
 export async function handleMessageUnreadClear(data: any, io: Server) {
   const { conversationId, recipient, sender } = data;
   const Sender = await User.findById(sender);
-  if (Sender?.socket_id) {
-    io.to(Sender?.socket_id!).emit("messages:status:seen", conversationId);
+  if (Sender?.socketId) {
+    io.to(Sender?.socketId!).emit("messages:status:seen", conversationId);
   }
   await Message.updateMany(
     { conversationId, recipients: recipient },

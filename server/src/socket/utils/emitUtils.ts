@@ -13,14 +13,14 @@ export async function emitToPrivate({
   io: Server;
 }) {
   const [sender, recipient] = await Promise.all([
-    User.findById(senderId).select("socket_id -_id"),
-    User.findById(recipientId).select("socket_id -_id"),
+    User.findById(senderId).select("socketId -_id"),
+    User.findById(recipientId).select("socketId -_id"),
   ]);
-  if (sender?.socket_id) {
-    io.to(sender.socket_id).emit("message:status:sent", message);
+  if (sender?.socketId) {
+    io.to(sender.socketId).emit("message:status:sent", message);
   }
-  if (recipient?.socket_id) {
-    io.to(recipient?.socket_id).emit("message:new", message);
+  if (recipient?.socketId) {
+    io.to(recipient?.socketId).emit("message:new", message);
   }
 }
 
@@ -35,15 +35,15 @@ export async function emitToGroup({
   message: any;
   io: Server;
 }) {
-  const sender = await User.findById(senderId).select("socket_id -_id");
-  if (sender?.socket_id) {
-    io.to(sender.socket_id).emit("group:message:status:sent", message);
+  const sender = await User.findById(senderId).select("socketId -_id");
+  if (sender?.socketId) {
+    io.to(sender.socketId).emit("group:message:status:sent", message);
   }
 
   const socketPromises = recipientsIds.map((id) =>
     User.findById(id)
-      .select("socket_id -_id")
-      .then((user) => user?.socket_id)
+      .select("socketId -_id")
+      .then((user) => user?.socketId)
   );
 
   const socketIds = await Promise.all(socketPromises);

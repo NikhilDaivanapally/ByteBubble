@@ -92,7 +92,7 @@ const sendOtp = async (req: AuthenticateRequest, res: Response) => {
     const otpExpiryTime = Date.now() + 10 * 60 * 1000; // 10 minutes
 
     const user = await User.findByIdAndUpdate(userId, {
-      otp_expiry_time: otpExpiryTime,
+      otpExpiryTime: otpExpiryTime,
     });
 
     if (!user) {
@@ -138,7 +138,7 @@ const verifyOtp = async (req: Request, res: Response) => {
   const { email, otp } = req.body;
   const user = await User.findOne({
     email,
-    otp_expiry_time: { $gt: Date.now() },
+    otpExpiryTime: { $gt: Date.now() },
   }).select("-password");
   if (!user) {
     res.status(400).json({
@@ -166,7 +166,7 @@ const verifyOtp = async (req: Request, res: Response) => {
   // OTP is Correct
   user.verified = true;
   user.otp = undefined;
-  user.otp_expiry_time = undefined;
+  user.otpExpiryTime = undefined;
   await user.save({ validateModifiedOnly: true });
   res.status(200).json({
     status: "success",
