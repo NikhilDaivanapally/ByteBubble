@@ -90,7 +90,9 @@ const SignUp = () => {
         const data = new FormData();
         for (const key in signupFormData) {
           const typedKey = key as keyof typeof signupFormData;
-          data.append(key, signupFormData[typedKey] as any); // You can cast as string or File depending on your data shape
+          if (signupFormData[typedKey]) {
+            data.append(key, signupFormData[typedKey]);
+          }
         }
 
         await signup(data);

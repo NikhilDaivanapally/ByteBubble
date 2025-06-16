@@ -1,11 +1,16 @@
 import { Server } from "socket.io";
-import User from "../../models/user.model";
-import { Message } from "../../models/message.mode";
 import { Readable } from "stream";
 import { formatGroupMessages } from "../../utils/formatMessages";
 import { v2 as cloudinary } from "cloudinary";
 import { gridFSBucket } from "../../db/connectDB";
 import { emitToGroup } from "../utils/emitUtils";
+import {
+  GroupAudioMessage,
+  GroupImageMessage,
+  GroupMessage,
+  GroupTextMessage,
+} from "../../models/groupMessage.model";
+import User from "../../models/user.model";
 
 type GroupMessageProps = {
   _id: string;
@@ -37,7 +42,7 @@ function buildGroupMessage(message: GroupMessageProps) {
 }
 
 export async function handleGetGroupMessages(data: any, callback: any) {
-  const messages = await Message.find({
+  const messages = await GroupMessage.find({
     conversationId: data.conversationId,
   });
   let formatted = formatGroupMessages(messages, data.authUserId);
@@ -48,7 +53,7 @@ export async function handleGetGroupMessages(data: any, callback: any) {
 export async function handleGroupTextMessage(messagePayload: any, io: Server) {
   const { senderId, recipientsIds } = messagePayload;
   await emitToGroup({ senderId, recipientsIds, message: messagePayload, io });
-  await Message.create(buildGroupMessage(messagePayload));
+  await GroupTextMessage.create(buildGroupMessage(messagePayload));
 }
 
 export async function handleGroupPhotoMessage(messagePayload: any, io: Server) {
@@ -60,7 +65,7 @@ export async function handleGroupPhotoMessage(messagePayload: any, io: Server) {
     message: { photoUrl: image?.secure_url, description: text || "" },
   };
   await emitToGroup({ senderId, recipientsIds, message, io });
-  await Message.create(buildGroupMessage(message));
+  await GroupImageMessage.create(buildGroupMessage(message));
 }
 
 export async function handleGroupAudioMessage(messagePayload: any, io: Server) {
@@ -80,7 +85,7 @@ export async function handleGroupAudioMessage(messagePayload: any, io: Server) {
       message: { audioId: uploadStream.id },
     };
     await emitToGroup({ senderId, recipientsIds, message, io });
-    await Message.create(buildGroupMessage(message));
+    await GroupAudioMessage.create(buildGroupMessage(message));
   });
 }
 
@@ -92,7 +97,7 @@ export async function handleGroupMessageSeen(messagePayload: any, io: Server) {
     io.to(sender?.socketId!).emit("group:message:status:seen", messagePayload);
   }
   console.log("Running Messages Seen");
-  await Message.findOneAndUpdate(
+  await GroupMessage.findOneAndUpdate(
     { _id: messagePayload?.messageId, isRead: { $ne: messagePayload?.user } },
     { $addToSet: { isRead: messagePayload?.user } }
   );
@@ -104,8 +109,7 @@ export async function handleGroupMessageUnreadUpdate(
 ) {
   const recipientsSocketIds = messagePayload.recipientsIds.map(
     async (id: string) => {
-      const { socketId }: any =
-        await User.findById(id).select("socketId -_id");
+      const { socketId }: any = await User.findById(id).select("socketId -_id");
       return socketId;
     }
   );
@@ -132,7 +136,7 @@ export async function handleGroupMessageUnreadClear(data: any, io: Server) {
   }
   console.log("Running clear unread");
 
-  const messages = await Message.find({
+  const messages = await GroupMessage.find({
     conversationId,
     recipients: recipient,
     "isRead.userId": { $ne: user.userId },
@@ -154,6 +158,6 @@ export async function handleGroupMessageUnreadClear(data: any, io: Server) {
       },
     }));
 
-    await Message.bulkWrite(bulkOps);
+    await GroupMessage.bulkWrite(bulkOps);
   }
 }

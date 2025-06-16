@@ -1,7 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { User as UserType } from "../types/user.type";
 import User from "../models/user.model";
 import { userSelectFields } from "../constants";
 // Local Strategy

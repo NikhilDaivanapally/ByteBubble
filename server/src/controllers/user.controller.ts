@@ -4,15 +4,12 @@ import { uploadCloudinary } from "../utils/cloudinary";
 import User from "../models/user.model";
 import { NextFunction, Request, Response } from "express";
 import Friendship from "../models/friendship.model";
-import { User as UserType } from "../types/user.type";
-import DirectConversation from "../models/DirectConversation.model";
-import GroupConversation from "../models/GroupConversation.model";
-import { Message } from "../models/message.mode";
+import DirectConversation from "../models/directConversation.model";
+import GroupConversation from "../models/groupConversation.model";
+// import { Message } from "../models/message.mode";
 import {
-  DirectConversationInput,
   formatDirectConversations,
   formatGroupConversations,
-  GroupConversationInput,
 } from "../utils/formatConversations";
 import { group, individual } from "../utils/conversationTypes";
 import { userSelectFields } from "../constants";
@@ -122,7 +119,7 @@ const getFriends = async (
               passwordResetToken: 0,
               confirmPassword: 0,
               verified: 0,
-              otpExpiryTime: 0,
+              otpExpiryAt: 0,
               otp: 0,
               __v: 0,
             },
@@ -211,7 +208,7 @@ const getDirectConversations = async (
                 passwordResetToken: 0,
                 confirmPassword: 0,
                 verified: 0,
-                otpExpiryTime: 0,
+                otpExpiryAt: 0,
                 otp: 0,
                 __v: 0,
               },
@@ -300,7 +297,7 @@ const getGroupConversations = async (
                 passwordResetToken: 0,
                 confirmPassword: 0,
                 verified: 0,
-                otpExpiryTime: 0,
+                otpExpiryAt: 0,
                 otp: 0,
                 __v: 0,
               },
@@ -328,7 +325,7 @@ const getGroupConversations = async (
                 passwordResetToken: 0,
                 confirmPassword: 0,
                 verified: 0,
-                otpExpiryTime: 0,
+                otpExpiryAt: 0,
                 otp: 0,
                 __v: 0,
               },
@@ -454,7 +451,7 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
                   passwordResetToken: 0,
                   confirmPassword: 0,
                   verified: 0,
-                  otpExpiryTime: 0,
+                  otpExpiryAt: 0,
                   otp: 0,
                   __v: 0,
                 },
@@ -539,7 +536,7 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
                   passwordResetToken: 0,
                   confirmPassword: 0,
                   verified: 0,
-                  otpExpiryTime: 0,
+                  otpExpiryAt: 0,
                   otp: 0,
                   __v: 0,
                 },
@@ -567,7 +564,7 @@ const getConversation = async (req: updateProfileRequest, res: Response) => {
                   passwordResetToken: 0,
                   confirmPassword: 0,
                   verified: 0,
-                  otpExpiryTime: 0,
+                  otpExpiryAt: 0,
                   otp: 0,
                   __v: 0,
                 },
@@ -735,13 +732,6 @@ const createGroup = async (
   }
 };
 
-const messagepost = async (req: Request, res: Response) => {
-  const data = req.body;
-  console.log(data);
-  const createmsg = await Message.create(data);
-  res.json({ status: 200, data: createmsg });
-};
-
 export {
   updateProfile,
   getUsers,
@@ -751,5 +741,4 @@ export {
   getGroupConversations,
   getConversation,
   createGroup,
-  messagepost,
 };

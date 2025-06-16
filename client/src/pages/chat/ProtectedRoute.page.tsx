@@ -9,13 +9,14 @@ import PageLoader from "../../components/Loaders/PageLoader";
 export function ProtectedPage({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
-
   const [me, { isLoading, data, isError }] = useLazySuccessQuery();
   const [called, setCalled] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated && !called) {
       me({});
+      setCalled(true);
+    } else if (isAuthenticated) {
       setCalled(true);
     }
   }, [isAuthenticated, called, me]);

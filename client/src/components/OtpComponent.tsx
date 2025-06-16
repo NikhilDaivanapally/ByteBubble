@@ -37,8 +37,9 @@ const OtpComponent: React.FC<OtpComponentProps> = ({ email, length }) => {
   ] = useOtpsubmitMutation();
 
   useEffect(() => {
+    if (!inputRefs.current.length) return;
     inputRefs.current[0]?.focus();
-  }, []);
+  }, [inputRefs.current]);
 
   useEffect(() => {
     if (otpsubmitData) {
@@ -75,12 +76,12 @@ const OtpComponent: React.FC<OtpComponentProps> = ({ email, length }) => {
       newOtp[index] = value.slice(-1); // get only last char if pasted
       setOtp(newOtp);
 
-      const nextIndex = otp.indexOf("");
+      const nextIndex = newOtp.indexOf("");
       if (value && index < length - 1) {
         inputRefs.current[nextIndex >= 0 ? nextIndex : index + 1]?.focus();
       }
     },
-    [otp, length]
+    [otp, length, inputRefs.current]
   );
 
   const handleKeydown = useCallback(
@@ -125,10 +126,7 @@ const OtpComponent: React.FC<OtpComponentProps> = ({ email, length }) => {
       <h1 className="font-semibold text-2xl text-center">Verify OTP</h1>
       <p className="text-center text-sm text-gray-600">
         We have sent a verification code to{" "}
-        <span className="font-semibold text-black underline">
-          {/* {email} */}
-          harry@gmail.com
-        </span>
+        <span className="font-semibold text-black underline">{email}</span>
       </p>
       <form onSubmit={handleOtpsubmit} className="w-full space-y-2">
         <div className="flex gap-2 my-8 justify-center">

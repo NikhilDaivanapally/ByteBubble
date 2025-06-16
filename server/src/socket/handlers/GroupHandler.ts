@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
-import GroupConversation from "../../models/GroupConversation.model";
+import GroupConversation from "../../models/groupConversation.model";
 import { Server } from "socket.io";
 import mongoose, { Types } from "mongoose";
 import User from "../../models/user.model";
@@ -24,7 +24,7 @@ export async function handleCreateGroup(data: any, io: Server) {
     _id: groupCreated?._id,
     name: groupCreated?.title,
     avatar: groupCreated?.avatar,
-    admin: groupCreated?.admin,
+    admin: groupCreated?.createdBy,
     users: groupCreated?.participants,
     message: {
       messageType: null,

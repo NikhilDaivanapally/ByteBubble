@@ -1,6 +1,10 @@
-import { Message } from "../types/message.type";
+import { DirectMessageDoc } from "../types/message/direct-message.type";
+import { GroupMessageDoc } from "../types/message/group-message.type";
 
-const formatDirectMessages = (messages: Message[], authUserId: string) => {
+const formatDirectMessages = (
+  messages: DirectMessageDoc[],
+  authUserId: string
+) => {
   return messages?.map((el: any) => {
     return {
       _id: el?._id,
@@ -18,7 +22,10 @@ const formatDirectMessages = (messages: Message[], authUserId: string) => {
   });
 };
 
-const formatGroupMessages = (messages: Message[], authUserId: string) => {
+const formatGroupMessages = (
+  messages: GroupMessageDoc[],
+  authUserId: string
+) => {
   return messages?.map((el: any) => {
     return {
       _id: el?._id,

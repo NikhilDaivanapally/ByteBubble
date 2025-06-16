@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import User from "../../models/user.model";
-import GroupConversation from "../../models/GroupConversation.model";
+import GroupConversation from "../../models/groupConversation.model";
 
 interface TypingData {
   roomId: string;

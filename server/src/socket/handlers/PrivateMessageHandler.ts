@@ -1,11 +1,16 @@
 import { Server } from "socket.io";
-import User from "../../models/user.model";
-import { Message } from "../../models/message.mode";
 import { v2 as cloudinary } from "cloudinary";
 import { gridFSBucket } from "../../db/connectDB";
 import { Readable } from "stream";
 import { formatDirectMessages } from "../../utils/formatMessages";
 import { emitToPrivate } from "../utils/emitUtils";
+import {
+  DirectAudioMessage,
+  DirectImageMessage,
+  DirectMessage,
+  DirectTextMessage,
+} from "../../models/directMessage.model";
+import User from "../../models/user.model";
 
 type MessageProps = {
   _id: string;
@@ -37,7 +42,7 @@ function buildMessage(message: MessageProps) {
 }
 
 export async function handleGetDirectMessages(data: any, callback: any) {
-  const messages = await Message.find({
+  const messages = await DirectMessage.find({
     conversationId: data.conversationId,
   });
   let formatted = formatDirectMessages(messages, data.authUserId);
@@ -51,7 +56,7 @@ export async function handleTextMessage(
 ) {
   const { senderId, recipientId } = messagePayload;
   await emitToPrivate({ senderId, recipientId, message: messagePayload, io });
-  await Message.create(buildMessage(messagePayload));
+  await DirectTextMessage.create(buildMessage(messagePayload));
 }
 
 export async function handlePhotoMessage(messagePayload: any, io: Server) {
@@ -64,7 +69,7 @@ export async function handlePhotoMessage(messagePayload: any, io: Server) {
   };
   await emitToPrivate({ senderId, recipientId, message, io });
 
-  await Message.create(buildMessage(message));
+  await DirectImageMessage.create(buildMessage(message));
 }
 
 export async function handleAudioMessage(messagePayload: any, io: Server) {
@@ -85,7 +90,7 @@ export async function handleAudioMessage(messagePayload: any, io: Server) {
       message: { audioId: uploadStream.id },
     };
     await emitToPrivate({ senderId, recipientId, message, io });
-    await Message.create(buildMessage(message));
+    await DirectAudioMessage.create(buildMessage(message));
   });
 }
 
@@ -96,7 +101,7 @@ export async function handleMessageSeen(messagePayload: any, io: Server) {
   if (sender?.socketId) {
     io.to(sender?.socketId!).emit("message:status:seen", messagePayload);
   }
-  await Message.findOneAndUpdate(
+  await DirectMessage.findOneAndUpdate(
     { _id: messagePayload?._id },
     { $set: { isRead: true } }
   );
@@ -118,7 +123,7 @@ export async function handleMessageUnreadClear(data: any, io: Server) {
   if (Sender?.socketId) {
     io.to(Sender?.socketId!).emit("messages:status:seen", conversationId);
   }
-  await Message.updateMany(
+  await DirectMessage.updateMany(
     { conversationId, recipients: recipient },
     { $set: { isRead: true } }
   );

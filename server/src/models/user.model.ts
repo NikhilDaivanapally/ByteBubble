@@ -49,7 +49,7 @@ const userSchema = new Schema<User>(
     otp: {
       type: String,
     },
-    otpExpiryTime: {
+    otpExpiryAt: {
       type: Date,
     },
     socketId: {
@@ -62,6 +62,7 @@ const userSchema = new Schema<User>(
     googleId: {
       type: String,
     },
+    blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );
@@ -75,20 +76,6 @@ userSchema.pre("save", async function (next) {
 
   // Hash the password with cost of 12
   this.password = await bcrypt.hash(this.password, 12);
-
-  next();
-});
-
-// Hash the confirmPassword
-userSchema.pre("save", async function (next) {
-  // Run this function in two situations
-  // 1) first time the user document is being created (this.isModified('password') will be true)
-  // 2) when the password was actually modified (this.isModified('password') will be true)
-  if (!this.isModified("confirmPassword") || !this.confirmPassword)
-    return next();
-
-  // Hash the password with cost of 12
-  this.confirmPassword = await bcrypt.hash(this.confirmPassword, 12);
 
   next();
 });

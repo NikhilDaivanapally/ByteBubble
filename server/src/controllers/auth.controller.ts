@@ -29,53 +29,81 @@ const registerUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  // collect the Data from re body
-  // In incoming data we get noraml data & avatar (image) to handle this we use multer & cloudinary
-  const filteredBody: RegisterUserProps = filterObj(
-    req.body,
-    "userName",
-    "email",
-    "password",
-    "confirmPassword",
-    "gender"
-  );
-  if (Object.values(filteredBody).some((field) => field?.trim() === "")) {
-    res.status(400).json({
+  try {
+    const { userName, email, password, confirmPassword, about } = filterObj(
+      req.body,
+      "userName",
+      "email",
+      "password",
+      "confirmPassword",
+      "about"
+    );
+
+    // Check for missing required fields
+    if (
+      [userName, email, password, confirmPassword].some(
+        (field) => field?.trim() === ""
+      )
+    ) {
+      res.status(400).json({
+        status: "error",
+        message: "All fields are required.",
+      });
+      return;
+    }
+
+    // Validate password match
+    if (password !== confirmPassword) {
+      res.status(400).json({
+        status: "error",
+        message: "Password and Confirm Password must match.",
+      });
+      return;
+    }
+
+    // Check for existing email
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      res.status(409).json({
+        status: "error",
+        message: "Email already in use. Please login.",
+      });
+      return;
+    }
+
+    // Upload avatar if provided
+    const avatarLocalPath = req.file?.path;
+    const avatarUploadResult = avatarLocalPath
+      ? await uploadCloudinary(avatarLocalPath)
+      : null;
+
+    // Build user data object
+    const userData: any = {
+      userName,
+      email,
+      password,
+      status: "Offline",
+      avatar: avatarUploadResult?.secure_url || "",
+    };
+
+    // Conditionally add "about" if valid
+    if (about?.trim()) {
+      userData.about = about.trim();
+    }
+
+    // Create new user
+    const newUser = await User.create(userData);
+
+    // Attach user ID to request for further processing (e.g., auto-login)
+    req.userId = newUser._id;
+    next();
+  } catch (error) {
+    res.status(500).json({
       status: "error",
-      message: "All fields are Required",
+      message: "Something went wrong during registration.",
     });
     return;
   }
-  const existing_user = await User.findOne({ email: filteredBody.email });
-  if (existing_user) {
-    res.status(409).json({
-      status: "error",
-      message: "Email already in use, Please login.",
-    });
-    return;
-  }
-  if (String(filteredBody.password) !== String(filteredBody.confirmPassword)) {
-    res.status(400).json({
-      status: "error",
-      message: "password and confirmPassword must be same",
-    });
-    return;
-  }
-
-  const avatarLocalpath = req.file?.path;
-
-  let avatar;
-  if (avatarLocalpath) {
-    avatar = await uploadCloudinary(avatarLocalpath);
-  }
-  const new_user = await User.create({
-    ...filteredBody,
-    status: "Offline",
-    avatar: avatar?.secure_url || "",
-  });
-
-  req.userId = new_user._id;
-  next();
 };
 
 // sendOtp
@@ -89,10 +117,10 @@ const sendOtp = async (req: AuthenticateRequest, res: Response) => {
       lowerCaseAlphabets: false,
     });
 
-    const otpExpiryTime = Date.now() + 10 * 60 * 1000; // 10 minutes
+    const otpExpiryAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
     const user = await User.findByIdAndUpdate(userId, {
-      otpExpiryTime: otpExpiryTime,
+      otpExpiryAt: otpExpiryAt,
     });
 
     if (!user) {
@@ -133,12 +161,12 @@ const sendOtp = async (req: AuthenticateRequest, res: Response) => {
 };
 
 // verifyOTP
-const verifyOtp = async (req: Request, res: Response) => {
+const verifyOtp = async (req: Request, res: Response, next: NextFunction) => {
   //otp needs to be a string
   const { email, otp } = req.body;
   const user = await User.findOne({
     email,
-    otpExpiryTime: { $gt: Date.now() },
+    otpExpiryAt: { $gt: Date.now() },
   }).select("-password");
   if (!user) {
     res.status(400).json({
@@ -166,12 +194,25 @@ const verifyOtp = async (req: Request, res: Response) => {
   // OTP is Correct
   user.verified = true;
   user.otp = undefined;
-  user.otpExpiryTime = undefined;
+  user.otpExpiryAt = undefined;
   await user.save({ validateModifiedOnly: true });
-  res.status(200).json({
-    status: "success",
-    user: user,
-    message: "OTP verified and  signup successfull",
+
+  req.login(user, (err) => {
+    if (err) {
+      return next(err); // Handle error during the login process
+    }
+    res
+      .cookie("connect.sid", req.sessionID, {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+      })
+      .status(200)
+      .json({
+        status: "success",
+        user: user,
+        message: "OTP verified and User signup Successful",
+      });
   });
   return;
 };
@@ -324,7 +365,6 @@ const resetPassword = async (req: Request, res: Response) => {
     }
 
     user.password = newPassword;
-    user.confirmPassword = confirmNewPassword;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save(); // run validators & trigger pre-save middleware like hashing

@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import DirectConversation from "../../models/DirectConversation.model";
+import DirectConversation from "../../models/directConversation.model";
 import mongoose from "mongoose";
 import { formatDirectConversations } from "../../utils/formatConversations";
 
@@ -58,7 +58,7 @@ export async function handleStartConversation(
                 passwordResetToken: 0,
                 confirmPassword: 0,
                 verified: 0,
-                otpExpiryTime: 0,
+                otpExpiryAt: 0,
                 otp: 0,
                 __v: 0,
               },

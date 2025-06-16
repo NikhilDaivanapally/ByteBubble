@@ -3,7 +3,6 @@ import Friendship from "../models/friendship.model";
 import { upload } from "../middlewares/multer.middleware";
 import { ensureAuthenticated } from "../middlewares/auth.middleware";
 import {
-  messagepost,
   createGroup,
   getConversation,
   getDirectConversations,
@@ -52,7 +51,6 @@ router.post(
   createGroup as RequestHandler
 );
 
-router.post("/message", messagepost);
 router.post("/addrequest", async (req, res) => {
   const { sender, recipient } = req.body;
   const data = await Friendship.create({

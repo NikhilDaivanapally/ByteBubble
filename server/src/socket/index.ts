@@ -2,7 +2,7 @@ import http from "http";
 import { app } from "../app";
 import { Server } from "socket.io";
 import User from "../models/user.model";
-import DirectConversation from "../models/DirectConversation.model";
+import DirectConversation from "../models/directConversation.model";
 import registerPrivateEvents from "./events/PrivateEvents";
 import registerGroupEvents from "./events/GroupEvents";
 import registerGroupMessageEvents from "./events/GroupMessageEvents";
