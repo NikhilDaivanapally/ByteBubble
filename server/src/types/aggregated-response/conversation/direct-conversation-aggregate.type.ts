@@ -1,4 +1,4 @@
-import { DirectParticipantMeta } from "../../conversation/direct-conversation.type";
+import { DirectParticipantMeta } from "../../model/conversation/direct-conversation-model.type";
 import { AggregatedDirectMessage } from "../message/direct-message-aggregate.type";
 import { User } from "../user-aggregate.type";
 

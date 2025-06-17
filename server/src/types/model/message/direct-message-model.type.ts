@@ -1,7 +1,7 @@
 import { Document, InferSchemaType, Types } from "mongoose";
-import { MessageType } from "../../constants/message-types";
-import { userSnapshotSchema } from "../message-schemas/userSnapshot.schema";
-import { MessageContent } from "../message-content-type";
+import { MessageType } from "../../../constants/message-types";
+import { userSnapshotSchema } from "../../message-schemas/userSnapshot.schema";
+import { MessageContent } from "../../message-content-type";
 
 export interface DirectMessageDoc extends Document {
   _id: Types.ObjectId;

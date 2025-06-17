@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { DirectConversationDoc } from "../types/conversation/direct-conversation.type";
+import { DirectConversationDoc } from "../types/model/conversation/direct-conversation-model.type";
 
 const DirectConversationSchema = new Schema<DirectConversationDoc>(
   {

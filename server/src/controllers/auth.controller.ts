@@ -9,7 +9,7 @@ import { ResetPassord } from "../Templates/Mail/resetPassword";
 import passport from "passport";
 import { NextFunction, Request, Response } from "express";
 import { Error, Types } from "mongoose";
-import { User as UserType } from "../types/user.type";
+import { User as UserType } from "../types/model/user-model.type";
 
 interface RegisterUserProps {
   username: string;

@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { MessageType } from "../../../constants/message-types";
 import { DirectSystemEventType } from "../../../constants/system-event-types";
-import { DirectParticipantMeta } from "../../conversation/direct-conversation.type";
+import { DirectParticipantMeta } from "../../model/conversation/direct-conversation-model.type";
 import { MessageContent } from "../../message-content-type";
 
 export type DirectConversationResponse = {

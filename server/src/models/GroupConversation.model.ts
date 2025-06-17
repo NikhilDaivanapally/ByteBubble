@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { GroupConversationDoc } from "../types/conversation/group-conversation.type";
+import { GroupConversationDoc } from "../types/model/conversation/group-conversation-model.type";
 
 const groupConversationSchema = new Schema<GroupConversationDoc>(
   {

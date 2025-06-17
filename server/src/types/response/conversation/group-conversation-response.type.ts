@@ -3,7 +3,7 @@ import { MessageType } from "../../../constants/message-types";
 import { GroupSystemEventType } from "../../../constants/system-event-types";
 import { MessageContent } from "../../message-content-type";
 import { User } from "../user-response.type";
-import { GroupParticipantMeta } from "../../conversation/group-conversation.type";
+import { GroupParticipantMeta } from "../../model/conversation/group-conversation-model.type";
 
 export type GroupConversationResponse = {
   _id: string;

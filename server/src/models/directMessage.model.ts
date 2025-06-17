@@ -2,7 +2,7 @@ import mongoose, { Schema, model } from "mongoose";
 import { textSchema } from "../types/message-schemas/text.schema";
 import { audioSchema } from "../types/message-schemas/audio.schema";
 import { imageSchema } from "../types/message-schemas/image.schema";
-import { DirectMessageDoc } from "../types/message/direct-message.type";
+import { DirectMessageDoc } from "../types/model/message/direct-message-model.type";
 import { directEventTypes } from "../constants/system-event-types";
 import { userSnapshotSchema } from "../types/message-schemas/userSnapshot.schema";
 import { messageTypes } from "../constants/message-types";

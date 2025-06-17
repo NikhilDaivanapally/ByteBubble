@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { FriendshipDoc } from "../types/friendship/friendship.type";
+import { FriendshipDoc } from "../types/model/friendship/friendship-model.type";
 const friendShipSchema = new Schema<FriendshipDoc>(
   {
     sender: {

@@ -1,5 +1,5 @@
-import { DirectMessageDoc } from "../types/message/direct-message.type";
-import { GroupMessageDoc } from "../types/message/group-message.type";
+import { DirectMessageDoc } from "../types/model/message/direct-message-model.type";
+import { GroupMessageDoc } from "../types/model/message/group-message-model.type";
 
 const formatDirectMessages = (
   messages: DirectMessageDoc[],

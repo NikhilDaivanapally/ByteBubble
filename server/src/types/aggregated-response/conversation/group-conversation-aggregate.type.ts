@@ -1,4 +1,4 @@
-import { GroupParticipantMeta } from "../../conversation/group-conversation.type";
+import { GroupParticipantMeta } from "../../model/conversation/group-conversation-model.type";
 import { AggregatedGroupMessage } from "../message/group-message-aggregate.type";
 import { User } from "../user-aggregate.type";
 

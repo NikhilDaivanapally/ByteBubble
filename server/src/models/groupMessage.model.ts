@@ -1,7 +1,7 @@
 // models/GroupMessage.ts
 
 import mongoose, { model, Schema } from "mongoose";
-import { GroupMessageDoc } from "../types/message/group-message.type";
+import { GroupMessageDoc } from "../types/model/message/group-message-model.type";
 import { textSchema } from "../types/message-schemas/text.schema";
 import { audioSchema } from "../types/message-schemas/audio.schema";
 import { imageSchema } from "../types/message-schemas/image.schema";
