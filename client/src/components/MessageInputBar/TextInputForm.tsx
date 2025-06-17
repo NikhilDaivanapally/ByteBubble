@@ -17,7 +17,7 @@ import {
 } from "../../store/slices/appSlice";
 import { parseFiles } from "../../utils/parse-files";
 import useTypingStatus from "../../hooks/use-typing-status";
-
+import { ObjectId } from "bson";
 const TextInputForm = ({
   handleRecording,
 }: {
@@ -90,7 +90,7 @@ const TextInputForm = ({
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!message.trim()) return;
-    const messageId = crypto.randomUUID();
+    const messageId = new ObjectId().toHexString();
     const timestamp = new Date().toISOString();
 
     const messagePayload = {
@@ -117,7 +117,6 @@ const TextInputForm = ({
         ...messagePayload,
         senderId: auth?._id,
         recipientId: direct_chat.current_direct_conversation?.userId,
-        conversationType: individual,
       });
     } else {
       dispatch(

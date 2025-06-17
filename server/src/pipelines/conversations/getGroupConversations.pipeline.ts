@@ -52,7 +52,7 @@ export const getGroupConversationsPipeline = () => [
   // Lookup messages
   {
     $lookup: {
-      from: "messages",
+      from: "groupmessages",
       localField: "_id",
       foreignField: "conversationId",
       as: "messages",

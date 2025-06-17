@@ -10,7 +10,7 @@ const LayoutNavbar = () => {
   const { activeChatId } = useSelector((state: RootState) => state.app);
   return (
     <nav
-      className={`w-full h-20 lg:h-full lg:w-20 flex ${
+      className={`w-full h-fit lg:h-full lg:w-20 flex ${
         activeChatId ? "hidden md:flex" : ""
       } lg:flex-col justify-between items-center px-4 py-2 lg:px-0 lg:py-4`}
     >

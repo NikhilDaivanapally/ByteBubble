@@ -39,7 +39,7 @@ const Connect = () => {
   }, [currentTab]);
 
   return (
-    <div className="h-full p-4 md:px-20 md:py-5 flex flex-col">
+    <div className="h-full pt-3 px-2 md:px-20 md:py-5 flex flex-col">
       <ul className="relative list-none flex gap-1 justify-around bg-btn-primary/30 w-full md:w-2xl p-1.5 rounded-lg mx-auto">
         <motion.div
           layoutId="activeTabBackground"

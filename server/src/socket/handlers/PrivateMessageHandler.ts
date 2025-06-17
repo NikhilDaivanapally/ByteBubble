@@ -16,12 +16,13 @@ type MessageProps = {
   _id: string;
   senderId: string;
   recipientId: string;
-  messageType: "link" | "text" | "photo" | "audio";
+  messageType: "link" | "text" | "image" | "audio" | "system";
   message: {
     text?: string;
     audioId?: string;
+    imageUrl?: string;
+    description?: string;
   };
-  conversationType: string;
   conversationId: string;
   createdAt: string;
   updatedAt: string;
@@ -31,10 +32,9 @@ function buildMessage(message: MessageProps) {
   return {
     _id: message?._id,
     sender: message?.senderId,
-    recipients: message?.recipientId,
+    recipient: message?.recipientId,
     messageType: message?.messageType,
     message: message?.message,
-    conversationType: message?.conversationType,
     conversationId: message?.conversationId,
     createdAt: message?.createdAt,
     updatedAt: message?.updatedAt,

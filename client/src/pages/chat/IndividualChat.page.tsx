@@ -67,11 +67,11 @@ const IndividualChat = () => {
     <div className="h-full flex">
       {/* Sidebar */}
       <div
-        className={`flex flex-col gap-4 px-4 flex-1 md:flex-none min-w-[340px] md:w-[370px]
+        className={`flex flex-col gap-2 sm:gap-3 px-4 flex-1 md:flex-none min-w-[340px] md:w-[370px]
         ${activeChatId ? "hidden md:flex" : ""}
         md:h-full overflow-y-hidden`}
       >
-        <h1 className="text-2xl font-semibold pt-4">Chats</h1>
+        <h1 className="text-2xl font-semibold pt-3">Chats</h1>
 
         <SearchInput
           conversations={DirectConversations || []}

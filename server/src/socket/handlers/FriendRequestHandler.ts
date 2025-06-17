@@ -4,7 +4,7 @@ import User from "../../models/user.model";
 import Friendship from "../../models/friendship.model";
 
 export async function handleFriendRequest(
-  { sender, recipient }: any,
+  { sender, recipient, actionUser }: any,
   io: Server
 ) {
   try {
@@ -12,8 +12,12 @@ export async function handleFriendRequest(
       User.findById(sender).select(userSelectFields),
       User.findById(recipient).select(userSelectFields),
     ]);
-    if (!senderUser || !recipientUser) return;
-    const newRequest = await Friendship.create({ sender, recipient });
+    if (!senderUser || !recipientUser || !actionUser) return;
+    const newRequest = await Friendship.create({
+      sender,
+      recipient,
+      actionUser,
+    });
 
     const friendRequest = await Friendship.findById(newRequest._id)
       .select("_id sender recipient status")
@@ -45,7 +49,7 @@ export async function handleFriendRequest(
 }
 
 export async function handleFriendRequestAccept(
-  { request_id }: any,
+  { request_id, actionUser }: any,
   io: Server
 ) {
   try {
@@ -56,9 +60,10 @@ export async function handleFriendRequestAccept(
       User.findById(request.recipient).select(userSelectFields),
     ]);
 
-    if (!senderUser || !receiverUser) return;
+    if (!senderUser || !receiverUser || !actionUser) return;
 
     request.status = "accepted";
+    request.actionUser = actionUser;
     await request.save({ validateModifiedOnly: true });
 
     // Notify sender

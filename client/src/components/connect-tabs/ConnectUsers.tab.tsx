@@ -23,6 +23,7 @@ const ConnectUsers = () => {
       socket.emit("friend:request", {
         recipient: _id,
         sender: authUser?._id,
+        actionUser: authUser?._id,
       });
     },
     [socket, authUser]

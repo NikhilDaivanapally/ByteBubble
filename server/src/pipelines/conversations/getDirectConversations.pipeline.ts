@@ -34,7 +34,7 @@ export const getDirectConversationsPipeline = (userId: string | undefined) => [
   },
   {
     $lookup: {
-      from: "messages",
+      from: "directmessages",
       localField: "_id",
       foreignField: "conversationId",
       as: "messages",
