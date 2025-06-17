@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { userSelectFields } from "../../constants";
+import { userSelectFields } from "../../constants/user-select-fields";
 import User from "../../models/user.model";
 import Friendship from "../../models/friendship.model";
 

@@ -16,7 +16,10 @@ import {
   updateGroupMessageSeenStatus,
   updateGroupMessagesSeen,
 } from "../store/slices/conversation";
-import { useGetConversationMutation } from "../store/slices/apiSlice";
+import {
+  useGetDirectConversationMutation,
+  useGetGroupConversationMutation,
+} from "../store/slices/apiSlice";
 
 // Private message events
 export const useMessageEvents = (enabled: boolean) => {
@@ -25,8 +28,8 @@ export const useMessageEvents = (enabled: boolean) => {
   const user = useSelector((state: RootState) => state.auth.user);
   const { direct_chat } = useSelector((state: RootState) => state.conversation);
 
-  const [getConversation, { data: conversationData }] =
-    useGetConversationMutation();
+  const [getDirectConversation, { data: conversationData }] =
+    useGetDirectConversationMutation();
 
   // Update Redux when a new conversation is fetched
   useEffect(() => {
@@ -108,14 +111,14 @@ export const useMessageEvents = (enabled: boolean) => {
 
   const handleMarkMessageAsUnread = useCallback(
     async (message: any) => {
-      const { conversationId, conversationType } = message;
+      const { conversationId } = message;
 
       const existingConversation = direct_chat?.DirectConversations?.find(
         (conv) => conv?._id === conversationId
       );
       if (!existingConversation) {
         try {
-          await getConversation({ conversationId, conversationType });
+          await getDirectConversation({ conversationId });
         } catch (err) {
           console.error("Failed to fetch missing conversation", err);
         }
@@ -136,7 +139,7 @@ export const useMessageEvents = (enabled: boolean) => {
         );
       }
     },
-    [direct_chat, getConversation]
+    [direct_chat, getDirectConversation]
   );
 
   useEffect(() => {
@@ -172,8 +175,8 @@ export const useGroupMessageEvents = (enabled: boolean) => {
   const user = useSelector((state: RootState) => state.auth.user);
   const { group_chat } = useSelector((state: RootState) => state.conversation);
 
-  const [getConversation, { data: conversationData }] =
-    useGetConversationMutation();
+  const [getGroupConversation, { data: conversationData }] =
+    useGetGroupConversationMutation();
 
   // Update Redux when a new conversation is fetched
   useEffect(() => {
@@ -277,14 +280,14 @@ export const useGroupMessageEvents = (enabled: boolean) => {
 
   const handleMarkGroupMessageAsUnread = useCallback(
     async (message: any) => {
-      const { conversationId, conversationType } = message;
+      const { conversationId } = message;
       const existing = group_chat.GroupConversations?.find(
         (conv) => conv._id === conversationId
       );
 
       if (!existing) {
         try {
-          await getConversation({ conversationId, conversationType });
+          await getGroupConversation({ conversationId });
         } catch (err) {
           console.error("Failed to fetch group conversation", err);
         }
@@ -312,7 +315,7 @@ export const useGroupMessageEvents = (enabled: boolean) => {
         );
       }
     },
-    [group_chat, dispatch, getConversation, user]
+    [group_chat, dispatch, getGroupConversation, user]
   );
 
   useEffect(() => {

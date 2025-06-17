@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import User from "../models/user.model";
-import { userSelectFields } from "../constants";
+import { userSelectFields } from "../constants/user-select-fields";
 // Local Strategy
 
 passport.use(

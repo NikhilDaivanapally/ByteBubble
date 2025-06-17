@@ -5,7 +5,7 @@ import { selectConversation } from "../store/slices/appSlice";
 import { GroupConversationProps, UserProps } from "../types";
 import { addGroupConversation } from "../store/slices/conversation";
 import { RootState } from "../store/store";
-import { useGetConversationMutation } from "../store/slices/apiSlice";
+import { useGetGroupConversationMutation } from "../store/slices/apiSlice";
 import { group } from "../utils/conversation-types";
 
 type NewMembersProps = {
@@ -21,8 +21,8 @@ export const useGroupEvents = (enabled: boolean) => {
     (state: RootState) => state.conversation.group_chat
   );
 
-  const [getConversation, { data: conversationData }] =
-    useGetConversationMutation();
+  const [getGroupConversation, { data: conversationData }] =
+    useGetGroupConversationMutation();
 
   // Keep a ref of GroupConversations for latest access in callbacks
   const groupConversationsRef = useRef(GroupConversations);
@@ -31,10 +31,10 @@ export const useGroupEvents = (enabled: boolean) => {
   }, [GroupConversations]);
 
   // Keep a ref for getConversation since it's a function from RTK Query
-  const getConversationRef = useRef(getConversation);
+  const getConversationRef = useRef(getGroupConversation);
   useEffect(() => {
-    getConversationRef.current = getConversation;
-  }, [getConversation]);
+    getConversationRef.current = getGroupConversation;
+  }, [getGroupConversation]);
 
   // Update Redux when a new conversation is fetched
   useEffect(() => {

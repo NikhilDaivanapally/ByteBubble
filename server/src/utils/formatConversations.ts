@@ -1,71 +1,9 @@
-type DirectMessageProps = {
-  _id: string;
-  sender: string;
-  recipients: string;
-  isRead: boolean;
-  message: {
-    _id: string;
-    text?: string;
-    audioId?: string;
-    photoUrl?: string;
-    description?: string;
-  };
-  messageType: string;
-  createdAt: string;
-};
-
-type GroupMessage = {
-  _id: string;
-  sender: {
-    _id: string;
-    userName: string;
-    avatar: string;
-  };
-  recipients: string[];
-  isRead: boolean;
-  message: {
-    _id: string;
-    text?: string;
-    audioId?: string;
-    photoUrl?: string;
-    description?: string;
-  };
-  messageType: string;
-  createdAt: string;
-};
-
-type User = {
-  _id: string;
-  userName: string;
-  email: string;
-  gender: string;
-  avatar?: string;
-  about?: string;
-  createdAt: string;
-  updatedAt: string;
-  status: "Online" | "Offline" | string;
-};
-
-export type DirectConversationInput = {
-  _id: string;
-  user: User;
-  messages: DirectMessageProps[];
-};
-
-export type GroupConversationInput = {
-  _id: string;
-  name: string;
-  avatar: string;
-  about: string;
-  admin: User;
-  participants: User[];
-  messages: GroupMessage[];
-  createdAt: string;
-  updatedAt: string;
-};
+import mongoose from "mongoose";
+import { AggregatedGroupConversation } from "../types/aggregated-response/conversation/group-conversation-aggregate.type";
+import { AggregatedDirectConversation } from "../types/aggregated-response/conversation/direct-conversation-aggregate.type";
 
 const formatDirectConversations = (
-  conversations: DirectConversationInput[],
+  conversations: AggregatedDirectConversation[],
   authUserId: string
 ) => {
   if (!Array.isArray(conversations)) return [];
@@ -75,26 +13,33 @@ const formatDirectConversations = (
     const lastMessage = messages?.slice(-1)[0];
     const unreadMessages = messages?.filter(
       (msg) =>
-        msg?.recipients?.toString() === authUserId?.toString() &&
+        msg?.recipient?.toString() === authUserId?.toString() &&
         msg?.isRead === false
     );
 
     return {
       _id: el._id,
-      userId: el.user?._id,
-      name: el.user?.userName,
+      userId: el.user._id,
+      name: el.user.userName,
       avatar: el.user?.avatar,
+      meta: el.meta,
       isOnline: el.user?.status === "Online",
       message: {
-        messageType: lastMessage?.messageType || "",
-        message: lastMessage?.message || "",
-        createdAt: lastMessage?.createdAt || "",
+        messageType: lastMessage?.messageType,
+        systemEventType: lastMessage?.systemEventType,
+        message: lastMessage?.message,
+        metadata: lastMessage?.metadata,
+        eventUserSnapshot: lastMessage?.eventUserSnapshot,
+        isEdited: lastMessage.isEdited,
+        editedAt: lastMessage?.editedAt,
+        deletedFor: lastMessage?.deletedFor,
+        isDeletedForEveryone: lastMessage?.isDeletedForEveryone,
+        createdAt: lastMessage?.createdAt,
       },
       unreadMessagesCount: unreadMessages?.length || 0,
-      isSeen: lastMessage?.isRead || "",
-      isOutgoing:
-        lastMessage?.sender?.toString() === authUserId.toString() || "",
-      time: lastMessage?.createdAt || "",
+      isSeen: lastMessage?.isRead,
+      isOutgoing: lastMessage?.sender?.toString() === authUserId.toString(),
+      time: lastMessage?.createdAt,
       about: el.user?.about,
     };
   });
@@ -106,7 +51,7 @@ const formatDirectConversations = (
     );
 };
 const formatGroupConversations = (
-  conversations: GroupConversationInput[],
+  conversations: AggregatedGroupConversation[],
   authUserId: string
 ) => {
   if (!Array.isArray(conversations)) return [];
@@ -117,27 +62,35 @@ const formatGroupConversations = (
     const unreadMessages = messages?.filter(
       (msg) =>
         msg.recipients?.toString() === authUserId.toString() &&
-        msg.isRead === false
+        !msg.readBy.includes(new mongoose.Types.ObjectId(authUserId))
     );
 
     return {
-      _id: el?._id,
-      name: el?.name,
+      _id: el._id,
+      name: el.name,
       avatar: el?.avatar,
-      about: el?.about,
-      users: el?.participants,
-      admin: el?.admin,
+      about: el.about,
+      users: el.participants,
+      admin: el.admin,
+      meta: el.meta,
       message: {
-        messageType: lastMessage?.messageType || "",
+        messageType: lastMessage?.messageType,
+        systemEventType: lastMessage?.systemEventType,
         message: lastMessage?.message || "",
-        createdAt: lastMessage?.createdAt || "",
+        metadata: lastMessage?.metadata,
+        eventUserSnapshot: lastMessage?.eventUserSnapshot,
+        isEdited: lastMessage.isEdited,
+        editedAt: lastMessage?.editedAt,
+        deletedFor: lastMessage?.deletedFor,
+        isDeletedForEveryone: lastMessage?.isDeletedForEveryone,
+        createdAt: lastMessage?.createdAt,
       },
       from: lastMessage?.sender || "",
       isOutgoing:
-        lastMessage?.sender?._id?.toString() === authUserId?.toString() || null,
-      time: lastMessage?.createdAt || "",
-      unreadMessagesCount: unreadMessages?.length,
-      isSeen: lastMessage?.isRead || "",
+        lastMessage?.sender?._id?.toString() === authUserId?.toString(),
+      time: lastMessage?.createdAt,
+      unreadMessagesCount: unreadMessages.length,
+      seenBy: lastMessage?.readBy,
     };
   });
 

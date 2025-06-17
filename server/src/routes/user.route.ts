@@ -4,10 +4,11 @@ import { upload } from "../middlewares/multer.middleware";
 import { ensureAuthenticated } from "../middlewares/auth.middleware";
 import {
   createGroup,
-  getConversation,
+  getDirectConversation,
   getDirectConversations,
   getFriendrequest,
   getFriends,
+  getGroupConversation,
   getGroupConversations,
   getUsers,
   updateProfile,
@@ -40,10 +41,17 @@ router.get(
 );
 
 router.post(
-  "/get_conversation",
+  "/get_direct_conversation",
   ensureAuthenticated,
-  getConversation as RequestHandler
+  getDirectConversation as RequestHandler
 );
+
+router.post(
+  "/get_group_conversation",
+  ensureAuthenticated,
+  getGroupConversation as RequestHandler
+);
+
 router.post(
   "/create_group",
   ensureAuthenticated,

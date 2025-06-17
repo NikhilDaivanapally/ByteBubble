@@ -6,13 +6,17 @@ import { NextFunction, Request, Response } from "express";
 import Friendship from "../models/friendship.model";
 import DirectConversation from "../models/directConversation.model";
 import GroupConversation from "../models/groupConversation.model";
-// import { Message } from "../models/message.mode";
 import {
   formatDirectConversations,
   formatGroupConversations,
 } from "../utils/formatConversations";
-import { group, individual } from "../utils/conversationTypes";
-import { userSelectFields } from "../constants";
+import { userSelectFields } from "../constants/user-select-fields";
+import { getDirectConversationsPipeline } from "../pipelines/conversations/getDirectConversations.pipeline";
+import { getGroupConversationsPipeline } from "../pipelines/conversations/getGroupConversations.pipeline";
+import { AggregatedDirectConversation } from "../types/aggregated-response/conversation/direct-conversation-aggregate.type";
+import { AggregatedGroupConversation } from "../types/aggregated-response/conversation/group-conversation-aggregate.type";
+import { DirectConversationResponse } from "../types/response/conversation/direct-conversation-response.type";
+import { GroupConversationResponse } from "../types/response/conversation/group-conversation-response.type";
 
 interface updateProfileRequest extends Request {
   user?: {
@@ -46,22 +50,20 @@ const updateProfile = async (req: updateProfileRequest, res: Response) => {
 
 const getUsers = async (req: updateProfileRequest, res: Response) => {
   const currentUserId = req.user?._id;
-  const all_users = await User.find({ verified: true }).select(
-    userSelectFields
-  );
+  const allUsers = await User.find({ verified: true }).select(userSelectFields);
 
   // Fetch friendships where the current user is either sender or recipient
-  const currentuser_friends = await Friendship.find({
+  const currentUserFriends = await Friendship.find({
     $or: [{ sender: currentUserId }, { recipient: currentUserId }],
   });
 
   // Extract IDs that are not the current user's ID
-  const friendIds = currentuser_friends.map((friendship) => {
+  const friendIds = currentUserFriends.map((friendship) => {
     return String(friendship.sender) === String(currentUserId)
       ? friendship?.recipient?.toString()
       : friendship?.sender?.toString();
   });
-  const remaining_users = all_users.filter((user) => {
+  const restUsers = allUsers.filter((user) => {
     return (
       !friendIds.includes(user?._id?.toString()!) &&
       user?._id?.toString() !== currentUserId?.toString()
@@ -69,8 +71,8 @@ const getUsers = async (req: updateProfileRequest, res: Response) => {
   });
   res.status(200).json({
     status: "success",
-    data: remaining_users,
-    message: "Users found successfully!",
+    data: restUsers,
+    message: "Users found successfull!",
   });
 };
 
@@ -163,12 +165,10 @@ const getFriendrequest = async (req: updateProfileRequest, res: Response) => {
       },
     ],
     status: "pending",
-  })
-    .select("_id sender recipient")
-    .populate({
-      path: "sender recipient",
-      select: userSelectFields,
-    });
+  }).populate({
+    path: "sender recipient",
+    select: userSelectFields,
+  });
   res.status(200).json({
     status: "success",
     data: requests,
@@ -189,68 +189,13 @@ const getDirectConversations = async (
           },
         },
       },
-      {
-        $lookup: {
-          from: "users",
-          localField: "participants",
-          foreignField: "_id",
-          as: "user",
-          pipeline: [
-            {
-              $match: {
-                _id: { $ne: req.user?._id }, // Exclude the current user from the participants
-              },
-            },
-            {
-              $project: {
-                password: 0,
-                passwordResetExpires: 0,
-                passwordResetToken: 0,
-                confirmPassword: 0,
-                verified: 0,
-                otpExpiryAt: 0,
-                otp: 0,
-                __v: 0,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: "$user", // Unwind since we expect only one user in the array
-      },
-      {
-        $lookup: {
-          from: "messages",
-          localField: "_id",
-          foreignField: "conversationId",
-          as: "messages",
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          messages: 1, // Include messages
-          user: {
-            _id: 1,
-            userName: 1,
-            email: 1,
-            gender: 1,
-            avatar: 1,
-            about: 1,
-            socketId: 1,
-            createdAt: 1,
-            updatedAt: 1,
-            status: 1,
-          }, // The user field will now contain the desired user object
-        },
-      },
+      ...getDirectConversationsPipeline(req.user?._id),
     ]);
 
     const authUserId = req.user?._id as string;
-    const formatted = formatDirectConversations(
-      Existing_Direct_Conversations,
-      authUserId
+    const formatted: DirectConversationResponse[] = formatDirectConversations(
+      Existing_Direct_Conversations as AggregatedDirectConversation[],
+      authUserId as string
     );
     res.status(200).json({
       status: "success",
@@ -277,129 +222,16 @@ const getGroupConversations = async (
     const Existing_Group_Conversations = await GroupConversation.aggregate([
       {
         $match: {
-          $or: [
-            { participants: { $all: [req.user?._id] } },
-            { admin: req.user?._id },
-          ],
+          participants: { $in: [req.user?._id] },
         },
       },
-      {
-        $lookup: {
-          from: "users",
-          localField: "admin",
-          foreignField: "_id",
-          as: "admin",
-          pipeline: [
-            {
-              $project: {
-                password: 0,
-                passwordResetExpires: 0,
-                passwordResetToken: 0,
-                confirmPassword: 0,
-                verified: 0,
-                otpExpiryAt: 0,
-                otp: 0,
-                __v: 0,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$admin",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "participants",
-          foreignField: "_id",
-          as: "participants",
-          pipeline: [
-            {
-              $project: {
-                password: 0,
-                passwordResetExpires: 0,
-                passwordResetToken: 0,
-                confirmPassword: 0,
-                verified: 0,
-                otpExpiryAt: 0,
-                otp: 0,
-                __v: 0,
-              },
-            },
-          ],
-        },
-      },
-      // Lookup messages
-      {
-        $lookup: {
-          from: "messages",
-          localField: "_id",
-          foreignField: "conversationId",
-          as: "messages",
-        },
-      },
-      // Unwind messages
-      {
-        $unwind: {
-          path: "$messages",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      // Lookup sender details
-      {
-        $lookup: {
-          from: "users",
-          localField: "messages.sender",
-          foreignField: "_id",
-          as: "messages.senderDetails",
-        },
-      },
-      // Unwind senderDetails
-      {
-        $unwind: {
-          path: "$messages.senderDetails",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      // Replace sender with senderDetails
-      {
-        $addFields: {
-          "messages.sender": {
-            _id: "$messages.senderDetails._id",
-            userName: "$messages.senderDetails.userName",
-            avatar: "$messages.senderDetails.avatar",
-          },
-        },
-      },
-      // Remove the now redundant senderDetails
-      {
-        $project: {
-          "messages.senderDetails": 0,
-        },
-      },
-      // Regroup messages
-      {
-        $group: {
-          _id: "$_id",
-          name: { $first: "$title" },
-          avatar: { $first: "$avatar" },
-          about: { $first: "$about" },
-          admin: { $first: "$admin" },
-          participants: { $first: "$participants" },
-          messages: { $push: "$messages" },
-        },
-      },
+      ...getGroupConversationsPipeline(),
     ]);
-    console.log(Existing_Group_Conversations);
 
     const authUserId = req.user?._id as string;
-    const formatted = formatGroupConversations(
-      Existing_Group_Conversations,
-      authUserId
+    const formatted: GroupConversationResponse[] = formatGroupConversations(
+      Existing_Group_Conversations as AggregatedGroupConversation[],
+      authUserId as string
     );
 
     res.status(200).json({
@@ -409,8 +241,6 @@ const getGroupConversations = async (
     });
     return;
   } catch (err) {
-    console.log(err);
-    // Handle error appropriately
     res.status(400).json({
       status: "Error",
       data: null,
@@ -420,246 +250,85 @@ const getGroupConversations = async (
   }
 };
 
-const getConversation = async (req: updateProfileRequest, res: Response) => {
-  const { conversationId, conversationType } = req.body;
+const getDirectConversation = async (
+  req: updateProfileRequest,
+  res: Response
+) => {
+  const { conversationId } = req.body;
   const authUserId = req.user?._id || "";
-  // let conversation: DirectConversationInput | GroupConversationInput;
-  switch (conversationType) {
-    case individual:
-      const Directconversation = await DirectConversation.aggregate([
-        {
-          $match: {
-            _id: new mongoose.Types.ObjectId(conversationId),
-          },
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "participants",
-            foreignField: "_id",
-            as: "user",
-            pipeline: [
-              {
-                $match: {
-                  _id: { $ne: req.user?._id }, // Exclude the current user from the participants
-                },
-              },
-              {
-                $project: {
-                  password: 0,
-                  passwordResetExpires: 0,
-                  passwordResetToken: 0,
-                  confirmPassword: 0,
-                  verified: 0,
-                  otpExpiryAt: 0,
-                  otp: 0,
-                  __v: 0,
-                },
-              },
-            ],
-          },
-        },
-        {
-          $unwind: "$user", // Unwind since we expect only one user in the array
-        },
-        {
-          $lookup: {
-            from: "messages",
-            localField: "_id",
-            foreignField: "conversationId",
-            as: "messages",
-          },
-        },
-        {
-          $project: {
-            _id: 1,
-            messages: 1, // Include messages
-            user: {
-              _id: 1,
-              userName: 1,
-              email: 1,
-              gender: 1,
-              avatar: 1,
-              about: 1,
-              socketId: 1,
-              createdAt: 1,
-              updatedAt: 1,
-              status: 1,
-            }, // The user field will now contain the desired user object
-          },
-        },
-      ]);
-      const formattedDirectConversation = formatDirectConversations(
-        Directconversation,
-        authUserId
-      );
-      const hasMessages =
-        formattedDirectConversation[0]?.message?.message ?? null;
-      if (hasMessages) {
-        res.status(200).json({
-          status: "success",
-          data: {
-            conversationType,
-            conversation: formattedDirectConversation
-              ? formattedDirectConversation[0]
-              : null,
-          },
-          message: "Conversation found successfully",
-        });
-        return;
-      }
-      res.status(200).json({
-        status: "success",
-        data: null,
-        message: "Conversation Notfound due to no Messages successfully",
-      });
-      return;
-      break;
-    case "GroupConversation":
-      const Groupconversation = await GroupConversation.aggregate([
-        {
-          $match: {
-            _id: new mongoose.Types.ObjectId(conversationId),
-          },
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "admin",
-            foreignField: "_id",
-            as: "admin",
-            pipeline: [
-              {
-                $project: {
-                  password: 0,
-                  passwordResetExpires: 0,
-                  passwordResetToken: 0,
-                  confirmPassword: 0,
-                  verified: 0,
-                  otpExpiryAt: 0,
-                  otp: 0,
-                  __v: 0,
-                },
-              },
-            ],
-          },
-        },
-        {
-          $unwind: {
-            path: "$admin",
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "participants",
-            foreignField: "_id",
-            as: "participants",
-            pipeline: [
-              {
-                $project: {
-                  password: 0,
-                  passwordResetExpires: 0,
-                  passwordResetToken: 0,
-                  confirmPassword: 0,
-                  verified: 0,
-                  otpExpiryAt: 0,
-                  otp: 0,
-                  __v: 0,
-                },
-              },
-            ],
-          },
-        },
-        // Lookup messages
-        {
-          $lookup: {
-            from: "messages",
-            localField: "_id",
-            foreignField: "conversationId",
-            as: "messages",
-          },
-        },
-        // Unwind messages
-        {
-          $unwind: {
-            path: "$messages",
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        // Lookup sender details
-        {
-          $lookup: {
-            from: "users",
-            localField: "messages.sender",
-            foreignField: "_id",
-            as: "messages.senderDetails",
-          },
-        },
-        // Unwind senderDetails
-        {
-          $unwind: {
-            path: "$messages.senderDetails",
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        // Replace sender with senderDetails
-        {
-          $addFields: {
-            "messages.sender": {
-              _id: "$messages.senderDetails._id",
-              userName: "$messages.senderDetails.userName",
-              avatar: "$messages.senderDetails.avatar",
-            },
-          },
-        },
-        // Remove the now redundant senderDetails
-        {
-          $project: {
-            "messages.senderDetails": 0,
-          },
-        },
-        // Regroup messages
-        {
-          $group: {
-            _id: "$_id",
-            name: { $first: "$title" },
-            avatar: { $first: "$avatar" },
-            about: { $first: "$about" },
-            admin: { $first: "$admin" },
-            participants: { $first: "$participants" },
-            messages: { $push: "$messages" },
-          },
-        },
-      ]);
-      const formattedGroupConversation = formatGroupConversations(
-        Groupconversation,
-        authUserId
-      );
-      // const hasGroupMessage =
-      // formattedGroupConversation[0]?.message?.message ?? null;
-      if (formattedGroupConversation.length) {
-        res.status(200).json({
-          status: "success",
-          data: {
-            conversationType,
-            conversation: formattedGroupConversation
-              ? formattedGroupConversation[0]
-              : null,
-          },
-          message: "Conversation found successfully",
-        });
-        return;
-      }
-      res.status(200).json({
-        status: "success",
-        data: null,
-        message: "Conversation Notfound due to no Messages successfully",
-      });
-      return;
-      break;
+
+  const Directconversation = await DirectConversation.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(conversationId),
+      },
+    },
+    ...getDirectConversationsPipeline(req.user?._id),
+  ]);
+  const formattedDirectConversation = formatDirectConversations(
+    Directconversation,
+    authUserId
+  );
+  const hasMessages = formattedDirectConversation[0]?.message?.message ?? null;
+  if (hasMessages) {
+    res.status(200).json({
+      status: "success",
+      data: {
+        conversation: formattedDirectConversation
+          ? formattedDirectConversation[0]
+          : null,
+      },
+      message: "Conversation found successfully",
+    });
+    return;
   }
+  res.status(200).json({
+    status: "success",
+    data: null,
+    message: "Conversation Notfound due to no Messages successfully",
+  });
+  return;
+};
+
+const getGroupConversation = async (
+  req: updateProfileRequest,
+  res: Response
+) => {
+  const { conversationId } = req.body;
+  const authUserId = req.user?._id || "";
+
+  const Groupconversation = await GroupConversation.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(conversationId),
+      },
+    },
+    ...getGroupConversationsPipeline(),
+  ]);
+
+  const formattedGroupConversation = formatGroupConversations(
+    Groupconversation,
+    authUserId
+  );
+
+  if (formattedGroupConversation.length) {
+    res.status(200).json({
+      status: "success",
+      data: {
+        conversation: formattedGroupConversation
+          ? formattedGroupConversation[0]
+          : null,
+      },
+      message: "Conversation found successfully",
+    });
+    return;
+  }
+  res.status(200).json({
+    status: "success",
+    data: null,
+    message: "Conversation Notfound due to no Messages successfully",
+  });
+  return;
 };
 
 const createGroup = async (
@@ -739,6 +408,7 @@ export {
   getFriendrequest,
   getDirectConversations,
   getGroupConversations,
-  getConversation,
+  getDirectConversation,
+  getGroupConversation,
   createGroup,
 };

@@ -46,10 +46,16 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
-
-    getConversation: builder.mutation({
+    getDirectConversation: builder.mutation({
       query: (data) => ({
-        url: `/v1/user/get_conversation`,
+        url: `/v1/user/get_direct_conversation`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    getGroupConversation: builder.mutation({
+      query: (data) => ({
+        url: `/v1/user/get_group_conversation`,
         method: "POST",
         body: data,
       }),
@@ -106,11 +112,11 @@ export const {
   useFetchFriendsQuery,
   useFriendrequestsQuery,
   useFetchDirectConversationsQuery,
-  // useFetchGroupConversationsQuery,
   useLazyFetchGroupConversationsQuery,
   useLogoutMutation,
   useUpdateuserMutation,
-  useGetConversationMutation,
+  useGetDirectConversationMutation,
+  useGetGroupConversationMutation,
   useCreateGroupMutation,
   useLazySuccessQuery,
 } = apiSlice;
