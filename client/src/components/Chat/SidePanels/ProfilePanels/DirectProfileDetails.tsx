@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../../../store/store";
 import React, { useMemo, useCallback, useState } from "react";
-import { Icons } from "../../../icons";
-import { Avatar } from "../../ui/Avatar";
-import ShowMedia from "../../ShowMedia";
-import { setfullImagePreview } from "../../../store/slices/conversation";
+import { RootState } from "../../../../store/store";
+import { setfullImagePreview } from "../../../../store/slices/conversation";
+import { Icons } from "../../../../icons";
+import { Avatar } from "../../../ui/Avatar";
+import { direct } from "../../../../utils/conversation-types";
+import ShowMedia from "../../../ShowMedia";
 
 type Props = {
   showDetails: boolean;
@@ -33,7 +34,7 @@ const DirectProfileDetails = ({
   const allMedia = useMemo(() => {
     return (
       messages
-        ?.filter((msg) => msg.messageType === "photo")
+        ?.filter((msg) => msg.messageType === "image")
         .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)) ?? []
     );
   }, [messages]);
@@ -71,7 +72,7 @@ const DirectProfileDetails = ({
                 size="xl"
                 url={imageSrc}
                 online={isOnline}
-                fallBackType="individual"
+                fallBackType={direct}
               />
               <div className="text-center">
                 <p className="font-semibold">{name}</p>
@@ -99,7 +100,7 @@ const DirectProfileDetails = ({
                 {mediaPreview.map((img, i) => (
                   <img
                     key={i}
-                    src={img.message.photoUrl}
+                    src={img.message.imageUrl}
                     alt="media"
                     onClick={() => handleImageClick(img)}
                     className="cursor-pointer"

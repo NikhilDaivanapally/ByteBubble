@@ -1,12 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
 import { AdaptiveDropdown } from "../AdaptiveDropdown";
-import { Icons } from "../../../icons";
-import { RootState } from "../../../store/store";
+import { UserProps } from "../../../../types";
+import { RootState } from "../../../../store/store";
+import { Icons } from "../../../../icons";
 import {
   setCurrentGroupConversation,
   updateGroupConversation,
-} from "../../../store/slices/conversation";
-import { UserProps } from "../../../types";
+} from "../../../../store/slices/conversation";
 
 export const GroupActions = ({ member }: { member: UserProps | null }) => {
   const dispatch = useDispatch();

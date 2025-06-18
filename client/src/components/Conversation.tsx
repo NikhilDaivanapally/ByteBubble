@@ -31,7 +31,7 @@ export const DirectConversation = React.memo(
       avatar,
       isOnline,
       message: msg,
-      isSeen,
+      isRead,
       isOutgoing,
       time,
       unreadMessagesCount,
@@ -126,12 +126,12 @@ export const DirectConversation = React.memo(
               <div className="flex-center gap-1">
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    isSeen ? "bg-green-600" : "bg-gray-300"
+                    isRead ? "bg-green-600" : "bg-gray-300"
                   }`}
                 ></div>
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    isSeen ? "bg-green-600" : "bg-gray-300"
+                    isRead ? "bg-green-600" : "bg-gray-300"
                   }`}
                 ></div>
               </div>
@@ -165,7 +165,8 @@ export const GroupConversation = React.memo(
       avatar,
       message: msg,
       from,
-      isSeen,
+      users,
+      readBy,
       isOutgoing,
       time,
       unreadMessagesCount,
@@ -202,7 +203,7 @@ export const GroupConversation = React.memo(
             sender: from?._id,
             user: {
               userId: auth?._id,
-              isSeen: true,
+              isRead: true,
               seenAt: new Date().toISOString(),
             },
           });
@@ -278,12 +279,16 @@ export const GroupConversation = React.memo(
               <div className="flex-center gap-1">
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    isSeen ? "bg-green-600" : "bg-gray-300"
+                    readBy.length == users.length - 1
+                      ? "bg-green-600"
+                      : "bg-gray-300"
                   }`}
                 ></div>
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    isSeen ? "bg-green-600" : "bg-gray-300"
+                    readBy.length == users.length - 1
+                      ? "bg-green-600"
+                      : "bg-gray-300"
                   }`}
                 ></div>
               </div>

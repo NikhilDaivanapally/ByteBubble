@@ -2,22 +2,22 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { Icons } from "../../icons";
+import { ObjectId } from "bson";
+import { RootState } from "../../../store/store";
+import { direct, group } from "../../../utils/conversation-types";
+import useTypingStatus from "../../../hooks/use-typing-status";
+import { socket } from "../../../socket";
 import {
   addDirectMessage,
   addGroupMessage,
-} from "../../store/slices/conversation";
-import { socket } from "../../socket";
-import { group, individual } from "../../utils/conversation-types";
+} from "../../../store/slices/conversation";
+import { Icons } from "../../../icons";
 import {
   updateMediaFiles,
   updateMediaPreviewUrls,
   updateOpenCamera,
-} from "../../store/slices/appSlice";
-import { parseFiles } from "../../utils/parse-files";
-import useTypingStatus from "../../hooks/use-typing-status";
-import { ObjectId } from "bson";
+} from "../../../store/slices/appSlice";
+import { parseFiles } from "../../../utils/parse-files";
 const TextInputForm = ({
   handleRecording,
 }: {
@@ -39,7 +39,7 @@ const TextInputForm = ({
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const currentConversation = useMemo(() => {
-    if (chatType === "individual") {
+    if (chatType === direct) {
       return direct_chat.current_direct_conversation?.userId;
     }
     const groupUsers = group_chat?.current_group_conversation?.users || [];
@@ -102,11 +102,10 @@ const TextInputForm = ({
       updatedAt: timestamp,
     };
 
-    if (chatType === "individual") {
+    if (chatType === direct) {
       dispatch(
         addDirectMessage({
           ...messagePayload,
-          conversationType: individual,
           isIncoming: false,
           isOutgoing: true,
           status: "pending",

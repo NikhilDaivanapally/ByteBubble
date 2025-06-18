@@ -11,6 +11,15 @@ import { messageTypes } from "../constants/message-types";
 import { linkSchema } from "../types/message-schemas/link.schema";
 import { safeDiscriminator } from "../utils/safeDiscriminator";
 
+export const ReadBySchema = new Schema(
+  {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    isRead: { type: Boolean, default: false },
+    seenAt: { type: Date, default: null },
+  },
+  { _id: false }
+); // _id: false to prevent automatic _id for subdocuments
+
 const groupMessageSchema = new Schema<GroupMessageDoc>(
   {
     _id: { type: Schema.Types.ObjectId, required: true },
@@ -22,7 +31,7 @@ const groupMessageSchema = new Schema<GroupMessageDoc>(
       required: true,
     },
     messageType: { type: String, enum: messageTypes, required: true },
-    readBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    readBy: ReadBySchema,
     deletedFor: [{ type: Schema.Types.ObjectId, ref: "User" }],
     isDeletedForEveryone: { type: Boolean, default: false },
     reactions: [

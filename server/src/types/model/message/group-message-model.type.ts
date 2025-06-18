@@ -2,6 +2,7 @@ import { Document, InferSchemaType, Types } from "mongoose";
 import { MessageType } from "../../../constants/message-types";
 import { userSnapshotSchema } from "../../message-schemas/userSnapshot.schema";
 import { MessageContent } from "../../message-content-type";
+import { ReadBySchema } from "../../../models/groupMessage.model";
 
 export interface GroupMessageDoc extends Document {
   _id: Types.ObjectId;
@@ -10,7 +11,7 @@ export interface GroupMessageDoc extends Document {
   conversationId: Types.ObjectId;
   messageType: MessageType;
   message: MessageContent;
-  readBy: Types.ObjectId[];
+  readBy: InferSchemaType<typeof ReadBySchema>[];
   deletedFor: Types.ObjectId[];
   isDeletedForEveryone: boolean;
   reactions: {

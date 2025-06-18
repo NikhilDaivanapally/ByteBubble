@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import useRecording from "../../hooks/use-recording";
+import { RootState } from "../../../store/store";
+import useRecording from "../../../hooks/use-recording";
 import AudioRecorderUI from "./AudioRecorderUI";
 import TextInputForm from "./TextInputForm";
 

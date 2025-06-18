@@ -1,7 +1,12 @@
 import { RootState } from "../store/store";
 import { GroupMessageProps } from "../types";
+import { direct } from "./conversation-types";
 
-type SenderProps = { _id: string; avatar: string; userName: string };
+type SenderProps = {
+  _id: string;
+  avatar: string | undefined;
+  userName: string;
+};
 
 function getSenderFromGroup(
   el: GroupMessageProps,
@@ -10,16 +15,16 @@ function getSenderFromGroup(
 ): SenderProps {
   let sender: SenderProps = { _id: "", avatar: "", userName: "" };
 
-  if (chatType !== "individual" && !el.isOutgoing) {
+  if (chatType !== direct && !el.isOutgoing) {
     groupConversations?.forEach((conv) => {
       if (conv._id === el?.conversationId || conv._id === el?._id) {
         const foundUser = [...conv.users, conv.admin].find(
-          (user) => el.from === user?._id
+          (user) => el.from?._id === user?._id
         );
         if (foundUser) {
           sender = {
             _id: foundUser?._id,
-            avatar: foundUser.avatar,
+            avatar: foundUser?.avatar,
             userName: foundUser.userName,
           };
         }

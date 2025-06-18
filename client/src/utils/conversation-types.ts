@@ -1,4 +1,4 @@
-const individual = "OneToOneMessage";
-const group = "OneToManyMessage";
+const direct = "direct";
+const group = "group";
 
-export { individual, group };
+export { direct, group };

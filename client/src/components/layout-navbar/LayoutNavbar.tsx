@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { Avatar } from "../ui/Avatar";
+import { direct } from "../../utils/conversation-types";
 const LayoutNavbar = () => {
   const { pathname } = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -54,7 +55,7 @@ const LayoutNavbar = () => {
           );
         })}
       </ul>
-      <Avatar size="lg" url={user?.avatar} fallBackType={"individual"} />
+      <Avatar size="lg" url={user?.avatar} fallBackType={direct} />
     </nav>
   );
 };

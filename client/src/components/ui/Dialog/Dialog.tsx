@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Icons } from "../../icons";
+import { Icons } from "../../../icons";
 
 type DialogProps = {
   isOpen: boolean;

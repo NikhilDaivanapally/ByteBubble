@@ -1,29 +1,39 @@
-export type MessageContentProps = {
-  _id?: string;
+export type MessageContent = {
   text?: string;
   audioId?: string;
-  photoUrl?: string;
   description?: string;
+  imageUrl?: string;
 };
 
-export type Message = {
-  messageType: string;
-  message: MessageContentProps;
-  createdAt: Date;
+export type DirectMessage = {
+  messageType: MessageType | undefined;
+  systemEventType?: DirectSystemEventType | undefined;
+  message: MessageContent;
+  metadata?: string | undefined;
+  eventUserSnapshot?:
+    | {
+        _id: string;
+        userName: string;
+        avatar: string;
+      }
+    | undefined;
+  isEdited: boolean;
+  editedAt?: Date | undefined;
+  deletedFor: string[];
+  isDeletedForEveryone: boolean;
+  createdAt: Date | string | undefined;
 };
 
 export type UserProps = {
   _id: string;
   userName: string;
   email: string;
-  avatar: string;
-  about: string;
-  gender: string;
-  socketId: string;
-  status: string;
-  verified: boolean;
+  avatar?: string;
+  about?: string;
   createdAt: string;
   updatedAt: string;
+  socketId: string;
+  status: "Online" | "Offline" | string;
 };
 
 export type FriendRequestProps = {
@@ -32,63 +42,155 @@ export type FriendRequestProps = {
   recipient: UserProps;
 };
 
+export type DirectParticipantMeta = {
+  isArchived?: boolean;
+  isMuted?: boolean;
+  lastSeen?: Date | null;
+  // Add other user preferences if needed
+};
+export type MessageType =
+  | "link"
+  | "text"
+  | "audio"
+  | "image"
+  | "video"
+  | "reply"
+  | "system";
+export type DirectSystemEventType =
+  | "user_blocked"
+  | "user_unblocked"
+  | "message_unsent"
+  | "chat_cleared"
+  | "chat_deleted"
+  | "archived"
+  | "chat_muted";
+
 export type DirectConversationProps = {
   _id: string;
   userId: string;
   name: string;
-  avatar?: string;
+  avatar: string | undefined;
+  meta: Record<string, DirectParticipantMeta>;
   isOnline: boolean;
-  message: Message;
+  message: DirectMessage;
   unreadMessagesCount: number;
-  isSeen: boolean;
+  isRead: boolean;
   isOutgoing: boolean;
-  time: Date;
-  about?: string;
+  time: Date | string;
+  about: string | undefined;
 };
 
 export type DirectMessageProps = {
   _id: string;
-  messageType: string;
-  sender: string;
-  message: MessageContentProps;
-  createdAt: string;
-  updatedAt: string;
+  messageType: MessageType;
+  message: MessageContent;
   isIncoming: boolean;
   isOutgoing: boolean;
   status: string;
-  isSeen: boolean;
-  conversationType: string;
+  isRead: boolean;
   conversationId: string;
+  deletedFor: string[];
+  isDeletedForEveryone: boolean;
+  reactions: { user: string; emoji: string }[];
+  isEdited: boolean;
+  editedAt?: Date | undefined;
+  systemEventType: DirectSystemEventType;
+  metadata: string;
+  eventUserSnapshot: {
+    _id: string;
+    userName: string;
+    avatat?: string | undefined;
+  };
+  createdAt: string;
+  updatedAt: Date;
 };
 
+export type GroupSystemEventType =
+  | "user_added"
+  | "user_removed"
+  | "user_left"
+  | "group_renamed"
+  | "group_created"
+  | "admin_assigned"
+  | "admin_removed"
+  | "group_muted"
+  | "group_icon_changed"
+  | "group_description_updated"
+  | "message_pinned";
+
+export type GroupParticipantMeta = {
+  isMuted?: boolean;
+  // Add other user preferences if needed
+};
+export type GroupMessage = {
+  messageType: MessageType | undefined;
+  systemEventType: GroupSystemEventType | undefined;
+  message: MessageContent;
+  metadata: string;
+  eventUserSnapshot:
+    | {
+        _id: string;
+        userName: string;
+        avatar: string;
+      }
+    | undefined;
+  isEdited: boolean;
+  editedAt: Date | undefined;
+  deletedFor: string[];
+  isDeletedForEveryone: boolean;
+  createdAt: string | undefined;
+};
+export type GroupMessageProps = {
+  _id: string;
+  messageType: MessageType;
+  message: MessageContent;
+  isIncoming: boolean;
+  isOutgoing: boolean;
+  from: {
+    _id: string;
+    userName: string;
+    avatar?: string | undefined;
+  };
+  status: string;
+  readBy: {
+    userId: string;
+    isRead: boolean;
+    seenAt: Date;
+  }[];
+  conversationId: string;
+  deletedFor: string[];
+  isDeletedForEveryone: boolean;
+  reactions: { user: string; emoji: string }[];
+  isEdited: boolean;
+  editedAt?: Date | undefined;
+  systemEventType: DirectSystemEventType;
+  metadata: string;
+  eventUserSnapshot: {
+    _id: string;
+    userName: string;
+    avatat?: string | undefined;
+  };
+  createdAt: string;
+  updatedAt: Date;
+};
 export type GroupConversationProps = {
   _id: string;
   name: string;
-  avatar: string;
-  about?: string;
+  avatar: string | undefined;
+  about: string;
+  admin: UserProps;
   users: UserProps[];
-  admin?: UserProps;
-  message: Message;
-  from: { _id: string; userName: string; avatar: string };
+  message: GroupMessage;
+  from: {
+    _id: string;
+    userName: string;
+    avatar: string | undefined;
+  };
   isOutgoing: boolean;
+  time: string;
   unreadMessagesCount: number;
-  isSeen: [];
-  time: Date;
-};
-
-export type GroupMessageProps = {
-  _id: string;
-  messageType: string;
-  message: MessageContentProps;
-  createdAt: string;
-  updatedAt: string;
-  isIncoming: boolean;
-  isOutgoing: boolean;
-  status: string;
-  isSeen: any[];
-  from: string;
-  conversationType: string;
-  conversationId: string;
+  readBy: string[];
+  meta: Record<string, GroupParticipantMeta>;
 };
 
 // type for appSlice
@@ -106,10 +208,10 @@ export type appSliceProps = {
   users: UserProps[] | [];
   friendRequests: FriendRequestProps[] | [];
   activeChatId: string | null;
-  chatType: string | null;
+  chatType: "direct" | "group" | null;
   isCameraOpen: boolean;
   mediaFiles: File[] | File | null;
-  mediaPreviewUrls: previewObj[] | null;
+  mediaPreviewUrls: previewObj[];
   isTyping: string;
   isTypingRoomId: string | null;
   messageInfo: GroupMessageProps | null;

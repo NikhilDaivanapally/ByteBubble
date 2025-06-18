@@ -12,7 +12,7 @@ import {
   updateMediaPreviewUrls,
 } from "../store/slices/appSlice";
 import { Icons } from "../icons";
-import { group, individual } from "../utils/conversation-types";
+import { direct, group } from "../utils/conversation-types";
 
 const SendMediaMessage = () => {
   const dispatch = useDispatch();
@@ -81,19 +81,18 @@ const SendMediaMessage = () => {
     const messageCreatedAt = new Date().toISOString();
 
     switch (chatType) {
-      case "individual":
+      case direct:
         dispatch(
           addDirectMessage({
             _id: messageId,
             messageType: "photo",
             message: {
-              photoUrl: mediaPreviewUrls?.slice(-1)[0].url,
+              imageUrl: mediaPreviewUrls?.slice(-1)[0].url,
               description: message,
             },
             createdAt: messageCreatedAt,
             updatedAt: messageCreatedAt,
             conversationId: activeChatId,
-            conversationType: individual,
             isIncoming: false,
             isOutgoing: true,
             status: "pending",
@@ -117,13 +116,13 @@ const SendMediaMessage = () => {
         });
 
         break;
-      case "group":
+      case group:
         dispatch(
           addGroupMessage({
             _id: messageId,
             messageType: "photo",
             message: {
-              photoUrl: mediaPreviewUrls?.slice(-1)[0].url,
+              imageUrl: mediaPreviewUrls?.slice(-1)[0].url,
               description: message,
             },
             conversationId: activeChatId,

@@ -1,41 +1,40 @@
 import { motion, AnimatePresence } from "motion/react";
-import { Icons } from "../icons";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store/store";
-import { setfullImagePreview } from "../store/slices/conversation";
 import React, { useMemo, useState, useCallback, useEffect } from "react";
-import ShowMedia from "./ShowMedia";
-import { Avatar } from "./ui/Avatar";
-import { DirectConversationProps, GroupConversationProps, UserProps } from "../types";
-import Dialog from "./Dialog/Dialog";
-import AddMembersToGroup from "./AddMembersToGroup";
-import { GroupActions } from "./Dropdowns/actions/GroupActions";
+import { RootState } from "../../../../store/store";
+import { setfullImagePreview } from "../../../../store/slices/conversation";
+import { UserProps } from "../../../../types";
+import { Icons } from "../../../../icons";
+import { group } from "../../../../utils/conversation-types";
+import { Avatar } from "../../../ui/Avatar";
+import { GroupActions } from "../../../ui/Dropdowns/actions/GroupActions";
+import ShowMedia from "../../../ShowMedia";
+import Dialog from "../../../ui/Dialog/Dialog";
+import AddMembersToGroup from "../../../AddMembersToGroup";
 
-type ProfileDetailsProps = {
+type Props = {
   showDetails: boolean;
   handleCloseShowDetails: () => void;
 };
 
-const ProfileDetails = ({
+const GroupProfileDetails = ({
   showDetails,
   handleCloseShowDetails,
-}: ProfileDetailsProps) => {
+}: Props) => {
   const dispatch = useDispatch();
 
   const [isGroupAdmin, setIsGroupAdmin] = useState(false);
   const [showAllMedia, setShowAllMedia] = useState(false);
   const [isAddMember, setIsAddMember] = useState(false);
 
-  const { chatType } = useSelector((state: RootState) => state.app);
-  const { direct_chat, group_chat } = useSelector(
-    (state: RootState) => state.conversation
-  );
+  const { group_chat } = useSelector((state: RootState) => state.conversation);
   const auth = useSelector((state: RootState) => state.auth.user);
 
-  const currentConversation =
-    chatType === "individual"
-      ? direct_chat?.current_direct_conversation as DirectConversationProps
-      : group_chat?.current_group_conversation as GroupConversationProps;
+  const currentConversation = group_chat.current_group_conversation;
+  const messages = group_chat.current_group_messages;
+  const imageSrc = currentConversation?.avatar ?? null;
+  const name = currentConversation?.name ?? "";
+  const about = currentConversation?.about ?? "";
 
   useEffect(() => {
     if (currentConversation?.admin?._id == auth?._id) {
@@ -43,46 +42,30 @@ const ProfileDetails = ({
     }
   }, [currentConversation]);
 
-  const messages =
-    chatType === "individual"
-      ? direct_chat?.current_direct_messages
-      : group_chat?.current_group_messages;
-
-  const imageSrc = currentConversation?.avatar ?? null;
-  const name = currentConversation?.name ?? "";
-  const about = currentConversation?.about ?? "";
-
-  // Inline narrowing for `isOnline`:
-  const isOnline =
-    chatType === "individual" &&
-    currentConversation &&
-    "isOnline" in currentConversation
-      ? currentConversation.isOnline ?? false
-      : false;
-
-  const AllMediaImgs = useMemo(() => {
+  const allMedia = useMemo(() => {
     return (
       messages
-        ?.filter((el) => el?.messageType === "photo")
-        .sort((a, b) => Date.parse(b?.createdAt) - Date.parse(a?.createdAt)) ?? []
+        ?.filter((msg) => msg?.messageType === "image")
+        .sort((a, b) => Date.parse(b?.createdAt) - Date.parse(a?.createdAt)) ??
+      []
     );
   }, [messages]);
 
-  const MediaImgs = useMemo(() => AllMediaImgs?.slice(0, 3), [AllMediaImgs]);
-
-  const handleShowAllMedia = useCallback(() => setShowAllMedia(true), []);
-  const handleCloseAllMedia = useCallback(() => setShowAllMedia(false), []);
+  const mediaPreview = useMemo(() => allMedia?.slice(0, 3), [allMedia]);
 
   const handleImageClick = useCallback(
-    (img: (typeof AllMediaImgs)[number]) => {
+    (img: (typeof allMedia)[number]) => {
       dispatch(setfullImagePreview({ fullviewImg: img }));
     },
     [dispatch]
   );
 
+  const handleShowAllMedia = useCallback(() => setShowAllMedia(true), []);
+  const handleCloseAllMedia = useCallback(() => setShowAllMedia(false), []);
+
   const groupMembers = [
     currentConversation?.admin,
-    ...(currentConversation?.users as UserProps[]),
+    ...(currentConversation?.users || ([] as UserProps[])),
   ].filter((user) => user?._id !== auth?._id);
 
   const handleClose = useCallback(() => {
@@ -105,27 +88,19 @@ const ProfileDetails = ({
           </button>
 
           <div className="space-y-4 divide-y divide-gray-300">
-            {/* Profile Image and Detail section */}
             <div className="flex flex-col items-center gap-4 py-2">
-              <Avatar
-                size="xl"
-                url={imageSrc}
-                online={isOnline}
-                fallBackType={chatType}
-              />
+              <Avatar size="xl" url={imageSrc} fallBackType={group} />
               <div className="text-center">
                 <p className="font-semibold">{name}</p>
                 <p className="text-black/60 text-sm">Example@gmail.com</p>
               </div>
             </div>
 
-            {/* About section */}
             <div className="py-2">
               <p className="text-sm text-black/60">About</p>
               <p>{about}</p>
             </div>
 
-            {/* Media, audio, docs */}
             <div className="space-y-4 py-2">
               <div
                 onClick={handleShowAllMedia}
@@ -133,15 +108,15 @@ const ProfileDetails = ({
               >
                 <p>Media, Audio , Links & Docs</p>
                 <p className="flex gap-0.5 bg-gray-200 hover:bg-gray-300 transition duration-200 p-1 rounded-lg">
-                  {AllMediaImgs.length}
+                  {allMedia.length}
                   <Icons.ArrowRightIcon className="w-4" />
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                {MediaImgs?.map((el, i) => (
+                {mediaPreview?.map((el, i) => (
                   <img
                     key={`img_${i}`}
-                    src={el?.message?.photoUrl}
+                    src={el?.message?.imageUrl}
                     alt="Media"
                     className="cursor-pointer"
                     onClick={() => handleImageClick(el)}
@@ -155,7 +130,6 @@ const ProfileDetails = ({
                 onClick={() => setIsAddMember(true)}
                 className="w-full rounded-md flex gap-4 p-1 items-center cursor-pointer text-green-500 bg-green-50 hover:bg-green-100"
               >
-                {/* <Avatar url={""} size="md" online={auth?.status == "Online"} /> */}
                 <Icons.UserPlusIcon className="w-10 h-10 p-1.5" />
                 <div className="">
                   <p>Add members</p>
@@ -181,17 +155,20 @@ const ProfileDetails = ({
                 {auth?._id !== currentConversation?.admin?._id &&
                   isGroupAdmin && (
                     <div className="ml-auto">
-                      <GroupActions member={auth}  />
+                      <GroupActions member={auth} />
                     </div>
                   )}
               </div>
 
               {/*admin &&  group members */}
-              {groupMembers?.map((member) => {
+              {groupMembers?.map((member, i) => {
                 const isOnline = member?.status === "Online";
                 const isAdmin = member?._id == currentConversation?.admin?._id;
                 return (
-                  <div className="flex gap-4 items-center p-1 cursor-pointer rounded-md hover:bg-gray-100 group">
+                  <div
+                    key={i}
+                    className="flex gap-4 items-center p-1 cursor-pointer rounded-md hover:bg-gray-100 group"
+                  >
                     <Avatar url={member?.avatar} size="md" online={isOnline} />
                     <div className="">
                       <p>{member?.userName}</p>
@@ -204,7 +181,7 @@ const ProfileDetails = ({
                     )}
                     {!isAdmin && isGroupAdmin && (
                       <div className="ml-auto">
-                        <GroupActions member={member} />
+                        <GroupActions member={member || null} />
                       </div>
                     )}
                   </div>
@@ -229,4 +206,4 @@ const ProfileDetails = ({
   );
 };
 
-export default React.memo(ProfileDetails);
+export default React.memo(GroupProfileDetails);

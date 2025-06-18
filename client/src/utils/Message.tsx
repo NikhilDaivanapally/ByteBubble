@@ -1,16 +1,18 @@
 import { ReactNode } from "react";
 import { Icons } from "../icons";
-import { Message } from "../types";
+import { DirectMessage, GroupMessage } from "../types";
 
 type FormattedMessage = {
   message: ReactNode;
 };
 
-const getFormattedMessage = (msg: Message): FormattedMessage => {
+const getFormattedMessage = (
+  msg: DirectMessage | GroupMessage
+): FormattedMessage => {
   let message: ReactNode = null;
 
   switch (msg?.messageType) {
-    case "photo":
+    case "image":
       message = (
         <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
           <Icons.CameraIconSecondary className="shrink-0 leading-0" />

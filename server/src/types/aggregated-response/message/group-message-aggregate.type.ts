@@ -5,7 +5,11 @@ import { GroupSystemEventType } from "../../../constants/system-event-types";
 
 export type AggregatedGroupMessage = {
   _id: Types.ObjectId;
-  sender: Types.ObjectId;
+  sender: {
+    _id: Types.ObjectId;
+    userName: string;
+    avatar: string | undefined;
+  };
   recipients: Types.ObjectId[];
   conversationId: Types.ObjectId;
   messageType: MessageType;

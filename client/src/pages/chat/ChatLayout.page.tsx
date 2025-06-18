@@ -53,7 +53,7 @@ const ChatLayout = () => {
   // Handle chat type routing
   useEffect(() => {
     if (pathname.startsWith("/chat")) {
-      dispatch(updateChatType("individual"));
+      dispatch(updateChatType("direct"));
     } else if (pathname.startsWith("/group")) {
       dispatch(updateChatType("group"));
     }

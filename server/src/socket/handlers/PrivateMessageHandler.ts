@@ -65,7 +65,7 @@ export async function handlePhotoMessage(messagePayload: any, io: Server) {
   const image = await cloudinary.uploader.upload(file[0].blob);
   const message = {
     ...messagePayload,
-    message: { photoUrl: image?.secure_url, description: text || "" },
+    message: { imageUrl: image?.secure_url, description: text || "" },
   };
   await emitToPrivate({ senderId, recipientId, message, io });
 

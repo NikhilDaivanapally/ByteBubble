@@ -2,21 +2,30 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { socket } from "../socket";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { addDirectMessage, addGroupMessage } from "../store/slices/conversation";
-import { group, individual } from "../utils/conversation-types";
+import {
+  addDirectMessage,
+  addGroupMessage,
+} from "../store/slices/conversation";
+import { direct, group } from "../utils/conversation-types";
 
 const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
   const dispatch = useDispatch();
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [recordingState, setRecordingState] = useState<"recording" | "pause">("recording");
+  const [recordingState, setRecordingState] = useState<"recording" | "pause">(
+    "recording"
+  );
   const [currentTime, setCurrentTime] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const { chatType, activeChatId } = useSelector((state: RootState) => state.app);
-  const { direct_chat, group_chat } = useSelector((state: RootState) => state.conversation);
+  const { chatType, activeChatId } = useSelector(
+    (state: RootState) => state.app
+  );
+  const { direct_chat, group_chat } = useSelector(
+    (state: RootState) => state.conversation
+  );
   const auth = useSelector((state: RootState) => state.auth.user);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -30,7 +39,9 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
     if (!group_chat.current_group_conversation?.admin) return [];
     const users = group_chat.current_group_conversation.users || [];
     const admin = group_chat.current_group_conversation.admin;
-    return [...users, admin].filter((el) => el._id !== auth?._id).map((el) => el._id);
+    return [...users, admin]
+      .filter((el) => el._id !== auth?._id)
+      .map((el) => el._id);
   }, [group_chat.current_group_conversation, auth?._id]);
 
   const resetRecordingState = () => {
@@ -50,55 +61,58 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
     setAudioUrl(null);
   };
 
-  const setupAudioVisualization = useCallback((stream: MediaStream) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const setupAudioVisualization = useCallback(
+    (stream: MediaStream) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const audioContext = new AudioContext();
-    const analyser = audioContext.createAnalyser();
-    const source = audioContext.createMediaStreamSource(stream);
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaStreamSource(stream);
 
-    source.connect(analyser);
-    analyser.fftSize = 2048;
+      source.connect(analyser);
+      analyser.fftSize = 2048;
 
-    const bufferLength = analyser.fftSize;
-    const dataArray = new Uint8Array(bufferLength);
-    const ctx = canvas.getContext("2d")!;
-    
-    const draw = () => {
-      if (!canvasRef.current) return;
-      requestAnimationFrame(draw);
+      const bufferLength = analyser.fftSize;
+      const dataArray = new Uint8Array(bufferLength);
+      const ctx = canvas.getContext("2d")!;
 
-      analyser.getByteTimeDomainData(dataArray);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const draw = () => {
+        if (!canvasRef.current) return;
+        requestAnimationFrame(draw);
 
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-      gradient.addColorStop(0, "#b721ff");
-      gradient.addColorStop(1, "#21d4fd");
+        analyser.getByteTimeDomainData(dataArray);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = gradient;
-      ctx.beginPath();
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        gradient.addColorStop(0, "#b721ff");
+        gradient.addColorStop(1, "#21d4fd");
 
-      const sliceWidth = canvas.width / bufferLength;
-      let x = 0;
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = gradient;
+        ctx.beginPath();
 
-      for (let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 128.0;
-        const y = (v * canvas.height) / 2;
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        x += sliceWidth;
-      }
+        const sliceWidth = canvas.width / bufferLength;
+        let x = 0;
 
-      ctx.lineTo(canvas.width, canvas.height / 2);
-      ctx.stroke();
-      ctx.fill();
-    };
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = (v * canvas.height) / 2;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          x += sliceWidth;
+        }
 
-    draw();
-    audioContextRef.current = audioContext;
-    analyserRef.current = analyser;
-  }, [canvasRef]);
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+        ctx.fill();
+      };
+
+      draw();
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+    },
+    [canvasRef]
+  );
 
   const handleRecording = async () => {
     try {
@@ -136,7 +150,7 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
           setRecordingTime((prev) => prev + 1);
         }, 1000);
         (mediaRecorder as any).intervalId = intervalId;
-        
+
         setupAudioVisualization(stream); // ck
         setIsRecording(true);
         if (recordingState === "pause") setRecordingState("recording");
@@ -197,7 +211,6 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
     };
   }, [audioUrl]);
 
-
   const handleSendAudio = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (recordingState == "recording") {
@@ -208,7 +221,7 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
     const messageCreatedAt = new Date().toISOString();
 
     switch (chatType) {
-      case "individual":
+      case direct:
         dispatch(
           addDirectMessage({
             _id: messageId,
@@ -217,7 +230,6 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
               audioId: audioUrl,
             },
             conversationId: activeChatId,
-            conversationType: individual,
             createdAt: messageCreatedAt,
             updatedAt: messageCreatedAt,
             isIncoming: false,
@@ -232,14 +244,13 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
           recipientId: direct_chat.current_direct_conversation?.userId,
           messageType: "audio",
           message: new Blob(AudioChunksRef.current, { type: "audio/wav" }),
-          conversationType: individual,
           conversationId: activeChatId,
           createdAt: messageCreatedAt,
           updatedAt: messageCreatedAt,
         });
 
         break;
-      case "group":
+      case group:
         dispatch(
           addGroupMessage({
             _id: messageId,

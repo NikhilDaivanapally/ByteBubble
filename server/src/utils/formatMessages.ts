@@ -5,19 +5,26 @@ const formatDirectMessages = (
   messages: DirectMessageDoc[],
   authUserId: string
 ) => {
-  return messages?.map((el: any) => {
+  return messages?.map((el: DirectMessageDoc) => {
     return {
       _id: el?._id,
       messageType: el?.messageType,
       message: el?.message,
+      isIncoming: el?.recipient.toString() == authUserId,
+      isOutgoing: el?.sender.toString() == authUserId,
+      status: "sent",
+      isRead: el?.isRead,
+      conversationId: el?.conversationId,
+      deletedFor: el?.deletedFor,
+      isDeletedForEveryone: el?.isDeletedForEveryone,
+      reactions: el?.reactions,
+      isEdited: el?.isEdited,
+      editedAt: el?.editedAt,
+      systemEventType: el?.systemEventType,
+      metadata: el?.metadata,
+      eventUserSnapshot: el.eventUserSnapshot,
       createdAt: el?.createdAt,
       updatedAt: el?.updatedAt,
-      isIncoming: el?.recipients == authUserId,
-      isOutgoing: el?.sender == authUserId,
-      status: "sent",
-      isSeen: el?.isRead,
-      conversationType: el?.conversationType,
-      conversationId: el?.conversationId,
     };
   });
 };
@@ -31,15 +38,22 @@ const formatGroupMessages = (
       _id: el?._id,
       messageType: el?.messageType,
       message: el?.message,
-      createdAt: el?.createdAt,
-      updatedAt: el?.updatedAt,
       isIncoming: el?.recipients.includes(authUserId),
       isOutgoing: el?.sender == authUserId,
       from: el?.sender,
       status: "sent",
-      isSeen: el?.isRead,
-      conversationType: el?.conversationType,
+      readBy: el?.readBy,
       conversationId: el?.conversationId,
+      deletedFor: el?.deletedFor,
+      isDeletedForEveryone: el?.isDeletedForEveryone,
+      reactions: el?.reactions,
+      isEdited: el?.isEdited,
+      editedAt: el?.editedAt,
+      systemEventType: el?.systemEventType,
+      metadata: el?.metadata,
+      eventUserSnapshot: el.eventUserSnapshot,
+      createdAt: el?.createdAt,
+      updatedAt: el?.updatedAt,
     };
   });
 };

@@ -265,9 +265,9 @@ const getDirectConversation = async (
     },
     ...getDirectConversationsPipeline(req.user?._id),
   ]);
-  const formattedDirectConversation = formatDirectConversations(
-    Directconversation,
-    authUserId
+  const formattedDirectConversation:DirectConversationResponse[] = formatDirectConversations(
+    Directconversation as AggregatedDirectConversation[],
+    authUserId as string
   );
   const hasMessages = formattedDirectConversation[0]?.message?.message ?? null;
   if (hasMessages) {
@@ -306,9 +306,9 @@ const getGroupConversation = async (
     ...getGroupConversationsPipeline(),
   ]);
 
-  const formattedGroupConversation = formatGroupConversations(
-    Groupconversation,
-    authUserId
+  const formattedGroupConversation:GroupConversationResponse[] = formatGroupConversations(
+    Groupconversation as AggregatedGroupConversation[],
+    authUserId as string
   );
 
   if (formattedGroupConversation.length) {

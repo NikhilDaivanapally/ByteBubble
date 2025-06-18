@@ -8,12 +8,12 @@ import {
 import { selectConversation } from "../../store/slices/appSlice";
 import ShowOfflineStatus from "../../components/ShowOfflineStatus";
 import SearchInput from "../../components/ui/SearchInput";
-import Chat from "../../components/Chat";
 import { motion } from "motion/react";
 import { DirectConversationProps } from "../../types";
 import { DirectConversation } from "../../components/Conversation";
 import ConversationSkeleton from "../../components/Loaders/SkeletonLoaders/ConversationSkeleton";
 import NoChat from "../../components/ui/NoChat";
+import DirectChat from "../../components/Chat/DirectChat/DirectChat";
 
 const IndividualChat = () => {
   const dispatch = useDispatch();
@@ -51,7 +51,7 @@ const IndividualChat = () => {
           createdAt: lastMsg.createdAt,
         },
         time: lastMsg.createdAt,
-        isSeen: lastMsg.isSeen,
+        isSeen: lastMsg.isRead,
       })
     );
   }, [current_direct_messages, dispatch]);
@@ -115,7 +115,7 @@ const IndividualChat = () => {
           activeChatId ? "block" : "hidden"
         } md:block overflow-hidden`}
       >
-        {activeChatId ? <Chat /> : <NoChat />}
+        {activeChatId ? <DirectChat /> : <NoChat />}
       </div>
     </div>
   );

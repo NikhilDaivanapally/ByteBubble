@@ -10,7 +10,7 @@ const initialState: appSliceProps = {
   chatType: null,
   isCameraOpen: false,
   mediaFiles: null,
-  mediaPreviewUrls: null,
+  mediaPreviewUrls: [],
   isTyping: "",
   isTypingRoomId: null,
   messageInfo: null,

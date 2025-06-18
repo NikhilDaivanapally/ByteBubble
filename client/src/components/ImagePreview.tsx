@@ -4,6 +4,7 @@ import { setfullImagePreview } from "../store/slices/conversation";
 import { useRef } from "react";
 import { Icons } from "../icons";
 import { motion, AnimatePresence } from "motion/react";
+import { direct } from "../utils/conversation-types";
 
 const ImagePreview = () => {
   const dispatch = useDispatch();
@@ -17,13 +18,13 @@ const ImagePreview = () => {
   const current_group_conversation = group_chat?.current_group_conversation;
   let MediaImgs = [];
 
-  if (chatType == "individual") {
+  if (chatType == direct) {
     MediaImgs = direct_chat?.current_direct_messages?.filter(
-      (el) => el.messageType == "photo"
+      (el) => el.messageType == "image"
     );
   } else {
     MediaImgs = group_chat?.current_group_messages?.filter(
-      (el) => el.messageType == "photo"
+      (el) => el.messageType == "image"
     );
   }
   const Current_index = MediaImgs.findIndex(
@@ -74,7 +75,7 @@ const ImagePreview = () => {
                   <img
                     className="w-full h-full rounded-full object-cover"
                     src={
-                      chatType === "individual"
+                      chatType === direct
                         ? fullImagePreview?.isOutgoing
                           ? authUser?.avatar
                           : current_direct_conversation?.avatar
@@ -89,7 +90,7 @@ const ImagePreview = () => {
                 {/* profile Info */}
                 <div className="">
                   <p className="font-semibold">
-                    {chatType === "individual"
+                    {chatType === direct
                       ? fullImagePreview?.isOutgoing
                         ? "you"
                         : current_direct_conversation?.name
@@ -126,7 +127,7 @@ const ImagePreview = () => {
               onClick={() => {}}
             >
               <img
-                src={fullImagePreview?.message.photoUrl}
+                src={fullImagePreview?.message.imageUrl}
                 className="w-full h-full object-contain"
                 alt=""
               />
@@ -169,7 +170,7 @@ const ImagePreview = () => {
                       }
                     >
                       <img
-                        src={el.message.photoUrl}
+                        src={el.message.imageUrl}
                         alt=""
                         className="w-full h-full object-contain select-none"
                       />

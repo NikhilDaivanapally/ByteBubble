@@ -108,7 +108,7 @@ const slice = createSlice({
     updateDirectMessagesSeen(state, _) {
       let messages = state.direct_chat.current_direct_messages;
       let new_messages = messages.map((el) => {
-        return { ...el, isSeen: true };
+        return { ...el, isRead: true };
       });
 
       state.direct_chat.current_direct_messages = new_messages;
@@ -120,12 +120,12 @@ const slice = createSlice({
       const userId = user?.userId;
       const messages = state.group_chat.current_group_messages || [];
       state.group_chat.current_group_messages = messages.map((el) => {
-        const seenList = el.isSeen || [];
+        const seenList = el.readBy || [];
 
         const alreadySeen = seenList.some((u) => u.userId === userId);
 
         if (!alreadySeen) {
-          return { ...el, isSeen: [...seenList, user] };
+          return { ...el, readBy: [...seenList, user] };
         }
 
         return el;
@@ -136,7 +136,7 @@ const slice = createSlice({
       let messages = state.direct_chat.current_direct_messages;
       let new_messages = messages.map((el) => {
         if (el?._id == action.payload?._id) {
-          return { ...el, isSeen: true };
+          return { ...el, isRead: true };
         }
         return el;
       });
@@ -150,7 +150,7 @@ const slice = createSlice({
 
           const updated: GroupMessageProps = {
             ...msg,
-            isSeen: [...(msg.isSeen || []), action.payload.user],
+            readBy: [...(msg.readBy || []), action.payload.user],
           };
 
           return updated;

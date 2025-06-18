@@ -22,7 +22,7 @@ const UploadedFileModule = () => {
 
   return (
     <>
-      {mediaPreviewUrls ? (
+      {mediaPreviewUrls.length ? (
         <div className="absolute inset-0 flex-center flex-col gap-10 backdrop-blur z-50">
           <Icons.XMarkIcon
             className="w-8 absolute top-0 right-0 ml-auto cursor-pointer"
@@ -30,8 +30,8 @@ const UploadedFileModule = () => {
           />
           {/* main Image */}
           <img
-            src={mediaPreviewUrls[activeIndex].url}
-            alt={mediaPreviewUrls[activeIndex]?.file}
+            src={mediaPreviewUrls[activeIndex]?.url}
+            // alt={mediaPreviewUrls[activeIndex]?.file}
             className="w-full max-w-xl mx-auto max-h-1/2"
           />
 

@@ -30,7 +30,7 @@ export type DirectConversationResponse = {
     createdAt: Date | undefined;
   };
   unreadMessagesCount: number;
-  isSeen: boolean;
+  isRead: boolean;
   isOutgoing: boolean;
   time: Date;
   about: string | undefined;

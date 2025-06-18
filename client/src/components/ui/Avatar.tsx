@@ -1,6 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import { Icons } from "../../icons";
+import { direct } from "../../utils/conversation-types";
 
 type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl";
 type FallBackType = string | null;
@@ -32,10 +33,10 @@ export const Avatar: React.FC<AvatarProps> = ({
   size = "md",
   online = false,
   className = "",
-  fallBackType = "individual",
+  fallBackType = { direct },
 }) => {
   const FallbackIcon =
-    fallBackType == "individual" ? Icons.UserIcon : Icons.UsersIcon;
+    fallBackType == direct ? Icons.UserIcon : Icons.UsersIcon;
 
   return (
     <div
@@ -57,7 +58,7 @@ export const Avatar: React.FC<AvatarProps> = ({
       ) : (
         <FallbackIcon className={fallBackStyle[size]} />
       )}
-      {fallBackType == "individual" && online && (
+      {fallBackType == direct && online && (
         <span
           className={clsx(
             "absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-transparent",

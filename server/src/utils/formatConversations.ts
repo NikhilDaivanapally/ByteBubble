@@ -37,7 +37,7 @@ const formatDirectConversations = (
         createdAt: lastMessage?.createdAt,
       },
       unreadMessagesCount: unreadMessages?.length || 0,
-      isSeen: lastMessage?.isRead,
+      isRead: lastMessage?.isRead,
       isOutgoing: lastMessage?.sender?.toString() === authUserId.toString(),
       time: lastMessage?.createdAt,
       about: el.user?.about,
@@ -90,7 +90,7 @@ const formatGroupConversations = (
         lastMessage?.sender?._id?.toString() === authUserId?.toString(),
       time: lastMessage?.createdAt,
       unreadMessagesCount: unreadMessages.length,
-      seenBy: lastMessage?.readBy,
+      readBy: lastMessage?.readBy,
     };
   });
 

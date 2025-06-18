@@ -9,7 +9,6 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import ShowOfflineStatus from "../../components/ShowOfflineStatus";
-import Chat from "../../components/Chat";
 import SearchInput from "../../components/ui/SearchInput";
 import { motion } from "motion/react";
 import { selectConversation } from "../../store/slices/appSlice";
@@ -17,10 +16,10 @@ import { GroupConversationProps } from "../../types";
 import ConversationSkeleton from "../../components/Loaders/SkeletonLoaders/ConversationSkeleton";
 import { Button } from "../../components/ui/Button";
 import { Icons } from "../../icons";
-import Dialog from "../../components/Dialog/Dialog";
 import CreateGroup from "../../components/CreateGroup";
 import NoChat from "../../components/ui/NoChat";
-
+import Dialog from "../../components/ui/Dialog/Dialog";
+import Chat from "../../components/Chat/GroupChat/GroupChat";
 const GroupChat = () => {
   const dispatch = useDispatch();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -64,7 +63,7 @@ const GroupChat = () => {
     const foundUser = [
       ...current_group_conversation?.users,
       current_group_conversation?.admin,
-    ].find((user) => user?._id === lastMsg.from);
+    ].find((user) => user?._id === lastMsg.from?._id);
 
     dispatch(
       updateGroupConversation({
@@ -81,7 +80,7 @@ const GroupChat = () => {
           createdAt: lastMsg.createdAt,
         },
         time: lastMsg.createdAt,
-        isSeen: lastMsg.isSeen,
+        readBy: lastMsg.readBy,
       })
     );
   }, [current_group_messages, dispatch]);

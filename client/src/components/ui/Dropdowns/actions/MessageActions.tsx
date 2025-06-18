@@ -1,9 +1,12 @@
 import { useDispatch } from "react-redux";
 import { AdaptiveDropdown } from "../AdaptiveDropdown";
-import { Icons } from "../../../icons";
-import { setMessageInfo } from "../../../store/slices/appSlice";
+// import { Icons } from "../../../icons";
+// import { setMessageInfo } from "../../../store/slices/appSlice";
 import { useMemo } from "react";
-import { individual } from "../../../utils/conversation-types";
+import { Icons } from "../../../../icons";
+import { direct } from "../../../../utils/conversation-types";
+import { setMessageInfo } from "../../../../store/slices/appSlice";
+// import { individual } from "../../../utils/conversation-types";
 
 export const MessageActions = ({ message }: { message: any }) => {
   const dispatch = useDispatch();
@@ -29,7 +32,7 @@ export const MessageActions = ({ message }: { message: any }) => {
   ];
 
   const actions = useMemo(() => {
-    return message?.conversationType == individual
+    return message?.conversationType == direct
       ? BaseActions
       : [
           {

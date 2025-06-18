@@ -15,6 +15,7 @@ import {
   GroupMessageProps,
   UserProps,
 } from "../types";
+import { direct, group } from "../utils/conversation-types";
 
 const useLoadChatMessages = ({
   activeChatId,
@@ -37,7 +38,7 @@ const useLoadChatMessages = ({
     if (!activeChatId) return;
     setIsLoading(true);
 
-    if (chatType === "individual") {
+    if (chatType === direct) {
       const currentChat = directConversations?.find(
         (el) => el?._id === activeChatId
       );
@@ -59,7 +60,7 @@ const useLoadChatMessages = ({
       } else {
         setIsLoading(false);
       }
-    } else if (chatType === "group") {
+    } else if (chatType === group) {
       const currentChat = groupConversations?.find(
         (el) => el?._id === activeChatId
       );

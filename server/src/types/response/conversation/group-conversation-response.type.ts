@@ -30,10 +30,14 @@ export type GroupConversationResponse = {
     isDeletedForEveryone: boolean;
     createdAt: Date | undefined;
   };
-  from: Types.ObjectId;
+  from: {
+    _id: Types.ObjectId;
+    userName: string;
+    avatar: string | undefined;
+  };
   isOutgoing: boolean;
   time: Date | undefined;
   unreadMessagesCount: number;
-  seenBy: Types.ObjectId[];
+  readBy: Types.ObjectId[];
   meta: Record<string, GroupParticipantMeta>;
 };

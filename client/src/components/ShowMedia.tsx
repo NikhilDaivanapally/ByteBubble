@@ -5,8 +5,8 @@ import SortMessages from "../utils/sort-messages";
 import { RootState } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setfullImagePreview } from "../store/slices/conversation";
-import { AudioMsg } from "./MessageTypes";
 import { createSelector } from "@reduxjs/toolkit";
+import { direct } from "../utils/conversation-types";
 type ShowMediaProps = {
   showAllMedia: boolean;
   handleCloseAllMedia: () => void;
@@ -19,14 +19,14 @@ const selectChatMessages = createSelector(
     (state: RootState) => state.conversation.group_chat.current_group_messages,
   ],
   (chatType, directMessages, groupMessages) =>
-    chatType === "individual" ? directMessages : groupMessages
+    chatType === direct ? directMessages : groupMessages
 );
 
 const Media = () => {
   const dispatch = useDispatch();
 
   const selectMediaMessages = createSelector([selectChatMessages], (messages) =>
-    messages.filter((msg) => msg.message?.photoUrl)
+    messages.filter((msg) => msg.message?.imageUrl)
   );
   const mediaMessages = useSelector(selectMediaMessages);
 
@@ -52,7 +52,7 @@ const Media = () => {
                   // <MediaMsg el={el}/>
                   <img
                     key={i}
-                    src={el?.message?.photoUrl}
+                    src={el?.message?.imageUrl}
                     alt=""
                     onClick={() =>
                       dispatch(setfullImagePreview({ fullviewImg: el }))
@@ -146,7 +146,7 @@ const Docs = () => {
   );
 
   const messages =
-    chatType == "individual"
+    chatType == direct
       ? direct_chat?.current_direct_messages
       : group_chat?.current_group_messages;
   console.log(messages);
