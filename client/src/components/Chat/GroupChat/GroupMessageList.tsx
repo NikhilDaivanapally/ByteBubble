@@ -1,9 +1,10 @@
 import { forwardRef } from "react";
 import { GroupMessageProps } from "../../../types";
-import { GroupMediaMsg } from "./messages/MediaMsg";
+import { GroupImageMsg } from "./messages/ImageMsg";
 import { GroupAudioMsg } from "./messages/AudioMsg";
 import { GroupTextMsg } from "./messages/TextMsg";
 import { GroupTimelineMsg } from "./messages/TimelineMsg";
+import { GroupSystemMsg } from "./messages/SystemMsg";
 
 interface GroupMessageListProps {
   sortedDates: string[];
@@ -18,7 +19,7 @@ const GroupMessageList = forwardRef<HTMLUListElement, GroupMessageListProps>(
     return (
       <ul
         ref={ref}
-        className="flex-1 overflow-x-hidden mt-1 scrollbar-custom px-4 space-y-2"
+        className="flex-1 overflow-x-hidden mt-1 scrollbar-custom px-2 sm:px-4 space-y-2"
       >
         {sortedDates.map((date) => (
           <div key={`${date}_GroupMsgs`} className="datewise_msgs space-y-2">
@@ -27,10 +28,10 @@ const GroupMessageList = forwardRef<HTMLUListElement, GroupMessageListProps>(
               switch (el.messageType) {
                 case "image":
                   return (
-                    <GroupMediaMsg
+                    <GroupImageMsg
                       el={el}
                       key={index}
-                      usersLength={usersLength}
+                      usersLength={usersLength - 1}
                       scrollToBottom={() => {}}
                     />
                   );
@@ -39,15 +40,17 @@ const GroupMessageList = forwardRef<HTMLUListElement, GroupMessageListProps>(
                     <GroupAudioMsg
                       el={el}
                       key={index}
-                      usersLength={usersLength}
+                      usersLength={usersLength - 1}
                     />
                   );
+                case "system":
+                  return <GroupSystemMsg key={index} el={el} />;
                 default:
                   return (
                     <GroupTextMsg
                       el={el}
                       key={index}
-                      usersLength={usersLength}
+                      usersLength={usersLength - 1}
                     />
                   );
               }

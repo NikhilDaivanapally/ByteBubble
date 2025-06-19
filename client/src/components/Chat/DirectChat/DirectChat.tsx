@@ -4,13 +4,13 @@ import { RootState } from "../../../store/store";
 import SortMessages from "../../../utils/sort-messages";
 import MessageInputBar from "../Footer";
 import CameraModule from "../../CameraModule";
-import UploadedFileModule from "../../UploadedFileModule";
 import useLoadChatMessages from "../../../hooks/use-load-chat-messages";
 import useAutoScroll from "../../../hooks/use-auto-scroll";
 import PageLoader from "../../Loaders/PageLoader";
 import DirectMessageList from "./DirectMessageList";
 import DirectChatHeader from "../Header/DirectChatHeader";
-import DirectProfileDetails from "../SidePanels/ProfilePanels/DirectProfileDetails";
+import DirectProfileDetails from "../SidePanels/DirectProfilePanel/DirectProfileDetails";
+import FileSendPreview from "../../FileSendPreview";
 
 const DirectChat = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -22,6 +22,7 @@ const DirectChat = () => {
   const { activeChatId, chatType, isCameraOpen } = useSelector(
     (state: RootState) => state.app
   );
+  const { mediaPreviewUrls } = useSelector((state: RootState) => state.app);
 
   useLoadChatMessages({
     activeChatId,
@@ -53,7 +54,9 @@ const DirectChat = () => {
     <div className="w-full h-full relative flex gap-2 overflow-hidden">
       <div className="flex flex-col flex-1 h-full relative overflow-hidden">
         {isCameraOpen && <CameraModule />}
-        <UploadedFileModule />
+        {mediaPreviewUrls && mediaPreviewUrls?.length > 0 && (
+          <FileSendPreview files={mediaPreviewUrls} />
+        )}
         <DirectChatHeader handleOpenShowDetails={handleOpenShowDetails} />
         <DirectMessageList
           ref={messagesListRef}

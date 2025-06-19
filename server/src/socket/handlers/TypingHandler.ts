@@ -1,6 +1,5 @@
 import { Server } from "socket.io";
 import User from "../../models/user.model";
-import GroupConversation from "../../models/groupConversation.model";
 
 interface TypingData {
   roomId: string;
@@ -8,19 +7,19 @@ interface TypingData {
     userName: string;
     auth_id: string;
   };
-  chatType: "individual" | "group";
+  chatType: "direct" | "group";
   currentConversation: string[] | string;
 }
 
 interface UserSocketInfo {
   socketId: string;
 }
+
 export async function handleStartTyping(data: TypingData, io: Server) {
   const { roomId, user, chatType, currentConversation } = data;
-
   try {
     switch (chatType) {
-      case "individual": {
+      case "direct": {
         const recipient = await User.findById(currentConversation as string)
           .select("socketId -_id")
           .lean<UserSocketInfo | null>();
@@ -35,17 +34,9 @@ export async function handleStartTyping(data: TypingData, io: Server) {
       }
 
       case "group": {
-        const groupInfo = await GroupConversation.findById(roomId)
-          .select("admin")
-          .lean<{ admin: string } | null>();
-        if (!groupInfo) {
-          return;
-        }
-        const { admin } = groupInfo;
-        const recipientIds: string[] = [
-          ...(currentConversation as string[]),
-          admin.toString(),
-        ].filter((id) => id !== user.auth_id);
+        const recipientIds: string[] = (currentConversation as [])?.filter(
+          (id: string) => id !== user.auth_id
+        );
         const socketInfoPromises = recipientIds.map(async (id) => {
           const user = await User.findById(id).select("socketId -_id");
           return user?.socketId;
@@ -73,10 +64,9 @@ export async function handleStartTyping(data: TypingData, io: Server) {
 }
 export async function handleStopTyping(data: TypingData, io: Server) {
   const { roomId, user, chatType, currentConversation } = data;
-
   try {
     switch (chatType) {
-      case "individual": {
+      case "direct": {
         const recipient = await User.findById(currentConversation as string)
           .select("socketId -_id")
           .lean<UserSocketInfo | null>();
@@ -91,19 +81,9 @@ export async function handleStopTyping(data: TypingData, io: Server) {
       }
 
       case "group": {
-        const messageDoc = await GroupConversation.findById(roomId)
-          .select("admin")
-          .lean<{ admin: string } | null>();
-
-        if (!messageDoc) {
-          return;
-        }
-
-        const { admin } = messageDoc;
-        const recipientIds: string[] = [
-          ...(currentConversation as string[]),
-          admin.toString(),
-        ].filter((id) => id !== user.auth_id);
+        const recipientIds: string[] = (currentConversation as [])?.filter(
+          (id: string) => id !== user.auth_id
+        );
 
         const socketInfoPromises = recipientIds.map(async (id) => {
           const user = await User.findById(id).select("socketId -_id");

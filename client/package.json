@@ -25,6 +25,7 @@
     "react-router-dom": "^7.6.0",
     "redux": "^5.0.1",
     "socket.io-client": "^4.8.1",
+    "socket.io-msgpack-parser": "^3.0.2",
     "swiper": "^11.2.6",
     "tailwindcss": "^4.1.5",
     "wavesurfer.js": "^7.9.5"

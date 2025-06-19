@@ -14,7 +14,7 @@ export type AggregatedGroupMessage = {
   conversationId: Types.ObjectId;
   messageType: MessageType;
   message: MessageContent;
-  readBy: Types.ObjectId[];
+  readBy: { userId: Types.ObjectId; isRead: boolean; seenAt: Date }[];
   deletedFor: Types.ObjectId[];
   isDeletedForEveryone: boolean;
   reactions: {

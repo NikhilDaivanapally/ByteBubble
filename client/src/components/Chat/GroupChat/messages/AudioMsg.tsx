@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { GroupMessageProps } from "../../../../types";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../store/store";
 import { Icons } from "../../../../icons";
-import getSenderFromGroup from "../../../../utils/get-sender-from-group";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import WaveSurfer from "wavesurfer.js";
-import { direct, group } from "../../../../utils/conversation-types";
-type senderProps = { avatar: string | undefined; userName: string };
+import { MessageActions } from "../../../ui/Dropdowns/actions/MessageActions";
 
 export const GroupAudioMsg = ({
   el,
@@ -24,18 +20,6 @@ export const GroupAudioMsg = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const waveformRef = useRef<HTMLDivElement | null>(null);
   const waveSurferRef = useRef<WaveSurfer | null>(null);
-  const { chatType } = useSelector((state: RootState) => state.app);
-  const { GroupConversations } = useSelector(
-    (state: RootState) => state.conversation.group_chat
-  );
-  let sender: senderProps = { avatar: "", userName: "" };
-  if (chatType == group) {
-    sender = getSenderFromGroup(
-      el as GroupMessageProps,
-      chatType,
-      GroupConversations
-    );
-  }
   const time = formatTo12HourTime(el?.createdAt);
   const readUsers = el.readBy?.length ?? 0;
   const seen = usersLength > 0 && readUsers >= usersLength;
@@ -106,15 +90,16 @@ export const GroupAudioMsg = ({
 
   return (
     <div
-      className={`Audio_msg w-fit flex gap-4 ${
+      className={`Audio_msg relative w-fit flex group items-start ${
         !el.isIncoming ? "ml-auto" : ""
       }`}
     >
-      {chatType !== direct && el.isIncoming && (
-        <div className="user_profile w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
+      {!el.isIncoming && <MessageActions message={el} />}
+      {el.isIncoming && (
+        <div className="user_profile mr-2 w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
           <img
             className="w-full h-full object-cover"
-            src={sender?.avatar}
+            src={el.from?.avatar}
             alt=""
           />
         </div>
@@ -129,8 +114,10 @@ export const GroupAudioMsg = ({
                 : "bg-white rounded-bl-none"
             }`}
           >
-            {chatType !== direct && (
-              <p className="userName">{sender?.userName}</p>
+            {el.isIncoming && (
+              <p className="userName text-black/60 text-sm">
+                {el.from?.userName}
+              </p>
             )}
 
             {audioUrl ? (

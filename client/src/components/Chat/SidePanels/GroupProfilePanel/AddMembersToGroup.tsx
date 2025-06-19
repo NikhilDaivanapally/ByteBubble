@@ -1,16 +1,16 @@
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store/store";
+import { RootState } from "../../../../store/store";
 import { useCallback, useMemo, useState } from "react";
-import { UserProps } from "../types";
-import { Icons } from "../icons";
-import Input from "./ui/Input";
-import { Button } from "./ui/Button";
-import { Avatar } from "./ui/Avatar";
-import { socket } from "../socket";
+import { UserProps } from "../../../../types";
+import { Icons } from "../../../../icons";
+import Input from "../../../ui/Input";
+import { Button } from "../../../ui/Button";
+import { Avatar } from "../../../ui/Avatar";
+import { socket } from "../../../../socket";
 import {
   setCurrentGroupConversation,
   updateGroupConversation,
-} from "../store/slices/conversation";
+} from "../../../../store/slices/conversation";
 
 type AddMembersToGroupProps = {
   onClose: () => void;

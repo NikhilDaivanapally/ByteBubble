@@ -15,6 +15,7 @@
   "type": "commonjs",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "bson": "^6.10.4",
     "cloudinary": "^2.6.0",
     "connect-redis": "^8.0.3",
     "cookie-parser": "^1.4.7",
@@ -32,6 +33,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "socket.io": "^4.8.1",
+    "socket.io-msgpack-parser": "^3.0.2",
     "streamifier": "^0.1.1"
   },
   "devDependencies": {

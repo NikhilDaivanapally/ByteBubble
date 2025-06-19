@@ -3,47 +3,55 @@ import GroupConversation from "../../models/groupConversation.model";
 import { Server } from "socket.io";
 import mongoose, { Types } from "mongoose";
 import User from "../../models/user.model";
-// import { ObjectId } from "mongodb";
-// import { ObjectId } from "mongodb";
+import { formatGroupConversations } from "../../utils/formatConversations";
+import { getGroupConversationsPipeline } from "../../pipelines/conversations/getGroupConversations.pipeline";
+import { AggregatedGroupConversation } from "../../types/aggregated-response/conversation/group-conversation-aggregate.type";
+import { GroupConversationResponse } from "../../types/response/conversation/group-conversation-response.type";
 export async function handleCreateGroup(data: any, io: Server) {
-  const { title, image, participants, admin } = data;
+  const { name, image, participants, createdBy } = data;
   const avatar = await cloudinary.uploader.upload(image);
   const document = await GroupConversation.create({
-    title,
+    name,
     avatar: avatar?.secure_url,
     participants,
-    admin,
+    createdBy,
   });
 
-  // Populate references and convert to plain JS object
-  let groupCreated = await GroupConversation.findById(document?._id)
-    .populate(["admin", "participants"])
-    .lean();
-
-  const formattedConversation = {
-    _id: groupCreated?._id,
-    name: groupCreated?.title,
-    avatar: groupCreated?.avatar,
-    admin: groupCreated?.createdBy,
-    users: groupCreated?.participants,
-    message: {
-      messageType: null,
-      message: null,
-      createdAt: null,
+  const Groupconversation = await GroupConversation.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(document?._id),
+      },
     },
-    from: null,
-    isOutgoing: null,
-    time: "",
-    isSeen: null,
-    unreadMessagesCount: 0,
-  };
-  const socketIds = participants.map((el: any) => el?.socketId);
-  io.to(admin?.socketId).emit("group:new:admin", formattedConversation);
-  socketIds.forEach((socketId: any) => {
+    ...getGroupConversationsPipeline(),
+  ]);
+
+  const formattedGroupConversation: GroupConversationResponse[] =
+    formatGroupConversations(
+      Groupconversation as AggregatedGroupConversation[],
+      createdBy as string
+    );
+
+  const participantsIds = participants.filter((id: string) => id !== createdBy);
+
+  const sender = await User.findById(createdBy).select("socketId -_id");
+  if (sender?.socketId) {
+    io.to(sender.socketId).emit(
+      "group:new:admin",
+      formattedGroupConversation[0]
+    );
+  }
+
+  const socketPromises = participantsIds.map((id: Types.ObjectId) =>
+    User.findById(id)
+      .select("socketId -_id")
+      .then((user) => user?.socketId)
+  );
+
+  const socketIds = await Promise.all(socketPromises);
+  socketIds.forEach((socketId) => {
     if (socketId) {
-      io.to(socketId).emit("group:new", formattedConversation);
-    } else {
-      console.error("Encountered a null or undefined socket ID.");
+      io.to(socketId).emit("group:new", formattedGroupConversation[0]);
     }
   });
 }

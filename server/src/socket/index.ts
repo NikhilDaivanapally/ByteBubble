@@ -9,8 +9,12 @@ import registerGroupMessageEvents from "./events/GroupMessageEvents";
 import registerPrivateMessageEvents from "./events/PrivateMessageEvents";
 import registerFriendRequestEvents from "./events/FriendRequestEvents";
 import registerTypingEvents from "./events/TypingEvents";
+import msgpackParser from "socket.io-msgpack-parser";
+
 const server = http.createServer(app);
 const io = new Server(server, {
+  transports: ["websocket"],
+  parser: msgpackParser,
   cors: {
     origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -112,8 +116,7 @@ io.on("connection", async (socket) => {
       { new: true } // return updated doc
     );
     const socketIds = friends?.map(async (id: string) => {
-      const { socketId }: any =
-        await User.findById(id).select("socketId -_id");
+      const { socketId }: any = await User.findById(id).select("socketId -_id");
       return socketId;
     });
 

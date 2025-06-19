@@ -11,12 +11,14 @@ import {
   GroupTextMessage,
 } from "../../models/groupMessage.model";
 import User from "../../models/user.model";
+import { GroupMessageResponse } from "../../types/response/message/group-message-response.type";
+import { ObjectId } from "bson";
 
 type GroupMessageProps = {
   _id: string;
   senderId: string;
   recipientsIds: string;
-  messageType: "link" | "text" | "photo" | "audio";
+  messageType: "link" | "text" | "image" | "audio" | "system";
   message: {
     text?: string;
     audioId?: string;
@@ -34,7 +36,6 @@ function buildGroupMessage(message: GroupMessageProps) {
     recipients: message?.recipientsIds,
     messageType: message?.messageType,
     message: message?.message,
-    conversationType: message?.conversationType,
     conversationId: message?.conversationId,
     createdAt: message?.createdAt,
     updatedAt: message?.updatedAt,
@@ -44,19 +45,42 @@ function buildGroupMessage(message: GroupMessageProps) {
 export async function handleGetGroupMessages(data: any, callback: any) {
   const messages = await GroupMessage.find({
     conversationId: data.conversationId,
-  });
-  let formatted = formatGroupMessages(messages, data.authUserId);
-
+  }).populate({ path: "sender", select: "_id userName avatar" });
+  let formatted: GroupMessageResponse[] = formatGroupMessages(
+    messages,
+    data.authUserId
+  );
   callback(formatted);
 }
 
 export async function handleGroupTextMessage(messagePayload: any, io: Server) {
-  const { senderId, recipientsIds } = messagePayload;
-  await emitToGroup({ senderId, recipientsIds, message: messagePayload, io });
+  const {
+    _id,
+    messageType,
+    message,
+    conversationId,
+    createdAt,
+    updatedAt,
+    from,
+    senderId,
+    recipientsIds,
+  } = messagePayload;
+  const formatMessage = {
+    _id,
+    messageType,
+    message,
+    conversationId,
+    from,
+    senderId,
+    recipientsIds,
+    createdAt,
+    updatedAt,
+  };
+  await emitToGroup({ senderId, recipientsIds, message: formatMessage, io });
   await GroupTextMessage.create(buildGroupMessage(messagePayload));
 }
 
-export async function handleGroupPhotoMessage(messagePayload: any, io: Server) {
+export async function handleGroupImageMessage(messagePayload: any, io: Server) {
   const { senderId, recipientsIds } = messagePayload;
   const { file, text } = messagePayload?.message;
   const image = await cloudinary.uploader.upload(file[0].blob);
@@ -77,7 +101,9 @@ export async function handleGroupAudioMessage(messagePayload: any, io: Server) {
   readableStream.push(null);
 
   // Upload to GridFS
-  const uploadStream = gridFSBucket.openUploadStream(crypto.randomUUID());
+  const uploadStream = gridFSBucket.openUploadStream(
+    new ObjectId().toHexString()
+  );
   readableStream.pipe(uploadStream);
   uploadStream.on("finish", async () => {
     const message = {
@@ -96,10 +122,9 @@ export async function handleGroupMessageSeen(messagePayload: any, io: Server) {
   if (sender?.socketId) {
     io.to(sender?.socketId!).emit("group:message:status:seen", messagePayload);
   }
-  console.log("Running Messages Seen");
   await GroupMessage.findOneAndUpdate(
-    { _id: messagePayload?.messageId, isRead: { $ne: messagePayload?.user } },
-    { $addToSet: { isRead: messagePayload?.user } }
+    { _id: messagePayload?.messageId, readBy: { $ne: messagePayload?.user } },
+    { $addToSet: { readBy: messagePayload?.user } }
   );
 }
 
@@ -139,7 +164,7 @@ export async function handleGroupMessageUnreadClear(data: any, io: Server) {
   const messages = await GroupMessage.find({
     conversationId,
     recipients: recipient,
-    "isRead.userId": { $ne: user.userId },
+    "readBy.userId": { $ne: user.userId },
   });
 
   if (messages.length > 0) {
@@ -148,10 +173,10 @@ export async function handleGroupMessageUnreadClear(data: any, io: Server) {
         filter: { _id: msg._id },
         update: {
           $addToSet: {
-            isRead: {
+            readBy: {
               userId: user.userId,
               seenAt: user.seenAt,
-              isSeen: user.isSeen,
+              isRead: user.isRead,
             },
           },
         },

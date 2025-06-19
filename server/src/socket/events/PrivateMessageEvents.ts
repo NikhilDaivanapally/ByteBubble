@@ -5,7 +5,7 @@ import {
   handleMessageSeen,
   handleMessageUnreadClear,
   handleMessageUnreadUpdate,
-  handlePhotoMessage,
+  handleImageMessage,
   handleTextMessage,
 } from "../handlers/PrivateMessageHandler";
 
@@ -21,8 +21,8 @@ export default function registerPrivateMessageEvents(
       case "text":
         await handleTextMessage(messagePayload, io);
         break;
-      case "photo":
-        await handlePhotoMessage(messagePayload, io);
+      case "image":
+        await handleImageMessage(messagePayload, io);
         break;
       case "audio":
         await handleAudioMessage(messagePayload, io);

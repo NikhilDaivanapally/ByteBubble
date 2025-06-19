@@ -34,12 +34,13 @@ const formatGroupMessages = (
   authUserId: string
 ) => {
   return messages?.map((el: any) => {
+    console.log(el.sender,authUserId)
     return {
       _id: el?._id,
       messageType: el?.messageType,
       message: el?.message,
       isIncoming: el?.recipients.includes(authUserId),
-      isOutgoing: el?.sender == authUserId,
+      isOutgoing: el?.sender._id.toString() == authUserId,
       from: el?.sender,
       status: "sent",
       readBy: el?.readBy,

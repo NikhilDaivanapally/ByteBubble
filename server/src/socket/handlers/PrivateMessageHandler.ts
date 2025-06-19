@@ -11,6 +11,8 @@ import {
   DirectTextMessage,
 } from "../../models/directMessage.model";
 import User from "../../models/user.model";
+import { DirectMessageResponse } from "../../types/response/message/direct-message-response.type";
+import { ObjectId } from "bson";
 
 type MessageProps = {
   _id: string;
@@ -45,7 +47,10 @@ export async function handleGetDirectMessages(data: any, callback: any) {
   const messages = await DirectMessage.find({
     conversationId: data.conversationId,
   });
-  let formatted = formatDirectMessages(messages, data.authUserId);
+  let formatted: DirectMessageResponse[] = formatDirectMessages(
+    messages,
+    data.authUserId
+  );
 
   callback(formatted);
 }
@@ -59,7 +64,7 @@ export async function handleTextMessage(
   await DirectTextMessage.create(buildMessage(messagePayload));
 }
 
-export async function handlePhotoMessage(messagePayload: any, io: Server) {
+export async function handleImageMessage(messagePayload: any, io: Server) {
   const { senderId, recipientId } = messagePayload;
   const { file, text } = messagePayload?.message;
   const image = await cloudinary.uploader.upload(file[0].blob);
@@ -81,7 +86,9 @@ export async function handleAudioMessage(messagePayload: any, io: Server) {
   readableStream.push(null);
 
   // Upload to GridFS
-  const uploadStream = gridFSBucket.openUploadStream(crypto.randomUUID());
+  const uploadStream = gridFSBucket.openUploadStream(
+    new ObjectId().toHexString()
+  );
   readableStream.pipe(uploadStream);
 
   uploadStream.on("finish", async () => {
@@ -89,6 +96,7 @@ export async function handleAudioMessage(messagePayload: any, io: Server) {
       ...messagePayload,
       message: { audioId: uploadStream.id },
     };
+    console.log(message, "message");
     await emitToPrivate({ senderId, recipientId, message, io });
     await DirectAudioMessage.create(buildMessage(message));
   });
@@ -124,7 +132,7 @@ export async function handleMessageUnreadClear(data: any, io: Server) {
     io.to(Sender?.socketId!).emit("messages:status:seen", conversationId);
   }
   await DirectMessage.updateMany(
-    { conversationId, recipients: recipient },
+    { conversationId, recipient },
     { $set: { isRead: true } }
   );
 }

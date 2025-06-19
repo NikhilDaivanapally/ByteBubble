@@ -13,9 +13,8 @@ const GroupMessageInfo = () => {
     (state: RootState) => state.conversation.group_chat
   );
   const { messageInfo } = useSelector((state: RootState) => state.app);
-  const handleClose = () => {
-    dispatch(setMessageInfo(null));
-  };
+
+  const handleClose = () => dispatch(setMessageInfo(null));
 
   const currentGroupConversationRef = useRef(current_group_conversation);
 
@@ -24,34 +23,36 @@ const GroupMessageInfo = () => {
   }, [current_group_conversation]);
 
   const recipients = useMemo(() => {
-    return [
-      ...(currentGroupConversationRef.current?.users || []),
-      currentGroupConversationRef.current?.admin,
-    ].filter((user) => user?._id !== messageInfo?.from);
+    const users = currentGroupConversationRef.current?.users || [];
+    if (!messageInfo?.from?._id) return users;
+    return users.filter(
+      (user) => user?._id?.toString() !== messageInfo?.from?._id?.toString()
+    );
   }, [messageInfo?.from]);
 
   const { seenBy, deliveredTo } = useMemo(() => {
     return recipients.reduce(
       (acc: { seenBy: any[]; deliveredTo: any[] }, user) => {
-        const seen = messageInfo?.isSeen.find(
-          (seenUser) => seenUser?.userId === user?._id
+        const seen = messageInfo?.readBy?.find(
+          (seenUser) => seenUser?.userId?.toString() === user?._id?.toString()
         );
-        if (seen) {
+
+        if (seen?.isRead) {
           acc.seenBy.push({
-            _id: user?._id,
-            userName: user?.userName,
-            avatar: user?.avatar,
-            isSeen: seen.isSeen,
+            _id: user._id,
+            userName: user.userName,
+            avatar: user.avatar,
             seenAt: seen.seenAt,
           });
         } else {
           acc.deliveredTo.push({
-            _id: user?._id,
-            userName: user?.userName,
-            avatar: user?.avatar,
-            deliveredAt: user?.createdAt,
+            _id: user._id,
+            userName: user.userName,
+            avatar: user.avatar,
+            deliveredAt: user.createdAt,
           });
         }
+
         return acc;
       },
       { seenBy: [], deliveredTo: [] }
@@ -72,65 +73,57 @@ const GroupMessageInfo = () => {
           <button onClick={handleClose}>
             <Icons.XMarkIcon className="w-8 p-1 rounded-full cursor-pointer hover:bg-gray-200 transition" />
           </button>
-          <div>
-            <div className="mb-2 flex items-center gap-2">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 rounded-full bg-green-600"></div>
-                <div className="w-2 h-2 rounded-full bg-green-600"></div>
-              </div>
-              <p>Read by</p>
-            </div>
-            {seenBy?.length ? (
-              <ul>
-                {seenBy.map((user, i) => {
-                  return (
-                    <li key={i} className="flex gap-4 items-center">
-                      <Avatar url={user?.avatar} />
-                      <div className="">
-                        <p>{user?.userName}</p>
-                        <span className="text-black/60 text-sm">
-                          {formatToReadableDate(user?.seenAt) +
-                            " at " +
-                            formatTo12HourTime(user?.seenAt)}
-                        </span>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              ""
-            )}
-          </div>
-          {deliveredTo?.length ? (
+
+          {/* Seen By */}
+          {seenBy.length > 0 && (
             <div>
               <div className="mb-2 flex items-center gap-2">
                 <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                  <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+                  <div className="w-2 h-2 rounded-full bg-green-600" />
+                  <div className="w-2 h-2 rounded-full bg-green-600" />
                 </div>
-                <p>delivered to</p>
+                <p>Read by</p>
               </div>
               <ul>
-                {deliveredTo.map((user, i) => {
-                  return (
-                    <li key={i} className="flex gap-4 items-center">
-                      <Avatar url={user?.avatar} />
-                      <div className="">
-                        <p>{user?.userName}</p>
-                        <span className="text-black/60 text-sm">
-                          {formatToReadableDate(user?.deliveredAt) +
-                            " at " +
-                            formatTo12HourTime(user?.deliveredAt)}
-                        </span>
-                      </div>
-                    </li>
-                  );
-                })}
+                {seenBy.map((user, i) => (
+                  <li key={i} className="flex gap-4 items-center">
+                    <Avatar url={user.avatar} />
+                    <div>
+                      <p>{user.userName}</p>
+                      <span className="text-black/60 text-sm">
+                        {formatToReadableDate(user.seenAt)} at {formatTo12HourTime(user.seenAt)}
+                      </span>
+                    </div>
+                  </li>
+                ))}
               </ul>
             </div>
-          ) : (
-            ""
+          )}
+
+          {/* Delivered To */}
+          {deliveredTo.length > 0 && (
+            <div>
+              <div className="mb-2 flex items-center gap-2">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 rounded-full bg-gray-300" />
+                  <div className="w-2 h-2 rounded-full bg-gray-300" />
+                </div>
+                <p>Delivered to</p>
+              </div>
+              <ul>
+                {deliveredTo.map((user, i) => (
+                  <li key={i} className="flex gap-4 items-center">
+                    <Avatar url={user.avatar} />
+                    <div>
+                      <p>{user.userName}</p>
+                      <span className="text-black/60 text-sm">
+                        {formatToReadableDate(user.deliveredAt)} at {formatTo12HourTime(user.deliveredAt)}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </motion.div>
       )}

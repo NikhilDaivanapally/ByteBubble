@@ -52,7 +52,6 @@ export const DirectConversation = React.memo(
     const { activeChatId, isTypingRoomId } = useSelector(
       (state: RootState) => state.app
     );
-
     const handleSelectConversation = useCallback(() => {
       if (activeChatId !== _id) {
         dispatch(setCurrentDirectMessages([]));
@@ -279,14 +278,14 @@ export const GroupConversation = React.memo(
               <div className="flex-center gap-1">
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    readBy.length == users.length - 1
+                    readBy?.length == users?.length - 1
                       ? "bg-green-600"
                       : "bg-gray-300"
                   }`}
                 ></div>
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    readBy.length == users.length - 1
+                    readBy?.length == users?.length - 1
                       ? "bg-green-600"
                       : "bg-gray-300"
                   }`}
@@ -297,7 +296,7 @@ export const GroupConversation = React.memo(
               <span className="lasttime_msg text-nowrap">{Time}</span>
             ) : null}
           </div>
-          {unreadMessagesCount ? (
+          {!isOutgoing && unreadMessagesCount ? (
             <span className="text-xs inline-block px-2 py-1 rounded-full bg-btn-primary/20">
               {unreadMessagesCount > 99
                 ? `${unreadMessagesCount}+`

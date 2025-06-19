@@ -51,7 +51,7 @@ const IndividualChat = () => {
           createdAt: lastMsg.createdAt,
         },
         time: lastMsg.createdAt,
-        isSeen: lastMsg.isRead,
+        isRead: lastMsg.isRead,
       })
     );
   }, [current_direct_messages, dispatch]);

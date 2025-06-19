@@ -21,6 +21,7 @@ import {
 import { useChatEvents } from "../../hooks/use-chat-events";
 import { useUsersStatusEvents } from "../../hooks/use-users-status-events";
 import { useGroupEvents } from "../../hooks/use-group-events";
+import { useSystemEvents } from "../../hooks/use-system-events";
 
 const useRegisterSocketEvents = (isConnected: boolean) => {
   useFriendRequestEvents(isConnected);
@@ -30,6 +31,7 @@ const useRegisterSocketEvents = (isConnected: boolean) => {
   useChatEvents(isConnected);
   useGroupEvents(isConnected);
   useUsersStatusEvents(isConnected);
+  useSystemEvents(isConnected);
 };
 
 const ChatLayout = () => {

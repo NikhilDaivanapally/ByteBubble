@@ -16,7 +16,7 @@ const formatDirectConversations = (
         msg?.recipient?.toString() === authUserId?.toString() &&
         msg?.isRead === false
     );
-
+    console.log(lastMessage)
     return {
       _id: el._id,
       userId: el.user._id,
@@ -59,11 +59,31 @@ const formatGroupConversations = (
   const formatted = conversations.map((el) => {
     const messages = el.messages || [];
     const lastMessage = messages.slice(-1)[0];
-    const unreadMessages = messages?.filter(
-      (msg) =>
-        msg.recipients?.toString() === authUserId.toString() &&
-        !msg.readBy.includes(new mongoose.Types.ObjectId(authUserId))
-    );
+    const unreadMessages = messages?.filter((msg) => {
+      // Skip if the user is the sender
+      if (msg.sender?._id?.toString?.() === authUserId.toString()) return false;
+
+      // Skip if the user is not in the recipients
+      if (
+        !msg.recipients?.some?.(
+          (r) => r?.toString?.() === authUserId.toString()
+        )
+      )
+        return false;
+
+      const readBy = msg.readBy ?? [];
+
+      // Include if user hasn't read the message
+      const hasRead = readBy.some(
+        (el) =>
+          el?.userId?.toString?.() === authUserId.toString() &&
+          el?.isRead === true
+      );
+
+      return !hasRead;
+    });
+
+    console.log(unreadMessages, authUserId);
 
     return {
       _id: el._id,

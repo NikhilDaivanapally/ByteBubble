@@ -2,10 +2,10 @@ import { Server, Socket } from "socket.io";
 import {
   handleGetGroupMessages,
   handleGroupAudioMessage,
+  handleGroupImageMessage,
   handleGroupMessageSeen,
   handleGroupMessageUnreadClear,
   handleGroupMessageUnreadUpdate,
-  handleGroupPhotoMessage,
   handleGroupTextMessage,
 } from "../handlers/GroupMessageHandler";
 
@@ -18,8 +18,8 @@ export default function registerGroupMessageEvents(socket: Socket, io: Server) {
       case "text":
         await handleGroupTextMessage(messagePayload, io);
         break;
-      case "photo":
-        await handleGroupPhotoMessage(messagePayload, io);
+      case "image":
+        await handleGroupImageMessage(messagePayload, io);
         break;
       case "audio":
         await handleGroupAudioMessage(messagePayload, io);

@@ -1,42 +1,28 @@
 import { motion, AnimatePresence } from "motion/react";
-import { Icons } from "../icons";
 import { useCallback, useMemo, useState } from "react";
-import SortMessages from "../utils/sort-messages";
-import { RootState } from "../store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setfullImagePreview } from "../store/slices/conversation";
-import { createSelector } from "@reduxjs/toolkit";
-import { direct } from "../utils/conversation-types";
+import { RootState } from "../../../../store/store";
+import SortMessages from "../../../../utils/sort-messages";
+import { setfullImagePreview } from "../../../../store/slices/conversation";
+import { Icons } from "../../../../icons";
+import { GroupAudioMsg } from "../../GroupChat/messages/AudioMsg";
 type ShowMediaProps = {
   showAllMedia: boolean;
   handleCloseAllMedia: () => void;
 };
-const selectChatMessages = createSelector(
-  [
-    (state: RootState) => state.app.chatType,
-    (state: RootState) =>
-      state.conversation.direct_chat.current_direct_messages,
-    (state: RootState) => state.conversation.group_chat.current_group_messages,
-  ],
-  (chatType, directMessages, groupMessages) =>
-    chatType === direct ? directMessages : groupMessages
-);
 
 const Media = () => {
   const dispatch = useDispatch();
-
-  const selectMediaMessages = createSelector([selectChatMessages], (messages) =>
-    messages.filter((msg) => msg.message?.imageUrl)
+  const { current_group_messages } = useSelector(
+    (state: RootState) => state.conversation.group_chat
   );
-  const mediaMessages = useSelector(selectMediaMessages);
-
   const { DatesArray, MessagesObject } = useMemo(() => {
     return SortMessages({
-      messages: mediaMessages,
-      filter: "photo",
+      messages: current_group_messages,
+      filter: "image",
       sort: "Desc",
     });
-  }, [mediaMessages]);
+  }, [current_group_messages]);
 
   return (
     <>
@@ -49,15 +35,14 @@ const Media = () => {
               </p>
               <div className="grid grid-cols-3 gap-4 items-center">
                 {MessagesObject[date].map((el: any, i: number) => (
-                  // <MediaMsg el={el}/>
-                  <img
-                    key={i}
-                    src={el?.message?.imageUrl}
-                    alt=""
+                  <div
                     onClick={() =>
                       dispatch(setfullImagePreview({ fullviewImg: el }))
                     }
-                  />
+                    key={i}
+                  >
+                    <img key={i} src={el?.message?.imageUrl} alt="" />
+                  </div>
                 ))}
               </div>
             </div>
@@ -70,18 +55,17 @@ const Media = () => {
   );
 };
 const Audio = () => {
-  const selectAudioMessages = createSelector([selectChatMessages], (messages) =>
-    messages.filter((msg) => msg.message?.audioId)
+  const { current_group_messages, current_group_conversation } = useSelector(
+    (state: RootState) => state.conversation.group_chat
   );
-  const audioMessages = useSelector(selectAudioMessages);
-
+  const usersLength = current_group_conversation?.users.length as number;
   const { DatesArray, MessagesObject } = useMemo(() => {
     return SortMessages({
-      messages: audioMessages,
+      messages: current_group_messages,
       filter: "audio",
       sort: "Desc",
     });
-  }, [audioMessages]);
+  }, [current_group_messages]);
   return (
     <>
       {DatesArray.length ? (
@@ -93,7 +77,11 @@ const Audio = () => {
               </p>
               <div className="grid  gap-4 items-center">
                 {MessagesObject[date].map((el: any, i: number) => (
-                  <AudioMsg el={el} key={i} />
+                  <GroupAudioMsg
+                    el={el}
+                    key={i}
+                    usersLength={usersLength - 1}
+                  />
                 ))}
               </div>
             </div>
@@ -106,18 +94,17 @@ const Audio = () => {
   );
 };
 const Links = () => {
-  const selectLinkMessages = createSelector([selectChatMessages], (messages) =>
-    messages.filter((msg) => msg.message?.text)
+  const { current_group_messages, current_group_conversation } = useSelector(
+    (state: RootState) => state.conversation.group_chat
   );
-  const linkMessages = useSelector(selectLinkMessages);
-
+  const usersLength = current_group_conversation?.users.length as number;
   const { DatesArray, MessagesObject } = useMemo(() => {
     return SortMessages({
-      messages: linkMessages,
+      messages: current_group_messages,
       filter: "link",
       sort: "Desc",
     });
-  }, [linkMessages]);
+  }, [current_group_messages]);
   return (
     <>
       {DatesArray.length ? (
@@ -140,22 +127,17 @@ const Links = () => {
   );
 };
 const Docs = () => {
-  const { chatType } = useSelector((state: RootState) => state.app);
-  const { direct_chat, group_chat } = useSelector(
-    (state: RootState) => state.conversation
+  const { current_group_messages, current_group_conversation } = useSelector(
+    (state: RootState) => state.conversation.group_chat
   );
-
-  const messages =
-    chatType == direct
-      ? direct_chat?.current_direct_messages
-      : group_chat?.current_group_messages;
-  console.log(messages);
-
-  const { DatesArray, MessagesObject } = SortMessages({
-    messages: messages,
-    filter: "Docs",
-    sort: "Desc",
-  });
+  const usersLength = current_group_conversation?.users.length as number;
+  const { DatesArray, MessagesObject } = useMemo(() => {
+    return SortMessages({
+      messages: current_group_messages,
+      filter: "doc",
+      sort: "Desc",
+    });
+  }, [current_group_messages]);
   return (
     <>
       {DatesArray.length ? (
@@ -178,20 +160,23 @@ const Docs = () => {
   );
 };
 
-const ShowMedia = ({ showAllMedia, handleCloseAllMedia }: ShowMediaProps) => {
-  const [currentTab, setCurrentTab] = useState("media");
+const GroupMediaPreviewSlider = ({
+  showAllMedia,
+  handleCloseAllMedia,
+}: ShowMediaProps) => {
+  const [currentTab, setCurrentTab] = useState("images");
 
   const handleChangeTab = useCallback((tab: string) => {
     setCurrentTab(tab);
   }, []);
 
-  const Tabs = ["media", "audio", "links", "docs"];
+  const Tabs = ["images", "audios", "links", "docs"];
 
   const currentTabComponent = useMemo(() => {
     switch (currentTab) {
-      case "media":
+      case "images":
         return <Media />;
-      case "audio":
+      case "audios":
         return <Audio />;
       case "links":
         return <Links />;
@@ -233,7 +218,7 @@ const ShowMedia = ({ showAllMedia, handleCloseAllMedia }: ShowMediaProps) => {
                   className="absolute w-1/4 inset-y-1.5 bg-white rounded-lg shadow z-1"
                   style={{
                     left:
-                      currentTab === "media"
+                      currentTab === "images"
                         ? "6px"
                         : `${currentIndex * 24.8}%`,
                   }}
@@ -265,4 +250,4 @@ const ShowMedia = ({ showAllMedia, handleCloseAllMedia }: ShowMediaProps) => {
   );
 };
 
-export default ShowMedia;
+export default GroupMediaPreviewSlider;

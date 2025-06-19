@@ -8,9 +8,9 @@ import { Icons } from "../../../../icons";
 import { group } from "../../../../utils/conversation-types";
 import { Avatar } from "../../../ui/Avatar";
 import { GroupActions } from "../../../ui/Dropdowns/actions/GroupActions";
-import ShowMedia from "../../../ShowMedia";
 import Dialog from "../../../ui/Dialog/Dialog";
-import AddMembersToGroup from "../../../AddMembersToGroup";
+import AddMembersToGroup from "./AddMembersToGroup";
+import GroupMediaPreviewSlider from "../MediaPreviewSlider/GroupMediaPreviewSlider";
 
 type Props = {
   showDetails: boolean;
@@ -193,7 +193,7 @@ const GroupProfileDetails = ({
             </div>
           </div>
 
-          <ShowMedia
+          <GroupMediaPreviewSlider
             showAllMedia={showAllMedia}
             handleCloseAllMedia={handleCloseAllMedia}
           />

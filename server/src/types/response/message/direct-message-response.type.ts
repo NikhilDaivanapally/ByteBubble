@@ -4,12 +4,13 @@ import { MessageType } from "../../../constants/message-types";
 
 export type DirectMessageResponse = {
   _id: Types.ObjectId;
-  sender: Types.ObjectId;
-  recipient: Types.ObjectId;
-  conversationId: Types.ObjectId;
   messageType: MessageType;
   message: MessageContent;
+  isIncoming: boolean;
+  isOutgoing: boolean;
+  status: string;
   isRead: boolean;
+  conversationId: Types.ObjectId;
   deletedFor: Types.ObjectId[];
   isDeletedForEveryone: boolean;
   reactions: {
@@ -19,7 +20,7 @@ export type DirectMessageResponse = {
   isEdited: boolean;
   editedAt?: Date;
   systemEventType?: string;
-  metadata?: any;
+  metadata?: string;
   eventUserSnapshot?: {
     _id: Types.ObjectId;
     userName: string;

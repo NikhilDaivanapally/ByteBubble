@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import EmojiPicker from "emoji-picker-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
@@ -13,15 +19,14 @@ import {
 } from "../store/slices/appSlice";
 import { Icons } from "../icons";
 import { direct, group } from "../utils/conversation-types";
+import { ObjectId } from "bson";
 
 const SendMediaMessage = () => {
   const dispatch = useDispatch();
   const [isEmojiPickerActive, setIsEmojiPickerActive] = useState(false);
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const { _id: auth_id }: any = useSelector(
-    (state: RootState) => state.auth.user
-  );
+  const auth = useSelector((state: RootState) => state.auth.user);
 
   const { activeChatId, chatType, mediaPreviewUrls } = useSelector(
     (state: RootState) => state.app
@@ -49,19 +54,10 @@ const SendMediaMessage = () => {
     handleToggleEmojiPicker();
   }, []);
 
-  let userList: {}[] = [];
-
-  if (
-    (group_chat?.current_group_conversation?.users as [])?.length > 0 &&
-    group_chat.current_group_conversation?.admin
-  ) {
-    userList = [
-      ...group_chat.current_group_conversation?.users,
-      group_chat.current_group_conversation?.admin,
-    ]
-      .filter((el) => el._id !== auth_id)
-      .map((el) => el._id);
-  }
+  const userList = useMemo(() => {
+    const users = group_chat?.current_group_conversation?.users || [];
+    return users.filter((u) => u?._id !== auth?._id).map((u) => u?._id);
+  }, [group_chat]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -77,42 +73,45 @@ const SendMediaMessage = () => {
   const handleSendMediaMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const messageId = crypto.randomUUID();
-    const messageCreatedAt = new Date().toISOString();
+    const messageId = new ObjectId().toHexString();
+    const timestamp = new Date().toISOString();
 
     switch (chatType) {
       case direct:
         dispatch(
           addDirectMessage({
             _id: messageId,
-            messageType: "photo",
+            messageType: "image",
             message: {
               imageUrl: mediaPreviewUrls?.slice(-1)[0].url,
               description: message,
             },
-            createdAt: messageCreatedAt,
-            updatedAt: messageCreatedAt,
-            conversationId: activeChatId,
             isIncoming: false,
             isOutgoing: true,
             status: "pending",
-            isSeen: false,
+            isRead: false,
+            conversationId: activeChatId,
+            deletedFor: [],
+            isDeletedForEveryone: false,
+            reactions: [],
+            isEdited: false,
+            createdAt: timestamp,
+            updatedAt: timestamp,
           })
         );
 
         socket.emit("message:send", {
           _id: messageId,
-          senderId: auth_id,
-          recipientId: direct_chat?.current_direct_conversation?.userId,
-          messageType: "photo",
+          messageType: "image",
           message: {
             file: mediaPreviewUrls,
             text: message,
           },
-          conversationType: group,
           conversationId: activeChatId,
-          createdAt: messageCreatedAt,
-          updatedAt: messageCreatedAt,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+          senderId: auth?._id,
+          recipientId: direct_chat?.current_direct_conversation?.userId,
         });
 
         break;
@@ -120,34 +119,41 @@ const SendMediaMessage = () => {
         dispatch(
           addGroupMessage({
             _id: messageId,
-            messageType: "photo",
+            messageType: "image",
             message: {
               imageUrl: mediaPreviewUrls?.slice(-1)[0].url,
               description: message,
             },
-            conversationId: activeChatId,
-            conversationType: group,
-            createdAt: messageCreatedAt,
-            updatedAt: messageCreatedAt,
             isIncoming: false,
             isOutgoing: true,
             status: "pending",
-            isSeen: false,
+            readBy: [],
+            conversationId: activeChatId,
+            deletedFor: [],
+            isDeletedForEveryone: [],
+            reactions: [],
+            isEdited: false,
+            createdAt: timestamp,
+            updatedAt: timestamp,
           })
         );
         socket.emit("group:message:send", {
           _id: messageId,
-          senderId: auth_id,
-          recipientsIds: userList,
-          messageType: "photo",
+          messageType: "image",
           message: {
             file: mediaPreviewUrls,
             text: message,
           },
-          conversationType: group,
           conversationId: activeChatId,
-          createdAt: messageCreatedAt,
-          updatedAt: messageCreatedAt,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+          senderId: auth?._id,
+          recipientsIds: userList,
+          from: {
+            _id: auth?._id,
+            userName: auth?.userName,
+            avatar: auth?.avatar,
+          },
         });
         break;
     }

@@ -4,8 +4,9 @@ import { setfullImagePreview } from "../../../../store/slices/conversation";
 import { Icons } from "../../../../icons";
 import Loader from "../../../ui/Loader";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
+import { MessageActions } from "../../../ui/Dropdowns/actions/MessageActions";
 
-export const DirectMediaMsg = ({
+export const DirectImageMsg = ({
   el,
   scrollToBottom,
 }: {
@@ -17,10 +18,12 @@ export const DirectMediaMsg = ({
 
   return (
     <div
-      className={`Media_msg w-fit flex gap-4 ${
+      className={`Media_msg relative w-fit flex group items-start ${
         !el.isIncoming ? "ml-auto" : ""
       }`}
     >
+      {!el.isIncoming && <MessageActions message={el} />}
+
       <div className={`p-1 rounded-xl space-y-1`}>
         <div
           className={`Media_Container p-1 relative border-1  shadow rounded-lg ${
@@ -30,6 +33,7 @@ export const DirectMediaMsg = ({
           }`}
         >
           <div
+            className="cursor-pointer"
             onClick={() => dispatch(setfullImagePreview({ fullviewImg: el }))}
           >
             <img

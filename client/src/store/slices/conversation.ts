@@ -31,12 +31,16 @@ const slice = createSlice({
       const messages = action.payload;
       if (messages?.length > 0) {
         state.direct_chat.current_direct_messages = messages;
+      } else {
+        state.direct_chat.current_direct_messages = [];
       }
     },
     setCurrentGroupMessages(state, action) {
       const messages = action.payload;
       if (messages?.length > 0) {
         state.group_chat.current_group_messages = messages;
+      } else {
+        state.group_chat.current_group_messages = [];
       }
     },
 

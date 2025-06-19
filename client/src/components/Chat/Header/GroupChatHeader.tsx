@@ -18,10 +18,7 @@ const GroupChatHeader = ({ handleOpenShowDetails = () => {} }) => {
     dispatch(ResetGroupChat());
   };
 
-  const participants = [
-    current_group_conversation?.admin,
-    ...(current_group_conversation?.users || []),
-  ]
+  const participants = [...(current_group_conversation?.users || [])]
     .filter((user) => user?._id !== auth?._id)
     .map((el, i, arr) => {
       const name = el?._id === auth?._id ? "you" : el?.userName;
@@ -48,9 +45,15 @@ const GroupChatHeader = ({ handleOpenShowDetails = () => {} }) => {
           <p className="text-base font-medium text-gray-900 truncate">
             {current_group_conversation?.name}
           </p>
-          <p className="text-sm truncate">
-            {isTyping ? `${isTyping} is typing` : `you${participants.join("")}`}
-          </p>
+          {isTyping ? (
+            <p className="text-sm text-green-500 truncate">
+              {isTyping} is typing
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500 truncate">
+              you ,{participants.join("")}
+            </p>
+          )}
         </div>
       </div>
 

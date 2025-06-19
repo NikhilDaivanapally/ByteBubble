@@ -1,13 +1,12 @@
 import { GroupMessageProps } from "../../../../types";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../../../store/store";
+import { useDispatch } from "react-redux";
 import { setfullImagePreview } from "../../../../store/slices/conversation";
 import { Icons } from "../../../../icons";
-import getSenderFromGroup from "../../../../utils/get-sender-from-group";
 import Loader from "../../../ui/Loader";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
+import { MessageActions } from "../../../ui/Dropdowns/actions/MessageActions";
 
-export const GroupMediaMsg = ({
+export const GroupImageMsg = ({
   el,
   usersLength,
   scrollToBottom,
@@ -17,25 +16,23 @@ export const GroupMediaMsg = ({
 
   scrollToBottom: () => void;
 }) => {
-  const { GroupConversations } = useSelector(
-    (state: RootState) => state.conversation.group_chat
-  );
-  const sender = getSenderFromGroup(el, "group", GroupConversations);
   const dispatch = useDispatch();
   const time = formatTo12HourTime(el?.createdAt);
   const readUsers = el.readBy?.length ?? 0;
   const seen = usersLength > 0 && readUsers >= usersLength;
   return (
     <div
-      className={`Media_msg w-fit flex gap-4 ${
+      className={`Media_msg relative w-fit flex group items-start  ${
         !el.isIncoming ? "ml-auto" : ""
       }`}
     >
+      {!el.isIncoming && <MessageActions message={el} />}
+
       {el.isIncoming && (
-        <div className="user_profile w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
+        <div className="user_profile mr-2 w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
           <img
-            src={sender.avatar}
             className="w-full h-full object-cover"
+            src={el.from?.avatar}
             alt=""
           />
         </div>
@@ -48,8 +45,14 @@ export const GroupMediaMsg = ({
               : "bg-white rounded-bl-none border-gray-200"
           }`}
         >
-          <p className="userName">{sender.userName}</p>
+          {el.isIncoming && (
+            <p className="userName text-black/60 text-sm">
+              {el.from?.userName}
+            </p>
+          )}
+
           <div
+            className="cursor-pointer"
             onClick={() => dispatch(setfullImagePreview({ fullviewImg: el }))}
           >
             <img

@@ -6,7 +6,7 @@ import { setfullImagePreview } from "../../../../store/slices/conversation";
 import { Icons } from "../../../../icons";
 import { Avatar } from "../../../ui/Avatar";
 import { direct } from "../../../../utils/conversation-types";
-import ShowMedia from "../../../ShowMedia";
+import DirectMediaPreviewSlider from "../MediaPreviewSlider/DirectMediaPreviewSlider";
 
 type Props = {
   showDetails: boolean;
@@ -109,7 +109,7 @@ const DirectProfileDetails = ({
               </div>
             </div>
           </div>
-          <ShowMedia
+          <DirectMediaPreviewSlider
             showAllMedia={showAllMedia}
             handleCloseAllMedia={handleCloseAllMedia}
           />

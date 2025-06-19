@@ -1,23 +1,36 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+// Optimized and Scalable TextInputForm.tsx with Enhanced Attachment Animation and Emoji Picker Dismissal
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  FormEvent,
+  ChangeEvent,
+} from "react";
 import EmojiPicker from "emoji-picker-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useDispatch, useSelector } from "react-redux";
 import { ObjectId } from "bson";
+
 import { RootState } from "../../../store/store";
-import { direct, group } from "../../../utils/conversation-types";
+import { direct } from "../../../utils/conversation-types";
 import useTypingStatus from "../../../hooks/use-typing-status";
 import { socket } from "../../../socket";
 import {
   addDirectMessage,
   addGroupMessage,
 } from "../../../store/slices/conversation";
-import { Icons } from "../../../icons";
 import {
   updateMediaFiles,
   updateMediaPreviewUrls,
   updateOpenCamera,
 } from "../../../store/slices/appSlice";
 import { parseFiles } from "../../../utils/parse-files";
+import { Icons } from "../../../icons";
+import useClickOutside from "../../../hooks/use-clickoutside";
+
+const MAX_TEXTAREA_HEIGHT = 130;
+
 const TextInputForm = ({
   handleRecording,
 }: {
@@ -25,8 +38,11 @@ const TextInputForm = ({
 }) => {
   const dispatch = useDispatch();
   const [message, setMessage] = useState("");
-  const [isEmojiPickerActive, setIsEmojiPickerActive] = useState(false);
-  const [isAttachementActive, setIsAttachementActive] = useState(false);
+  const [isEmojiPickerVisible, setEmojiPickerVisible] = useState(false);
+  const [isAttachmentVisible, setAttachmentVisible] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const emojiRef = useRef<HTMLDivElement>(null);
+  const attachmentRef = useRef<HTMLDivElement>(null);
 
   const { activeChatId, chatType } = useSelector(
     (state: RootState) => state.app
@@ -36,31 +52,25 @@ const TextInputForm = ({
   );
   const auth = useSelector((state: RootState) => state.auth.user);
 
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  const currentConversation = useMemo(() => {
-    if (chatType === direct) {
-      return direct_chat.current_direct_conversation?.userId;
-    }
-    const groupUsers = group_chat?.current_group_conversation?.users || [];
-    const admin = group_chat?.current_group_conversation?.admin;
-    return [...groupUsers, admin]
-      .filter((u) => u?._id !== auth?._id)
-      .map((u) => u?._id);
-  }, [chatType, direct_chat, group_chat]);
-
+  const isDirect = chatType === direct;
   const userList = useMemo(() => {
     const users = group_chat?.current_group_conversation?.users || [];
-    const admin = group_chat?.current_group_conversation?.admin;
-    return [...users, admin]
-      .filter((u) => u?._id !== auth?._id)
-      .map((u) => u?._id);
-  }, [group_chat]);
+    return users.filter((u) => u?._id !== auth?._id).map((u) => u?._id);
+  }, [group_chat, auth?._id]);
+
+  const currentConversation = useMemo(() => {
+    return isDirect
+      ? direct_chat.current_direct_conversation?.userId
+      : userList;
+  }, [isDirect, direct_chat, userList]);
 
   const { handleTyping } = useTypingStatus(
     socket,
     activeChatId,
-    { auth_id: auth?._id, userName: auth?.userName },
+    {
+      auth_id: auth?._id,
+      userName: auth?.userName,
+    },
     chatType,
     currentConversation
   );
@@ -68,71 +78,85 @@ const TextInputForm = ({
   const containsUrl = (text: string) => /(https?:\/\/[^\s]+)/gi.test(text);
 
   const autoResize = () => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = Math.min(textarea.scrollHeight, 130) + "px";
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(
+        textareaRef.current.scrollHeight,
+        MAX_TEXTAREA_HEIGHT
+      )}px`;
     }
   };
 
-  useEffect(() => {
-    autoResize();
-  }, []);
+  useEffect(autoResize, []);
 
   useEffect(() => {
-    if (textareaRef.current) textareaRef.current.focus();
+    textareaRef.current?.focus();
   }, [
     direct_chat.current_direct_messages,
     group_chat.current_group_messages,
     activeChatId,
   ]);
 
-  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!message.trim()) return;
+
     const messageId = new ObjectId().toHexString();
     const timestamp = new Date().toISOString();
-
+    const messageType = containsUrl(message) ? "link" : "text";
     const messagePayload = {
       _id: messageId,
-      messageType: containsUrl(message) ? "link" : "text",
+      messageType,
       message: { text: message },
       conversationId: activeChatId,
       createdAt: timestamp,
       updatedAt: timestamp,
     };
 
-    if (chatType === direct) {
+    if (isDirect) {
       dispatch(
         addDirectMessage({
           ...messagePayload,
           isIncoming: false,
           isOutgoing: true,
           status: "pending",
-          isSeen: false,
+          isRead: false,
+          deletedFor: [],
+          isDeletedForEveryone: false,
+          reactions: [],
+          isEdited: false,
         })
       );
+
       socket.emit("message:send", {
         ...messagePayload,
         senderId: auth?._id,
-        recipientId: direct_chat.current_direct_conversation?.userId,
+        recipientId: currentConversation,
       });
     } else {
       dispatch(
         addGroupMessage({
           ...messagePayload,
-          conversationType: group,
           isIncoming: false,
           isOutgoing: true,
           status: "pending",
-          isSeen: [],
+          readBy: [],
+          deletedFor: [],
+          isDeletedForEveryone: [],
+          reactions: [],
+          isEdited: false,
         })
       );
+
       socket.emit("group:message:send", {
         ...messagePayload,
         senderId: auth?._id,
         recipientsIds: userList,
-        conversationType: group,
+        from: {
+          _id: auth?._id,
+          userName: auth?.userName,
+          avatar: auth?.avatar,
+        },
       });
     }
 
@@ -141,15 +165,15 @@ const TextInputForm = ({
 
   const handleEmojiClick = (emoji: any) => {
     setMessage((prev) => prev + emoji.emoji);
-    setIsEmojiPickerActive(false);
+    setEmojiPickerVisible(false);
   };
 
-  const attachementsArray = [
+  const attachments = [
     {
       icon: <Icons.DocumentIcon className="w-5 text-violet-400" />,
       title: "Documents",
       accept: ".pdf, .doc, .docx, .xls, .xlsx",
-      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange: (e: ChangeEvent<HTMLInputElement>) => {
         dispatch(updateMediaFiles(e.target.files));
       },
     },
@@ -157,14 +181,14 @@ const TextInputForm = ({
       icon: <Icons.PhotoIcon className="w-5 text-blue-400" />,
       title: "Photos & Videos",
       accept: "image/*",
-      onChange: async (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange: async (e: ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
-        setIsAttachementActive(false);
-        const filesArray = Object.values(files);
-        dispatch(updateMediaFiles(filesArray));
-        const parsed = await parseFiles(filesArray);
-        dispatch(updateMediaPreviewUrls(parsed));
+        setAttachmentVisible(false);
+        const fileArray = Array.from(files);
+        dispatch(updateMediaFiles(fileArray));
+        const previewUrls = await parseFiles(fileArray);
+        dispatch(updateMediaPreviewUrls(previewUrls));
       },
     },
     {
@@ -172,10 +196,19 @@ const TextInputForm = ({
       title: "Camera",
       onClick: () => {
         dispatch(updateOpenCamera(true));
-        setIsAttachementActive(false);
+        setAttachmentVisible(false);
       },
     },
   ];
+
+  useClickOutside(
+    [emojiRef, attachmentRef],
+    () => {
+      setEmojiPickerVisible(false);
+      setAttachmentVisible(false);
+    },
+    { closeOnEscape: true }
+  );
 
   return (
     <form
@@ -183,85 +216,98 @@ const TextInputForm = ({
       className="w-full flex items-center gap-1 md:gap-3 p-1 md:p-1 bg-light mt-4 max-w-3xl rounded-lg md:rounded-xl mx-auto"
     >
       <textarea
-        value={message}
-        rows={1}
-        placeholder="write your message"
-        className="resize-none flex-1 w-full pl-2 placeholder:tracking-normal outline-none"
         ref={textareaRef}
+        rows={1}
+        value={message}
         onChange={(e) => {
           setMessage(e.target.value);
           autoResize();
           handleTyping();
         }}
+        placeholder="Write your message"
+        className="resize-none flex-1 w-full pl-2 placeholder:tracking-normal outline-none"
       />
 
-      <div className="p-1 relative cursor-pointer rounded-lg text-black/60">
+      {/* Emoji Picker */}
+      <div
+        ref={emojiRef}
+        className="p-1 relative cursor-pointer rounded-lg text-black/60"
+      >
         <Icons.SmileIcon
+          onClick={() => setEmojiPickerVisible(!isEmojiPickerVisible)}
           className="text-xl select-none"
-          onClick={() => setIsEmojiPickerActive((prev) => !prev)}
         />
-        <div className="absolute bottom-[160%] right-0 translate-x-1/4 md:right-full z-60 bg-gray-300">
-          <EmojiPicker
-            onEmojiClick={handleEmojiClick}
-            autoFocusSearch={false}
-            skinTonesDisabled={true}
-            searchDisabled={false}
-            lazyLoadEmojis={true}
-            height={370}
-            width={320}
-            open={isEmojiPickerActive}
-            previewConfig={{ showPreview: false }}
-            style={{ backgroundColor: "white" }}
-          />
-        </div>
+        {isEmojiPickerVisible && (
+          <div className="absolute bottom-[160%] right-0 translate-x-1/4 md:right-full z-60 bg-gray-300">
+            <EmojiPicker
+              onEmojiClick={handleEmojiClick}
+              autoFocusSearch={false}
+              skinTonesDisabled
+              searchDisabled={false}
+              lazyLoadEmojis
+              height={370}
+              width={320}
+              open={isEmojiPickerVisible}
+              previewConfig={{ showPreview: false }}
+              style={{ backgroundColor: "white" }}
+            />
+          </div>
+        )}
       </div>
 
-      <div className="p-1 relative cursor-pointer rounded-lg text-black/60">
+      {/* Attachments */}
+      <div
+        ref={attachmentRef}
+        className="p-1 relative cursor-pointer rounded-lg text-black/60"
+      >
         <Icons.AttachmentIcons
           className="text-xl"
-          onClick={() => setIsAttachementActive((prev) => !prev)}
+          onClick={() => setAttachmentVisible(true)}
         />
         <AnimatePresence>
-          {isAttachementActive && (
+          {isAttachmentVisible && (
             <motion.div
-              initial={{ scaleY: 0, opacity: 0 }}
-              animate={{ scaleY: 1, opacity: 1 }}
-              exit={{ scaleY: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="p-2 rounded-md space-y-1 origin-bottom absolute bottom-[160%] right-0 translate-x-1/4 md:right-full z-60 bg-gray-300"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="p-2 rounded-md space-y-1 origin-bottom absolute bottom-[160%] right-0 translate-x-1/4 md:right-full z-60 bg-gray-300 shadow-lg"
             >
               <ul>
-                {attachementsArray.map((el, i) => (
-                  <li key={i} className="list-none">
-                    {el.onChange ? (
-                      <label className="flex gap-2 p-2 text-sm text-nowrap rounded-md transition-all hover:bg-gray-200 cursor-pointer">
-                        {el.icon}
-                        <span>{el.title}</span>
-                        <input
-                          type="file"
-                          hidden
-                          accept={el.accept}
-                          multiple
-                          onChange={el.onChange}
-                        />
-                      </label>
-                    ) : (
-                      <div
-                        className="flex gap-2 p-2 text-sm text-nowrap rounded-md transition-all hover:bg-gray-200 cursor-pointer"
-                        onClick={el.onClick}
-                      >
-                        {el.icon}
-                        <span>{el.title}</span>
-                      </div>
-                    )}
-                  </li>
-                ))}
+                {attachments.map(
+                  ({ icon, title, accept, onChange, onClick }, i) => (
+                    <li key={i} className="list-none">
+                      {onChange ? (
+                        <label className="flex gap-2 p-2 text-sm rounded-md hover:bg-gray-200 cursor-pointer">
+                          {icon}
+                          <span>{title}</span>
+                          <input
+                            type="file"
+                            hidden
+                            accept={accept}
+                            multiple
+                            onChange={onChange}
+                          />
+                        </label>
+                      ) : (
+                        <div
+                          className="flex gap-2 p-2 text-sm rounded-md hover:bg-gray-200 cursor-pointer"
+                          onClick={onClick}
+                        >
+                          {icon}
+                          <span>{title}</span>
+                        </div>
+                      )}
+                    </li>
+                  )
+                )}
               </ul>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
+      {/* Mic Button */}
       <div
         className="p-1 cursor-pointer rounded-lg text-black/60"
         onClick={handleRecording}
@@ -269,9 +315,10 @@ const TextInputForm = ({
         <Icons.MicPrimary className="text-xl" />
       </div>
 
+      {/* Send Button */}
       <button
         type="submit"
-        className="p-3 cursor-pointer bg-btn-primary text-white rounded-lg"
+        className="p-3 bg-btn-primary text-white rounded-lg"
       >
         <Icons.SendIcon className="text-xl" />
       </button>

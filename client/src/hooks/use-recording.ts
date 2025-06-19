@@ -7,6 +7,7 @@ import {
   addGroupMessage,
 } from "../store/slices/conversation";
 import { direct, group } from "../utils/conversation-types";
+import { ObjectId } from "bson";
 
 const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
   const dispatch = useDispatch();
@@ -217,8 +218,8 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
       handleRecording();
     }
 
-    const messageId = crypto.randomUUID();
-    const messageCreatedAt = new Date().toISOString();
+    const messageId = new ObjectId().toHexString();
+    const timestamp = new Date().toISOString();
 
     switch (chatType) {
       case direct:
@@ -229,24 +230,45 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
             message: {
               audioId: audioUrl,
             },
-            conversationId: activeChatId,
-            createdAt: messageCreatedAt,
-            updatedAt: messageCreatedAt,
             isIncoming: false,
             isOutgoing: true,
             status: "pending",
-            isSeen: false,
+            isRead: false,
+            conversationId: activeChatId,
+            deletedFor: [],
+            isDeletedForEveryone: false,
+            reactions: [],
+            isEdited: false,
+            createdAt: timestamp,
+            updatedAt: timestamp,
           })
         );
-        socket.emit("message:send", {
+        console.log({
           _id: messageId,
-          senderId: auth?._id,
-          recipientId: direct_chat.current_direct_conversation?.userId,
           messageType: "audio",
           message: new Blob(AudioChunksRef.current, { type: "audio/wav" }),
           conversationId: activeChatId,
-          createdAt: messageCreatedAt,
-          updatedAt: messageCreatedAt,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+          senderId: auth?._id,
+          recipientId: direct_chat.current_direct_conversation?.userId,
+        });
+
+        const directAudioBlob = new Blob(AudioChunksRef.current, {
+          type: "audio/wav",
+        });
+
+        directAudioBlob.arrayBuffer().then((arrayBuffer) => {
+          socket.emit("message:send", {
+            _id: messageId,
+            messageType: "audio",
+            message: arrayBuffer, // Send as ArrayBuffer
+            conversationId: activeChatId,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+            senderId: auth?._id,
+            recipientId: direct_chat.current_direct_conversation?.userId,
+          });
         });
 
         break;
@@ -258,27 +280,40 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
             message: {
               audioId: audioUrl,
             },
-            conversationId: activeChatId,
-            conversationType: group,
-            createdAt: messageCreatedAt,
-            updatedAt: messageCreatedAt,
             isIncoming: false,
             isOutgoing: true,
             status: "pending",
-            isSeen: false,
+            readBy: [],
+            conversationId: activeChatId,
+            deletedFor: [],
+            isDeletedForEveryone: [],
+            reactions: [],
+            isEdited: false,
+            createdAt: timestamp,
+            updatedAt: timestamp,
           })
         );
 
-        socket.emit("group:message:send", {
-          _id: messageId,
-          senderId: auth?._id,
-          recipientsIds: userList,
-          messageType: "audio",
-          message: new Blob(AudioChunksRef.current, { type: "audio/wav" }),
-          conversationType: group,
-          conversationId: activeChatId,
-          createdAt: messageCreatedAt,
-          updatedAt: messageCreatedAt,
+        const groupAudioBlob = new Blob(AudioChunksRef.current, {
+          type: "audio/wav",
+        });
+
+        groupAudioBlob.arrayBuffer().then((arrayBuffer) => {
+          socket.emit("group:message:send", {
+            _id: messageId,
+            messageType: "audio",
+            message: arrayBuffer,
+            conversationId: activeChatId,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+            senderId: auth?._id,
+            recipientsIds: userList,
+            from: {
+              _id: auth?._id,
+              userName: auth?.userName,
+              avatar: auth?.avatar,
+            },
+          });
         });
 
         break;

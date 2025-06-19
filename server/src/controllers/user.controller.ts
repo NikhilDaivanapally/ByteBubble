@@ -185,7 +185,7 @@ const getDirectConversations = async (
       {
         $match: {
           participants: {
-            $in: [req.user?._id],
+            $in: [new mongoose.Types.ObjectId(req.user?._id)],
           },
         },
       },
@@ -265,10 +265,11 @@ const getDirectConversation = async (
     },
     ...getDirectConversationsPipeline(req.user?._id),
   ]);
-  const formattedDirectConversation:DirectConversationResponse[] = formatDirectConversations(
-    Directconversation as AggregatedDirectConversation[],
-    authUserId as string
-  );
+  const formattedDirectConversation: DirectConversationResponse[] =
+    formatDirectConversations(
+      Directconversation as AggregatedDirectConversation[],
+      authUserId as string
+    );
   const hasMessages = formattedDirectConversation[0]?.message?.message ?? null;
   if (hasMessages) {
     res.status(200).json({
@@ -306,10 +307,11 @@ const getGroupConversation = async (
     ...getGroupConversationsPipeline(),
   ]);
 
-  const formattedGroupConversation:GroupConversationResponse[] = formatGroupConversations(
-    Groupconversation as AggregatedGroupConversation[],
-    authUserId as string
-  );
+  const formattedGroupConversation: GroupConversationResponse[] =
+    formatGroupConversations(
+      Groupconversation as AggregatedGroupConversation[],
+      authUserId as string
+    );
 
   if (formattedGroupConversation.length) {
     res.status(200).json({

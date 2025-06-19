@@ -58,21 +58,25 @@ export const useMessageEvents = (enabled: boolean) => {
       const isCurrent = isCurrentConversation(conversationId);
 
       if (isCurrent) {
-        socket.emit("message:seen", { _id, senderId });
         dispatch(
           addDirectMessage({
             _id,
             message: msgContent,
             messageType,
-            createdAt,
-            updatedAt,
             isIncoming: true,
             isOutgoing: false,
-            isSeen: true,
+            isRead: true,
             status: "sent",
             conversationId,
+            deletedFor: [],
+            isDeletedForEveryone: [],
+            reactions: [],
+            isEdited: false,
+            createdAt,
+            updatedAt,
           })
         );
+        socket.emit("message:seen", { _id, senderId });
       } else {
         socket.emit("message:unread:update", message);
       }
@@ -103,7 +107,7 @@ export const useMessageEvents = (enabled: boolean) => {
       );
       if (!conversation) return;
 
-      dispatch(updateDirectConversation({ ...conversation, isSeen: true }));
+      dispatch(updateDirectConversation({ ...conversation, isRead: true }));
       dispatch(updateDirectMessagesSeen({}));
     },
     [dispatch, direct_chat]
@@ -193,43 +197,30 @@ export const useGroupMessageEvents = (enabled: boolean) => {
 
   const handleNewGroupMessage = useCallback(
     (message: any) => {
-      const {
-        _id,
-        senderId,
-        recipientsIds,
-        conversationId,
-        message: msgContent,
-        messageType,
-        createdAt,
-        updatedAt,
-      } = message;
-      const isIncoming = Array.isArray(recipientsIds)
-        ? recipientsIds.includes(user?._id)
-        : recipientsIds === user?._id;
-      const isOutgoing = senderId === user?._id;
+      const isIncoming = message?.recipientsIds?.includes(user?._id);
+      const isOutgoing = message?.senderId === user?._id;
 
-      if (isCurrentConversation(conversationId)) {
+      if (isCurrentConversation(message?.conversationId)) {
         socket.emit("group:message:seen", {
-          messageId: _id,
-          senderId,
+          messageId: message?._id,
+          senderId: message?.senderId,
           user: {
             userId: user?._id,
-            isSeen: true,
+            isRead: true,
             seenAt: new Date().toISOString(),
           },
         });
         dispatch(
           addGroupMessage({
-            _id,
-            message: msgContent,
-            messageType,
-            createdAt,
-            updatedAt,
+            ...message,
             isIncoming,
             isOutgoing,
             status: "sent",
-            from: senderId,
-            conversationId,
+            readBy: [],
+            deletedFor: [],
+            isDeletedForEveryone: [],
+            reactions: [],
+            isEdited: false,
           })
         );
       } else {
@@ -262,14 +253,14 @@ export const useGroupMessageEvents = (enabled: boolean) => {
       );
       if (!conversation) return;
 
-      const alreadySeen = (conversation.isSeen || []).some(
+      const alreadySeen = (conversation.readBy || []).some(
         (u: any) => u?.userId === user?.userId
       );
       if (!alreadySeen) {
         dispatch(
           updateGroupConversation({
             ...conversation,
-            isSeen: [...(conversation.isSeen || []), user],
+            readBy: [...(conversation.readBy || []), user],
           })
         );
       }
@@ -292,9 +283,6 @@ export const useGroupMessageEvents = (enabled: boolean) => {
           console.error("Failed to fetch group conversation", err);
         }
       } else {
-        const foundUser = [...existing.users, existing.admin].find(
-          (u) => u?._id == message?.senderId
-        );
         dispatch(
           updateGroupConversation({
             ...existing,
@@ -304,11 +292,7 @@ export const useGroupMessageEvents = (enabled: boolean) => {
               message: message?.message,
               createdAt: message?.createdAt,
             },
-            from: foundUser && {
-              _id: foundUser?._id,
-              avatar: foundUser?.avatar,
-              userName: foundUser?.userName,
-            },
+            from: message?.from,
             time: message?.createdAt,
             unreadMessagesCount: (existing.unreadMessagesCount || 0) + 1,
           })

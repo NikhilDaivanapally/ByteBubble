@@ -38,6 +38,6 @@ export type GroupConversationResponse = {
   isOutgoing: boolean;
   time: Date | undefined;
   unreadMessagesCount: number;
-  readBy: Types.ObjectId[];
+  readBy: { userId: Types.ObjectId; isRead: boolean; seenAt: Date }[];
   meta: Record<string, GroupParticipantMeta>;
 };

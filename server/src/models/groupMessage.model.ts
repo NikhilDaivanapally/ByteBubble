@@ -31,7 +31,7 @@ const groupMessageSchema = new Schema<GroupMessageDoc>(
       required: true,
     },
     messageType: { type: String, enum: messageTypes, required: true },
-    readBy: ReadBySchema,
+    readBy: { type: [ReadBySchema], default: [] },
     deletedFor: [{ type: Schema.Types.ObjectId, ref: "User" }],
     isDeletedForEveryone: { type: Boolean, default: false },
     reactions: [

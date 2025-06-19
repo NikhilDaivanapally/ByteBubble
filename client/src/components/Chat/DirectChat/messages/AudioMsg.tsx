@@ -3,6 +3,7 @@ import { DirectMessageProps } from "../../../../types";
 import { Icons } from "../../../../icons";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import WaveSurfer from "wavesurfer.js";
+import { MessageActions } from "../../../ui/Dropdowns/actions/MessageActions";
 
 export const DirectAudioMsg = ({ el }: { el: DirectMessageProps }) => {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -81,10 +82,12 @@ export const DirectAudioMsg = ({ el }: { el: DirectMessageProps }) => {
 
   return (
     <div
-      className={`Audio_msg w-fit flex gap-4 ${
+      className={`Audio_msg relative w-fit flex group items-start ${
         !el.isIncoming ? "ml-auto" : ""
       }`}
     >
+      {!el.isIncoming && <MessageActions message={el} />}
+
       {el.message?.audioId && (
         <div className="space-y-1">
           <div

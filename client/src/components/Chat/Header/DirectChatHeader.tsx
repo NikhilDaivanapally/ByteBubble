@@ -38,13 +38,13 @@ const DirectChatHeader = ({ handleOpenShowDetails = () => {} }) => {
           <p className="text-base font-medium text-gray-900 truncate">
             {current_direct_conversation?.name}
           </p>
-          <p className="text-sm truncate">
-            {isTyping
-              ? "Typing..."
-              : current_direct_conversation?.isOnline
-              ? "Online"
-              : "Offline"}
-          </p>
+          {isTyping ? (
+            <p className="text-sm text-green-500 truncate">Typing...</p>
+          ) : (
+            <p className="text-sm text-gray-500 truncate">
+              {current_direct_conversation?.isOnline ? "Online" : "Offline"}
+            </p>
+          )}
         </div>
       </div>
 
