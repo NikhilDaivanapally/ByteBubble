@@ -1,5 +1,4 @@
-// Optimized and Scalable TextInputForm.tsx with Enhanced Attachment Animation and Emoji Picker Dismissal
-import React, {
+import {
   useEffect,
   useMemo,
   useRef,
@@ -273,7 +272,7 @@ const TextInputForm = ({
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
               className="p-2 rounded-md space-y-1 origin-bottom absolute bottom-[160%] right-0 translate-x-1/4 md:right-full z-60 bg-gray-300 shadow-lg"
             >
-              <ul>
+              <ul className="whitespace-nowrap">
                 {attachments.map(
                   ({ icon, title, accept, onChange, onClick }, i) => (
                     <li key={i} className="list-none">

@@ -64,7 +64,6 @@ const GroupProfileDetails = ({
   const handleCloseAllMedia = useCallback(() => setShowAllMedia(false), []);
 
   const groupMembers = [
-    currentConversation?.admin,
     ...(currentConversation?.users || ([] as UserProps[])),
   ].filter((user) => user?._id !== auth?._id);
 

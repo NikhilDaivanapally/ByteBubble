@@ -9,14 +9,18 @@ import { AggregatedGroupConversation } from "../../types/aggregated-response/con
 import { GroupConversationResponse } from "../../types/response/conversation/group-conversation-response.type";
 export async function handleCreateGroup(data: any, io: Server) {
   const { name, image, participants, createdBy } = data;
-  const avatar = await cloudinary.uploader.upload(image);
-  const document = await GroupConversation.create({
+
+  let doc: any = {
     name,
-    avatar: avatar?.secure_url,
     participants,
     createdBy,
-  });
+  };
 
+  if (image) {
+    const avatar = await cloudinary.uploader.upload(image);
+    doc.avatar = avatar?.secure_url;
+  }
+  const document = await GroupConversation.create(doc);
   const Groupconversation = await GroupConversation.aggregate([
     {
       $match: {
