@@ -19,14 +19,22 @@ const authSlice = createSlice({
       state.user = action.payload;
       state.isAuthenticated = true;
     },
-
-    logout(state) {
-      state.user = null;
-      state.isAuthenticated = false;
+    blockUser(state, action) {
+      if (state.user) {
+        state?.user.blockedUsers.push(action.payload);
+      }
+    },
+    removeFromBlockList(state, action) {
+      if (state.user) {
+        const newBlockedUser = state.user.blockedUsers.filter(
+          (id) => id !== action.payload
+        );
+        state.user.blockedUsers = newBlockedUser;
+      }
     },
   },
 });
 
-export const { setUser, logout } = authSlice.actions;
+export const { setUser, blockUser, removeFromBlockList } = authSlice.actions;
 
 export default authSlice.reducer;

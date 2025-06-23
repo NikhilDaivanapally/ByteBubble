@@ -10,6 +10,8 @@ import registerPrivateMessageEvents from "./events/PrivateMessageEvents";
 import registerFriendRequestEvents from "./events/FriendRequestEvents";
 import registerTypingEvents from "./events/TypingEvents";
 import msgpackParser from "socket.io-msgpack-parser";
+import registerGroupSystemEvents from "./events/GroupSystemEvents";
+import registerPrivateSystemEvents from "./events/PrivateSystemEvents";
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -17,7 +19,7 @@ const io = new Server(server, {
   parser: msgpackParser,
   cors: {
     origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   },
 });
 
@@ -103,6 +105,8 @@ io.on("connection", async (socket) => {
   registerGroupMessageEvents(socket, io);
   registerFriendRequestEvents(socket, io);
   registerTypingEvents(socket, io);
+  registerPrivateSystemEvents(socket, io);
+  registerGroupSystemEvents(socket, io);
 
   socket.on("exit", async (data) => {
     const { user_id, friends } = data;

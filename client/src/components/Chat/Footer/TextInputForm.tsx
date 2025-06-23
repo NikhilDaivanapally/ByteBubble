@@ -27,6 +27,9 @@ import {
 import { parseFiles } from "../../../utils/parse-files";
 import { Icons } from "../../../icons";
 import useClickOutside from "../../../hooks/use-clickoutside";
+import { Button } from "../../ui/Button";
+import { removeFromBlockList } from "../../../store/slices/authSlice";
+import { DirectSystemEventType } from "../../../constants/system-event-types";
 
 const MAX_TEXTAREA_HEIGHT = 130;
 
@@ -50,7 +53,6 @@ const TextInputForm = ({
     (state: RootState) => state.conversation
   );
   const auth = useSelector((state: RootState) => state.auth.user);
-
   const isDirect = chatType === direct;
   const userList = useMemo(() => {
     const users = group_chat?.current_group_conversation?.users || [];
@@ -85,7 +87,6 @@ const TextInputForm = ({
       )}px`;
     }
   };
-
   useEffect(autoResize, []);
 
   useEffect(() => {
@@ -208,6 +209,58 @@ const TextInputForm = ({
     },
     { closeOnEscape: true }
   );
+  const isConversationBlocked = useMemo(() => {
+    if (auth && direct_chat.current_direct_conversation) {
+      return auth?.blockedUsers.includes(
+        direct_chat?.current_direct_conversation?.userId
+      );
+    }
+    return false;
+  }, [auth, direct_chat.current_direct_conversation]);
+
+  if (isConversationBlocked) {
+    return (
+      <div className="w-full flex items-center justify-center gap-10 p-1 mt-4">
+        <Button
+          variant="danger-outline"
+          shape="full"
+          size="sm"
+          icon={<Icons.DeleteIcon className="w-4 text-gree-500" />}
+          className="shadow-2xl"
+        >
+          Delete Chat
+        </Button>
+        <Button
+          variant="success-outline"
+          shape="full"
+          size="sm"
+          icon={<Icons.NoSymbolIcon className="w-4 text-gree-500" />}
+          onClick={() => {
+            dispatch(
+              removeFromBlockList(
+                direct_chat.current_direct_conversation?.userId
+              )
+            );
+          }}
+        >
+          Unblock
+        </Button>
+      </div>
+    );
+  }
+  if (
+    direct_chat.current_direct_messages.at(-1)?.systemEventType ==
+    DirectSystemEventType.USER_BLOCKED
+  ) {
+    return (
+      <div className="w-full flex items-center justify-center gap-10 p-1 mt-4">
+        <div className="flex items-center gap-2">
+          <Icons.NoSymbolIcon className="w-4" />
+          you have been blocked by this user
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form

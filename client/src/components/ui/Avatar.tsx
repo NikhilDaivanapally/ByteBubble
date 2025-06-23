@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { Icons } from "../../icons";
 import { direct } from "../../utils/conversation-types";
 
-type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl";
+type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 type FallBackType = string | null;
 
 const sizeStyles = {
@@ -12,6 +12,7 @@ const sizeStyles = {
   md: "w-10 h-10",
   lg: "w-12 h-12",
   xl: "w-16 h-16",
+  "2xl": "w-20 h-20",
 };
 const fallBackStyle = {
   xs: "w-4 h-4",
@@ -19,6 +20,7 @@ const fallBackStyle = {
   md: "w-5 h-5",
   lg: "w-6 h-6",
   xl: "w-8 h-8",
+  "2xl": "w-10 h-10",
 };
 type AvatarProps = {
   url: string | undefined | null;

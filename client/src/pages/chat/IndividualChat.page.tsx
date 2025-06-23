@@ -40,7 +40,7 @@ const IndividualChat = () => {
       return;
 
     const lastMsg = current_direct_messages[current_direct_messages.length - 1];
-
+    console.log(lastMsg,'lastmsg');
     dispatch(
       updateDirectConversation({
         ...current_direct_conversation,
@@ -49,6 +49,9 @@ const IndividualChat = () => {
           messageType: lastMsg.messageType,
           message: lastMsg.message,
           createdAt: lastMsg.createdAt,
+          systemEventType: lastMsg?.systemEventType,
+          metadata: lastMsg?.metadata,
+          eventUserSnapshot: lastMsg?.eventUserSnapshot,
         },
         time: lastMsg.createdAt,
         isRead: lastMsg.isRead,

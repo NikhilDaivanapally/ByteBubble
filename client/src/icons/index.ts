@@ -35,6 +35,8 @@ import {
   ArrowUturnLeftIcon,
   InformationCircleIcon,
   MinusCircleIcon,
+  NoSymbolIcon,
+  BellIcon,
 } from "@heroicons/react/16/solid";
 import { LuClock4, LuSend, LuSmile } from "react-icons/lu";
 import { RiAttachment2 } from "react-icons/ri";
@@ -43,6 +45,7 @@ import { FaPause } from "react-icons/fa6";
 import { MdDelete, MdOutlineCameraAlt } from "react-icons/md";
 import { IoMic, IoPlay } from "react-icons/io5";
 import { LiaUserShieldSolid } from "react-icons/lia";
+import { CiLock ,CiBellOn } from "react-icons/ci";
 import { GoogleIcon } from "./SvgIcons";
 export const Icons = {
   XMarkIcon,
@@ -81,6 +84,8 @@ export const Icons = {
   ArrowUturnLeftIcon,
   InformationCircleIcon,
   MinusCircleIcon,
+  NoSymbolIcon,
+  BellIcon,
   UserShield: LiaUserShieldSolid,
   ClockIcon: LuClock4,
   SendIcon: LuSend,
@@ -93,4 +98,6 @@ export const Icons = {
   PlaySeconday: IoPlay,
   CameraIconSecondary: MdOutlineCameraAlt,
   GoogleIcon,
+  CiLock,
+  CiBellOn 
 };

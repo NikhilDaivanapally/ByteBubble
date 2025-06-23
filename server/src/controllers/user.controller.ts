@@ -48,6 +48,36 @@ const updateProfile = async (req: updateProfileRequest, res: Response) => {
   return;
 };
 
+const updateUserProfile = async (req: updateProfileRequest, res: Response) => {
+  try {
+    const userId = req.user?._id;
+    const { name, about } = req.body;
+
+    const updates: any = {};
+    if (name !== undefined) updates.userName = name;
+    if (about !== undefined) updates.about = about;
+    const avatarLocalpath = req.file?.path;
+    if (avatarLocalpath) {
+      updates.avatar = await uploadCloudinary(avatarLocalpath);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+    res.status(200).json({
+      status: "success",
+      data: updatedUser,
+      message: "User Updated successfully",
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: "failed", data: null, message: "Internal Server Error" });
+  }
+};
+
 const getUsers = async (req: updateProfileRequest, res: Response) => {
   const currentUserId = req.user?._id;
   const allUsers = await User.find({ verified: true }).select(userSelectFields);
@@ -413,4 +443,5 @@ export {
   getDirectConversation,
   getGroupConversation,
   createGroup,
+  updateUserProfile,
 };

@@ -1,10 +1,59 @@
 import { useEffect } from "react";
 import { socket } from "../socket";
 import { useDispatch, useSelector } from "react-redux";
-import { addGroupMessage } from "../store/slices/conversation";
+import {
+  addDirectMessage,
+  addGroupMessage,
+} from "../store/slices/conversation";
 import { RootState } from "../store/store";
 
-export const useSystemEvents = (enabled: boolean) => {
+export const useDirectSystemEvents = (enabled: boolean) => {
+  const dispatch = useDispatch();
+
+  const handleUserBlocked = (data: any) => {
+    dispatch(
+      addDirectMessage({
+        ...data,
+        isIncoming: false,
+        isOutgoing: false,
+        status: "sent",
+        isRead: false,
+        deletedFor: [],
+        isDeletedForEveryone: false,
+        reactions: [],
+        isEdited: false,
+      })
+    );
+  };
+  const handleUserUnblocked = (data: any) => {
+    dispatch(
+      addDirectMessage({
+        ...data,
+        isIncoming: false,
+        isOutgoing: false,
+        status: "sent",
+        isRead: false,
+        deletedFor: [],
+        isDeletedForEveryone: false,
+        reactions: [],
+        isEdited: false,
+      })
+    );
+  };
+  useEffect(() => {
+    if (!enabled) return;
+
+    socket.on("blocked", handleUserBlocked);
+    socket.on("unblocked", handleUserUnblocked);
+
+    return () => {
+      socket.off("blocked", handleUserBlocked);
+      socket.off("unblocked", handleUserUnblocked);
+    };
+  }, [enabled]);
+};
+
+export const useGroupSystemEvents = (enabled: boolean) => {
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
   const handleUserRemovedSuccess = (data: any) => {

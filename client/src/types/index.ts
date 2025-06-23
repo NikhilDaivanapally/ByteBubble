@@ -34,6 +34,8 @@ export type UserProps = {
   updatedAt: string;
   socketId: string;
   status: "Online" | "Offline" | string;
+  verified: boolean;
+  blockedUsers: string[];
 };
 
 export type FriendRequestProps = {

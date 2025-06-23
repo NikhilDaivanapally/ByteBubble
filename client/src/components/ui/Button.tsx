@@ -10,6 +10,7 @@ type ButtonVariant =
   | "danger"
   | "danger-outline"
   | "success"
+  | "success-outline"
   | "warning"
   | "info"
   | "link";
@@ -62,6 +63,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   danger: "bg-red-600 text-white hover:bg-red-700",
   "danger-outline": "border border-red-600 text-red-600 hover:bg-red-50",
   success: "bg-green-600 text-white hover:bg-green-700",
+  "success-outline": "border border-green-600 text-green-600 hover:bg-green-50",
   warning: "bg-yellow-500 text-black hover:bg-yellow-600",
   info: "bg-sky-500 text-white hover:bg-sky-600",
   link: "text-blue-600 underline hover:text-blue-800 p-0 h-auto",

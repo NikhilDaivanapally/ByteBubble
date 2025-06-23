@@ -34,6 +34,9 @@ const getFormattedMessage = (
     case "link":
       message = msg?.message?.text || "";
       break;
+    case "system":
+      message = msg?.systemEventType;
+      break;
     default:
       message = null;
   }

@@ -12,6 +12,7 @@ import {
   getGroupConversations,
   getUsers,
   updateProfile,
+  updateUserProfile,
 } from "../controllers/user.controller";
 
 const router = Router();
@@ -21,6 +22,13 @@ router.patch(
   ensureAuthenticated,
   upload.single("avatar"),
   updateProfile as RequestHandler
+);
+
+router.patch(
+  "/profile",
+  ensureAuthenticated,
+  upload.single("avatar"),
+  updateUserProfile as RequestHandler
 );
 router.get("/get_users", ensureAuthenticated, getUsers as RequestHandler);
 router.get("/get_friends", ensureAuthenticated, getFriends as RequestHandler);

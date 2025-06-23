@@ -1,5 +1,10 @@
 import { lazy } from "react";
 import { ProtectedPage } from "./pages/chat/ProtectedRoute.page";
+import EditProfile from "./components/Settings/EditProfile";
+import Setting from "./components/Settings/Setting";
+import AccountSettings from "./components/Settings/AccountSettings";
+import Notifications from "./components/Settings/Notifications";
+import Privacy from "./components/Settings/Privacy";
 
 // Lazy-loaded pages
 const Home = lazy(() => import("./pages/Home.page"));
@@ -14,6 +19,7 @@ const GroupChat = lazy(() => import("./pages/chat/GroupChat.page"));
 const Connect = lazy(() => import("./pages/chat/Connect.page"));
 const Settings = lazy(() => import("./pages/settings/Settings.page"));
 const NotFound = lazy(() => import("./pages/NotFound.page"));
+
 const appRoutes = [
   { path: "/", element: <Home /> },
   {
@@ -35,10 +41,22 @@ const appRoutes = [
       { path: "/chat", element: <IndividualChat /> },
       { path: "/group", element: <GroupChat /> },
       { path: "/connect", element: <Connect /> },
-      { path: "/settings", element: <Settings /> },
+      {
+        path: "/settings",
+        element: <Settings />,
+        children: [
+          { path: "", element: <Setting /> },
+          { path: "edit-profile", element: <EditProfile /> },
+          { path: "account-settings", element: <AccountSettings /> },
+          { path: "notifications", element: <Notifications /> },
+          { path: "privacy", element: <Privacy /> },
+          { path: "help", element: <div>Help</div> },
+          { path: "about", element: <div>About</div> },
+        ],
+      },
     ],
   },
-  { path: "*", element: <NotFound /> }, // 404 fallback
+  { path: "*", element: <NotFound /> },
 ];
 
 export default appRoutes;

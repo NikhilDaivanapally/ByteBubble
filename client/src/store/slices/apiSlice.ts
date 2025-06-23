@@ -26,7 +26,6 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
-
     success: builder.query({
       query: () => "/v1/auth/login/success",
       keepUnusedDataFor: 2, // cache duration in seconds
@@ -68,7 +67,7 @@ export const apiSlice = createApi({
     }),
     updateuser: builder.mutation({
       query: (data) => ({
-        url: `/v1/user/update-profile`,
+        url: `/v1/user/profile`,
         method: "PATCH",
         body: data,
       }),

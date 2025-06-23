@@ -46,6 +46,7 @@ const slice = createSlice({
 
     // updating a conversation
     updateDirectConversation(state, action) {
+      console.log(action, "triggered by");
       const updatedList = (state.direct_chat?.DirectConversations || []).map(
         (el) => (el?._id !== action.payload?._id ? el : action.payload)
       );
