@@ -72,6 +72,13 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
+    updatePassword: builder.mutation({
+      query: (data) => ({
+        url: `/v1/user/update-password`,
+        method: "PATCH",
+        body: data,
+      }),
+    }),
     fetchUsers: builder.query({
       query: () => "/v1/user/get_users",
       keepUnusedDataFor: 2, // cache duration in seconds
@@ -90,6 +97,10 @@ export const apiSlice = createApi({
     }),
     fetchGroupConversations: builder.query({
       query: () => "/v1/user/get_group_conversations",
+      keepUnusedDataFor: 2, // cache duration in seconds
+    }),
+    fetchUnreadMessagesCount: builder.query({
+      query: () => "/v1/user/unread_counts",
       keepUnusedDataFor: 2, // cache duration in seconds
     }),
     createGroup: builder.mutation({
@@ -117,5 +128,7 @@ export const {
   useGetDirectConversationMutation,
   useGetGroupConversationMutation,
   useCreateGroupMutation,
+  useUpdatePasswordMutation,
   useLazySuccessQuery,
+  useFetchUnreadMessagesCountQuery,
 } = apiSlice;

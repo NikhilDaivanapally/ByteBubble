@@ -17,38 +17,16 @@ import { AggregatedDirectConversation } from "../types/aggregated-response/conve
 import { AggregatedGroupConversation } from "../types/aggregated-response/conversation/group-conversation-aggregate.type";
 import { DirectConversationResponse } from "../types/response/conversation/direct-conversation-response.type";
 import { GroupConversationResponse } from "../types/response/conversation/group-conversation-response.type";
+import { DirectMessage } from "../models/directMessage.model";
+import { GroupMessage } from "../models/groupMessage.model";
 
-interface updateProfileRequest extends Request {
+interface AuthenticatedRequest extends Request {
   user?: {
     _id: string;
   };
 }
 
-const updateProfile = async (req: updateProfileRequest, res: Response) => {
-  const filteredBody = filterObj(req.body, "userName", "about", "email");
-  const avatarLocalpath = req.file?.path;
-  let avatar;
-  if (avatarLocalpath) {
-    avatar = await uploadCloudinary(avatarLocalpath);
-  }
-
-  if (avatar?.secure_url) {
-    filteredBody.avatar = avatar.secure_url;
-  }
-  const userDoc = await User.findByIdAndUpdate(req.user?._id, filteredBody, {
-    new: true,
-    validateModifiedOnly: true,
-  });
-
-  res.status(200).json({
-    status: "success",
-    data: userDoc,
-    message: "User Updated successfully",
-  });
-  return;
-};
-
-const updateUserProfile = async (req: updateProfileRequest, res: Response) => {
+const updateUserProfile = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const userId = req.user?._id;
     const { name, about } = req.body;
@@ -58,7 +36,8 @@ const updateUserProfile = async (req: updateProfileRequest, res: Response) => {
     if (about !== undefined) updates.about = about;
     const avatarLocalpath = req.file?.path;
     if (avatarLocalpath) {
-      updates.avatar = await uploadCloudinary(avatarLocalpath);
+      const image = await uploadCloudinary(avatarLocalpath);
+      updates.avatar = image?.secure_url;
     }
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -78,7 +57,46 @@ const updateUserProfile = async (req: updateProfileRequest, res: Response) => {
   }
 };
 
-const getUsers = async (req: updateProfileRequest, res: Response) => {
+const updateUserPassword = async (req: AuthenticatedRequest, res: Response) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword)
+    return res.status(400).json({
+      status: "failed",
+      data: null,
+      message: "Both current and new passwords are required.",
+    });
+
+  try {
+    const userId = req.user?._id;
+    const user = await User.findById(userId);
+    if (!user)
+      return res
+        .status(404)
+        .json({ status: "Not Found", data: null, message: "User not found." });
+
+    const isMatch = await user.isPasswordCorrect(currentPassword);
+    if (!isMatch)
+      return res
+        .status(401)
+        .json({ message: "Current password is incorrect." });
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      data: user,
+      message: "Password Updated Successfully",
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: "failed", data: null, message: "Internal Server Error" });
+  }
+};
+
+const getUsers = async (req: AuthenticatedRequest, res: Response) => {
   const currentUserId = req.user?._id;
   const allUsers = await User.find({ verified: true }).select(userSelectFields);
 
@@ -107,7 +125,7 @@ const getUsers = async (req: updateProfileRequest, res: Response) => {
 };
 
 const getFriends = async (
-  req: updateProfileRequest,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -184,7 +202,7 @@ const getFriends = async (
   });
 };
 
-const getFriendrequest = async (req: updateProfileRequest, res: Response) => {
+const getFriendrequest = async (req: AuthenticatedRequest, res: Response) => {
   const requests = await Friendship.find({
     $or: [
       {
@@ -207,7 +225,7 @@ const getFriendrequest = async (req: updateProfileRequest, res: Response) => {
 };
 
 const getDirectConversations = async (
-  req: updateProfileRequest,
+  req: AuthenticatedRequest,
   res: Response
 ) => {
   try {
@@ -245,7 +263,7 @@ const getDirectConversations = async (
 };
 
 const getGroupConversations = async (
-  req: updateProfileRequest,
+  req: AuthenticatedRequest,
   res: Response
 ) => {
   try {
@@ -281,7 +299,7 @@ const getGroupConversations = async (
 };
 
 const getDirectConversation = async (
-  req: updateProfileRequest,
+  req: AuthenticatedRequest,
   res: Response
 ) => {
   const { conversationId } = req.body;
@@ -322,7 +340,7 @@ const getDirectConversation = async (
 };
 
 const getGroupConversation = async (
-  req: updateProfileRequest,
+  req: AuthenticatedRequest,
   res: Response
 ) => {
   const { conversationId } = req.body;
@@ -361,6 +379,42 @@ const getGroupConversation = async (
     message: "Conversation Notfound due to no Messages successfully",
   });
   return;
+};
+
+const getUnreadMessagesCount = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.user?._id;
+    const [directMessagesUnreadCount, groupMessagesUnreadCount] =
+      await Promise.all([
+        await DirectMessage.find({
+          recipient: userId,
+          isRead: false,
+        }).countDocuments(),
+        await GroupMessage.find({
+          recipients: userId,
+          readBy: { $ne: userId },
+        }).countDocuments(),
+      ]);
+    res.status(200).json({
+      status: "success",
+      data: {
+        directChats: directMessagesUnreadCount,
+        groupChats: groupMessagesUnreadCount,
+        total: directMessagesUnreadCount + groupMessagesUnreadCount,
+      },
+      message: "unread counts fetched successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "Error",
+      data: null,
+      message: "Error while fetching unread counts",
+    });
+    return;
+  }
 };
 
 const createGroup = async (
@@ -434,7 +488,6 @@ const createGroup = async (
 };
 
 export {
-  updateProfile,
   getUsers,
   getFriends,
   getFriendrequest,
@@ -442,6 +495,8 @@ export {
   getGroupConversations,
   getDirectConversation,
   getGroupConversation,
+  getUnreadMessagesCount,
   createGroup,
   updateUserProfile,
+  updateUserPassword,
 };

@@ -8,7 +8,17 @@ import { direct } from "../../utils/conversation-types";
 const LayoutNavbar = () => {
   const { pathname } = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
-  const { activeChatId } = useSelector((state: RootState) => state.app);
+  const { activeChatId, unreadCount } = useSelector(
+    (state: RootState) => state.app
+  );
+  const directNotificationEnabled = useSelector(
+    (state: RootState) =>
+      state.settings.data.notifications.messages.messageNotifications
+  );
+  const groupNotificationEnabled = useSelector(
+    (state: RootState) =>
+      state.settings.data.notifications.groupChats.groupChatNotifications
+  );
   return (
     <nav
       className={`w-full h-fit lg:h-full lg:w-20 flex ${
@@ -19,7 +29,18 @@ const LayoutNavbar = () => {
       <ul className="list-none flex gap-2 sm:gap-5 lg:flex-col relative h-full lg:h-fit lg:w-full justify-center items-center">
         {navListData?.map((item, i) => {
           const isActive = item.path.includes(pathname);
-
+          const count =
+            item.path == "/chat"
+              ? unreadCount.directChats
+              : item.path == "/group"
+              ? unreadCount.groupChats
+              : 0;
+          const notificationEnabled =
+            item.path == "/chat"
+              ? directNotificationEnabled
+              : item.path == "/group"
+              ? groupNotificationEnabled
+              : false;
           return (
             <li
               key={i}
@@ -45,6 +66,11 @@ const LayoutNavbar = () => {
                         : "fill-light stroke-[0.7px] stroke-black"
                     }`}
                   />
+                  {notificationEnabled && Boolean(count) && (
+                    <div className="absolute bottom-4/5 left-full w-4.5 h-4.5 leading-none flex-center rounded-full text-xs text-black/60 bg-btn-primary/40">
+                      {count}
+                    </div>
+                  )}
                 </div>
               </Link>
 

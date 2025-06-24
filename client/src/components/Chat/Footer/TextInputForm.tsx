@@ -30,6 +30,7 @@ import useClickOutside from "../../../hooks/use-clickoutside";
 import { Button } from "../../ui/Button";
 import { removeFromBlockList } from "../../../store/slices/authSlice";
 import { DirectSystemEventType } from "../../../constants/system-event-types";
+import { playSound } from "../../../utils/soundPlayer";
 
 const MAX_TEXTAREA_HEIGHT = 130;
 
@@ -133,6 +134,7 @@ const TextInputForm = ({
         senderId: auth?._id,
         recipientId: currentConversation,
       });
+      playSound("messageSend");
     } else {
       dispatch(
         addGroupMessage({

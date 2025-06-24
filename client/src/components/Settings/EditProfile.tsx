@@ -5,7 +5,7 @@ import Input from "../ui/Input";
 import { Button } from "../ui/Button";
 import { clearActiveSettingPage } from "../../store/slices/settingsSlice";
 import { Icons } from "../../icons";
-import { motion } from "framer-motion"; // ✅ fix import
+import { motion } from "motion/react";
 import toast from "react-hot-toast";
 import { useUpdateuserMutation } from "../../store/slices/apiSlice";
 import { setUser } from "../../store/slices/authSlice";
@@ -19,36 +19,46 @@ const EditProfile = () => {
   const navigate = useNavigate();
   const auth = useSelector((state: RootState) => state.auth.user);
 
-  const [name, setName] = useState(auth?.userName || "");
-  const [about, setAbout] = useState(auth?.about || "");
-  const [avatar, setAvatar] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    about: "",
+    avatar: null as File | null,
+  });
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const [updateUser, { isLoading, data, error }] = useUpdateuserMutation();
 
+  // Pre-fill fields with current user info
   useEffect(() => {
     if (auth) {
-      setName(auth.userName || "");
-      setAbout(auth.about || "");
+      setFormData({
+        name: auth.userName || "",
+        about: auth.about || "",
+        avatar: null,
+      });
     }
   }, [auth]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Handle changes (text and file)
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, files } = e.target;
+    const file = files?.[0];
 
-    if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      toast.error(`File must be less than ${MAX_IMAGE_SIZE_MB}MB`);
-      fileInputRef.current!.value = "";
-      return;
+    if (file) {
+      if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        toast.error(`File must be less than ${MAX_IMAGE_SIZE_MB}MB`);
+        fileInputRef.current!.value = "";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => setImageUrl(reader.result as string);
+      reader.readAsDataURL(file);
+      setFormData((prev) => ({ ...prev, avatar: file }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value.trimStart() }));
     }
-
-    const reader = new FileReader();
-    reader.onload = () => setImageUrl(reader.result as string);
-    reader.readAsDataURL(file);
-    setAvatar(file);
   };
 
   useEffect(() => {
@@ -56,27 +66,28 @@ const EditProfile = () => {
       dispatch(setUser(data.data));
       toast.success("Profile updated");
     }
-  }, [data, dispatch]);
-
-  useEffect(() => {
-    if (error) {
-      toast.error("Something went wrong. Try again.");
+    if (error && "data" in error) {
+      const errData = error.data as { message?: string };
+      toast.error(errData.message || "Failed to Update Profile");
     }
-  }, [error]);
+  }, [data, error, dispatch]);
 
   const handleSave = async () => {
-    const update: any = {};
+    const { name, about, avatar } = formData;
 
-    if (avatar) update.avatar = avatar;
-    if (name.trim() && name !== auth?.userName) update.name = name.trim();
-    if (about.trim() && about !== auth?.about) update.about = about.trim();
+    const form = new FormData();
 
-    if (Object.keys(update).length === 0) {
+    if (avatar) form.append("avatar", avatar);
+    if (name && name !== auth?.userName) form.append("name", name.trim());
+    if (about && about !== auth?.about) form.append("about", about.trim());
+
+    if ([...form.entries()].length === 0) {
       toast("No changes to update");
       return;
     }
+
     try {
-      await updateUser(update).unwrap();
+      await updateUser(form).unwrap();
     } catch (err) {
       console.error("Update failed", err);
     }
@@ -85,17 +96,16 @@ const EditProfile = () => {
   const handleClearActiveSettingsPage = useCallback(() => {
     dispatch(clearActiveSettingPage());
     navigate("/settings");
-  }, [dispatch]);
+  }, [dispatch, navigate]);
 
   const handleRemoveAvatar = () => {
     fileInputRef.current!.value = "";
-    setAvatar(null);
+    setFormData((prev) => ({ ...prev, avatar: null }));
     setImageUrl(null);
   };
 
   return (
     <div className="relative flex h-full flex-col bg-white overflow-x-hidden">
-      {/* Header */}
       <header className="border-b border-gray-200 px-2 py-4 md:py-2 flex gap-3 md:block">
         <Icons.ArrowLeftIcon
           className="w-6 md:hidden cursor-pointer"
@@ -104,7 +114,6 @@ const EditProfile = () => {
         <h1 className="text-xl font-semibold text-[#121416]">Edit Profile</h1>
       </header>
 
-      {/* Main */}
       <main className="flex-1 flex flex-col items-center py-10 px-4 overflow-y-auto">
         <section className="flex flex-col items-center gap-3">
           <motion.div
@@ -115,10 +124,13 @@ const EditProfile = () => {
           >
             <div
               className={`rounded-full overflow-hidden w-20 h-20 flex items-center justify-center border-2 transition-colors ${
-                imageUrl ? "border-indigo-200" : "border-gray-300"
+                imageUrl || auth?.avatar
+                  ? "border-indigo-200"
+                  : "border-gray-300"
               }`}
               style={{
-                backgroundImage: imageUrl ? undefined : `url(${auth?.avatar})`,
+                backgroundImage:
+                  !imageUrl && auth?.avatar ? `url(${auth.avatar})` : undefined,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundColor: imageUrl ? "#f8fafc" : "#eef2ff",
@@ -127,7 +139,7 @@ const EditProfile = () => {
               {imageUrl && (
                 <motion.img
                   src={imageUrl}
-                  alt="Uploaded"
+                  alt="Avatar preview"
                   className="w-full h-full object-cover"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -140,7 +152,7 @@ const EditProfile = () => {
               <motion.button
                 type="button"
                 onClick={handleRemoveAvatar}
-                className="absolute -top-2 -right-2 cursor-pointer bg-red-100 rounded-full p-1 shadow-sm border border-red-200 hover:bg-red-200 transition-colors"
+                className="absolute -top-2 -right-2 bg-red-100 rounded-full p-1 shadow-sm border border-red-200 hover:bg-red-200"
                 whileHover={{ scale: 1.1 }}
               >
                 <Icons.XMarkIcon className="text-red-500 w-4" />
@@ -148,7 +160,7 @@ const EditProfile = () => {
             )}
 
             <motion.div
-              className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-gray-200 hover:bg-gray-100 cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
               whileHover={{ scale: 1.1 }}
             >
@@ -160,15 +172,15 @@ const EditProfile = () => {
             hidden
             type="file"
             ref={fileInputRef}
-            onChange={handleFileChange}
+            onChange={handleChange}
             accept="image/*"
+            name="avatar"
           />
 
           <h2 className="text-xl font-bold text-[#121416]">{auth?.userName}</h2>
           <p className="text-sm text-[#6a7681]">{auth?.email}</p>
         </section>
 
-        {/* Form */}
         <form
           onSubmit={(e: FormEvent) => {
             e.preventDefault();
@@ -182,21 +194,23 @@ const EditProfile = () => {
             </label>
             <Input
               id="name"
+              name="name"
               placeholder="Enter your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={formData.name}
+              onChange={handleChange}
             />
           </div>
 
           <div className="flex flex-col">
-            <label htmlFor="about" className="font-medium text-[#121416] pb-1">
+            <label htmlFor="about" className="font-medium pb-1">
               About
             </label>
             <Input
               id="about"
+              name="about"
               placeholder="Tell us about yourself"
-              value={about}
-              onChange={(e) => setAbout(e.target.value)}
+              value={formData.about}
+              onChange={handleChange}
             />
           </div>
 

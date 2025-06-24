@@ -7,9 +7,14 @@ import ImagePreview from "../../components/ImagePreview";
 import {
   useFetchDirectConversationsQuery,
   useFetchFriendsQuery,
+  useFetchUnreadMessagesCountQuery,
 } from "../../store/slices/apiSlice";
 import { setDirectConversations } from "../../store/slices/conversation";
-import { updateChatType, updateFriends } from "../../store/slices/appSlice";
+import {
+  setUnreadCount,
+  updateChatType,
+  updateFriends,
+} from "../../store/slices/appSlice";
 import LayoutNavbar from "../../components/layout-navbar/LayoutNavbar";
 import { useSocketConnection } from "../../hooks/use-socket-connection";
 import { useFriendRequestEvents } from "../../hooks/use-friendrequest-events";
@@ -40,11 +45,19 @@ const useRegisterSocketEvents = (isConnected: boolean) => {
 
 const ChatLayout = () => {
   const dispatch = useDispatch();
+  const { pathname } = useLocation();
+
   const user = useSelector((state: RootState) => state.auth.user);
   const { friends } = useSelector((state: RootState) => state.app);
+
+  const { data: unreadCountdata } = useFetchUnreadMessagesCountQuery({});
   const { data: directConversationData } = useFetchDirectConversationsQuery({});
   const { data: friendsData } = useFetchFriendsQuery({});
-  const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (!unreadCountdata?.data) return;
+    dispatch(setUnreadCount(unreadCountdata?.data));
+  }, [unreadCountdata?.data]);
 
   useEffect(() => {
     if (!directConversationData?.data) return;

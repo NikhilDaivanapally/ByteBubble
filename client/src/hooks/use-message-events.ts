@@ -20,6 +20,7 @@ import {
   useGetDirectConversationMutation,
   useGetGroupConversationMutation,
 } from "../store/slices/apiSlice";
+import { playSound } from "../utils/soundPlayer";
 
 // Private message events
 export const useMessageEvents = (enabled: boolean) => {
@@ -27,7 +28,9 @@ export const useMessageEvents = (enabled: boolean) => {
 
   const user = useSelector((state: RootState) => state.auth.user);
   const { direct_chat } = useSelector((state: RootState) => state.conversation);
-
+  const isAppSounds = useSelector(
+    (state: RootState) => state.settings.data.notifications.messages.inAppSounds
+  );
   const [getDirectConversation, { data: conversationData }] =
     useGetDirectConversationMutation();
 
@@ -76,6 +79,9 @@ export const useMessageEvents = (enabled: boolean) => {
             updatedAt,
           })
         );
+        if (isAppSounds) {
+          playSound("messageReceive");
+        }
         socket.emit("message:seen", { _id, senderId });
       } else {
         socket.emit("message:unread:update", message);
@@ -141,6 +147,9 @@ export const useMessageEvents = (enabled: boolean) => {
               (existingConversation?.unreadMessagesCount || 0) + 1,
           })
         );
+        if (isAppSounds) {
+          playSound("incomingUnreadMessage");
+        }
       }
     },
     [direct_chat, getDirectConversation]
@@ -178,7 +187,10 @@ export const useGroupMessageEvents = (enabled: boolean) => {
 
   const user = useSelector((state: RootState) => state.auth.user);
   const { group_chat } = useSelector((state: RootState) => state.conversation);
-
+  const inAppSounds = useSelector(
+    (state: RootState) =>
+      state.settings.data.notifications.groupChats.inAppSounds
+  );
   const [getGroupConversation, { data: conversationData }] =
     useGetGroupConversationMutation();
 
@@ -223,6 +235,9 @@ export const useGroupMessageEvents = (enabled: boolean) => {
             isEdited: false,
           })
         );
+        if (inAppSounds) {
+          playSound("messageReceive");
+        }
       } else {
         socket.emit("group:message:unread:update", message);
       }
@@ -297,6 +312,9 @@ export const useGroupMessageEvents = (enabled: boolean) => {
             unreadMessagesCount: (existing.unreadMessagesCount || 0) + 1,
           })
         );
+        if (inAppSounds) {
+          playSound("incomingUnreadMessage");
+        }
       }
     },
     [group_chat, dispatch, getGroupConversation, user]

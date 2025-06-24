@@ -10,18 +10,18 @@ import {
   getFriends,
   getGroupConversation,
   getGroupConversations,
+  getUnreadMessagesCount,
   getUsers,
-  updateProfile,
+  updateUserPassword,
   updateUserProfile,
 } from "../controllers/user.controller";
 
 const router = Router();
 
 router.patch(
-  "/update-profile",
+  "/update-password",
   ensureAuthenticated,
-  upload.single("avatar"),
-  updateProfile as RequestHandler
+  updateUserPassword as RequestHandler
 );
 
 router.patch(
@@ -59,7 +59,11 @@ router.post(
   ensureAuthenticated,
   getGroupConversation as RequestHandler
 );
-
+router.get(
+  "/unread_counts",
+  ensureAuthenticated,
+  getUnreadMessagesCount as RequestHandler
+);
 router.post(
   "/create_group",
   ensureAuthenticated,

@@ -1,4 +1,3 @@
-// models/Settings.ts
 import mongoose from "mongoose";
 
 const SettingsSchema = new mongoose.Schema(
@@ -13,10 +12,6 @@ const SettingsSchema = new mongoose.Schema(
       groupChats: {
         groupChatNotifications: { type: Boolean, default: true },
         inAppSounds: { type: Boolean, default: true },
-      },
-      others: {
-        reactions: { type: Boolean, default: true },
-        groupEvents: { type: Boolean, default: true },
       },
     },
     privacy: {

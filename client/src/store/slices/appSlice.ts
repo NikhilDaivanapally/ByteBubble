@@ -14,6 +14,11 @@ const initialState: appSliceProps = {
   isTyping: "",
   isTypingRoomId: null,
   messageInfo: null,
+  unreadCount: {
+    directChats: 0,
+    groupChats: 0,
+    total: 0,
+  },
 };
 
 const slice = createSlice({
@@ -77,6 +82,9 @@ const slice = createSlice({
     setMessageInfo(state, action) {
       state.messageInfo = action.payload;
     },
+    setUnreadCount(state, action) {
+      state.unreadCount = action.payload;
+    },
   },
 });
 export const {
@@ -96,6 +104,7 @@ export const {
   removeRequestFromFriendRequests,
   setIsTyping,
   setMessageInfo,
+  setUnreadCount,
 } = slice.actions;
 
 export default slice.reducer;

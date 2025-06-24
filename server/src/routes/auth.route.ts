@@ -24,12 +24,10 @@ router.post("/verifyotp", verifyOtp);
 router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
-
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
-
 router.get("/google/callback", googleLogin);
 router.get("/login/success", ensureAuthenticated, loginSuccess);
 router.get("/login/failed", loginFailed);

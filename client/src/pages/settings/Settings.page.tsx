@@ -34,6 +34,12 @@ const Settings = () => {
       case "privacy":
         dispatch(setActiveSettingPage("Privacy"));
         break;
+      case "help":
+        dispatch(setActiveSettingPage("Help"));
+        break;
+      case "about":
+        dispatch(setActiveSettingPage("About"));
+        break;
       default:
         break;
     }

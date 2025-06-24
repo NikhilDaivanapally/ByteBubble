@@ -5,6 +5,8 @@ import Setting from "./components/Settings/Setting";
 import AccountSettings from "./components/Settings/AccountSettings";
 import Notifications from "./components/Settings/Notifications";
 import Privacy from "./components/Settings/Privacy";
+import Help from "./components/Settings/Help";
+import About from "./components/Settings/About";
 
 // Lazy-loaded pages
 const Home = lazy(() => import("./pages/Home.page"));
@@ -50,8 +52,8 @@ const appRoutes = [
           { path: "account-settings", element: <AccountSettings /> },
           { path: "notifications", element: <Notifications /> },
           { path: "privacy", element: <Privacy /> },
-          { path: "help", element: <div>Help</div> },
-          { path: "about", element: <div>About</div> },
+          { path: "help", element: <Help /> },
+          { path: "about", element: <About /> },
         ],
       },
     ],

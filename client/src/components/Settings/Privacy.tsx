@@ -1,94 +1,102 @@
-import { useDispatch } from "react-redux";
-import { Icons } from "../../icons";
-import { clearActiveSettingPage } from "../../store/slices/settingsSlice";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { clearActiveSettingPage } from "../../store/slices/settingsSlice";
+import { Icons } from "../../icons";
+import { SETTINGS_CONFIG } from "../../constants/settings-config";
+import { motion } from "motion/react";
+const PRIVACY_OPTIONS = ["Everyone", "My Contacts", "Nobody"];
 
 const Privacy = () => {
   const dispatch = useDispatch();
+
   const handleClearActiveSettingsPage = () => {
     dispatch(clearActiveSettingPage());
   };
+
   const [readReceiptsEnabled, setReadReceiptsEnabled] = useState(true);
+  const [selectValues, setSelectValues] = useState<Record<string, string>>({
+    profilePhotoVisibleTo: "Everyone",
+    AboutVisibleTo: "Everyone",
+    lastSeenVisibleTo: "Everyone",
+    groupsAddPermission: "Everyone",
+  });
 
   const handleToggleReadReceipts = () => {
     setReadReceiptsEnabled((prev) => !prev);
   };
 
-  const settings = {
-    profileInfo: [
-      { label: "Profile Photo", value: "Everyone" },
-      { label: "About", value: "Everyone" },
-    ],
-    messages: [
-      {
-        label: "Last Seen",
-        value: "Everyone",
-      },
-      {
-        label: "Read Receipts",
-        value: readReceiptsEnabled
-          ? "If turned off, you won't be able to see other people's read receipts."
-          : "You won't see or send read receipts.",
-        isToggle: true,
-      },
-    ],
-    groups: [{ label: "Add me to groups", value: "Everyone" }],
-    blockedContacts: [{ label: "Blocked Contacts", value: "0" }],
-    // disappearing: [{ label: "Default message timer", value: "Off" }],
+  const handleSelectChange = (key: string, value: string) => {
+    setSelectValues((prev) => ({ ...prev, [key]: value }));
   };
 
-  const renderSettingItem = (item: any, key: number) => (
+  const renderSelectItem = (itemKey: string, item: any) => (
     <div
-      key={key}
+      key={itemKey}
       className="flex items-center gap-4 bg-white px-4 min-h-[72px] py-2 justify-between"
     >
       <div className="flex flex-col justify-center">
-        <p className="text-[#121416] text-base font-medium leading-normal line-clamp-1">
+        <p className="text-[#121416] text-base font-medium leading-normal">
           {item.label}
         </p>
-        {!item.isToggle && (
-          <p className="text-[#6a7681] text-sm font-normal leading-normal line-clamp-2">
-            {item.value}
-          </p>
-        )}
-        {item.isToggle && (
-          <p className="text-[#6a7681] text-sm font-normal leading-normal line-clamp-2">
-            {item.value}
-          </p>
-        )}
+        <p className="text-sm text-gray-500">{selectValues[itemKey]}</p>
       </div>
-      {!item.isToggle ? (
-        <div className="shrink-0">
-          <p className="text-[#121416] text-base font-normal leading-normal">
-            {item.label === "Blocked Contacts" ? item.value : "Everyone"}
-          </p>
-        </div>
-      ) : (
+      <select
+        value={selectValues[itemKey]}
+        onChange={(e) => handleSelectChange(itemKey, e.target.value)}
+        className="border border-gray-300 rounded-md px-3 py-1 text-sm text-gray-700 bg-white"
+      >
+        {PRIVACY_OPTIONS.map((option) => (
+          <option key={option}>{option}</option>
+        ))}
+      </select>
+    </div>
+  );
+
+  const renderToggleItem = (item: any) => (
+    <div
+      key={item.label}
+      className="flex items-center gap-4 bg-white px-4 min-h-[72px] py-2 justify-between"
+    >
+      <div className="flex flex-col justify-center">
+        <p className="text-[#121416] text-base font-medium leading-normal">
+          {item.label}
+        </p>
+        <p className="text-[#6a7681] text-sm font-normal leading-normal">
+          {readReceiptsEnabled
+            ? "If turned off, you won't be able to see other people's read receipts."
+            : "You won't see or send read receipts."}
+        </p>
+      </div>
+      <div className="shrink-0">
         <label
-          className={`relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none ${
-            readReceiptsEnabled
-              ? "bg-[#dce8f3] justify-end"
-              : "bg-[#f1f2f4] justify-start"
-          } p-0.5`}
-          onClick={handleToggleReadReceipts}
+          className={`relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full p-0.5 transition-colors duration-300 ${
+            readReceiptsEnabled ? "bg-btn-primary/50" : "bg-[#f1f2f4]"
+          }`}
         >
-          <div
-            className="h-full w-[27px] rounded-full bg-white"
+          <input
+            type="checkbox"
+            className="sr-only"
+            checked={readReceiptsEnabled}
+            onChange={handleToggleReadReceipts}
+          />
+          <motion.div
+            className="h-[27px] w-[27px] rounded-full bg-white absolute top-0.5 left-0.5"
             style={{
               boxShadow:
                 "rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px",
             }}
-          ></div>
-          <input
-            type="checkbox"
-            className="invisible absolute"
-            checked={readReceiptsEnabled}
-            readOnly
+            animate={{ x: readReceiptsEnabled ? 20 : 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 500,
+              damping: 30,
+            }}
           />
         </label>
-      )}
+      </div>
     </div>
   );
+
   const Section = ({
     title,
     children,
@@ -103,6 +111,9 @@ const Privacy = () => {
       {children}
     </>
   );
+
+  const { profileInfo, messages, groups } = SETTINGS_CONFIG.privacy;
+
   return (
     <div className="relative flex h-full flex-col bg-white overflow-x-hidden">
       {/* Header */}
@@ -111,30 +122,26 @@ const Privacy = () => {
           className="w-6 md:hidden cursor-pointer"
           onClick={handleClearActiveSettingsPage}
         />
-        <h1 className="text-xl font-semibold text-[#121416]">privacy</h1>
+        <h1 className="text-xl font-semibold text-[#121416]">Privacy</h1>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col p-0 md:p-4 overflow-y-auto">
+      <main className="flex-1 flex flex-col py-10 px-4 overflow-y-auto">
         <Section title="Profile Information">
-          {settings.profileInfo.map(renderSettingItem)}
+          {Object.entries(profileInfo).map(([key, item]) =>
+            renderSelectItem(key, item)
+          )}
         </Section>
 
         <Section title="Messages">
-          {settings.messages.map(renderSettingItem)}
+          {messages.readReceipts && renderToggleItem(messages.readReceipts)}
         </Section>
 
         <Section title="Groups">
-          {settings.groups.map(renderSettingItem)}
+          {Object.entries(groups).map(([key, item]) =>
+            renderSelectItem(key, item)
+          )}
         </Section>
-
-        <Section title="Blocked Contacts">
-          {settings.blockedContacts.map(renderSettingItem)}
-        </Section>
-
-        {/* <Section title="Disappearing Messages">
-          {settings.disappearing.map(renderSettingItem)}
-        </Section> */}
       </main>
     </div>
   );

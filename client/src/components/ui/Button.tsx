@@ -1,7 +1,7 @@
 import React from "react";
 import { clsx } from "clsx";
 
-type ButtonSize = "sm" | "md" | "lg";
+type ButtonSize = "xs" | "sm" | "md" | "lg";
 type ButtonVariant =
   | "primary"
   | "secondary"
@@ -13,7 +13,9 @@ type ButtonVariant =
   | "success-outline"
   | "warning"
   | "info"
-  | "link";
+  | "link"
+  | "update";
+
 type ButtonShape = "md" | "full" | "square" | "pill";
 
 interface BaseButtonProps {
@@ -41,6 +43,7 @@ type ButtonAsLink = BaseButtonProps &
 type ButtonProps = ButtonAsButton | ButtonAsLink;
 
 const sizeStyles: Record<ButtonSize, string> = {
+  xs:"px-2 py-1 text-xs",
   sm: "px-3 py-1.5 text-sm",
   md: "px-4 py-2 text-base",
   lg: "px-5 py-3 text-lg",
@@ -67,6 +70,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   warning: "bg-yellow-500 text-black hover:bg-yellow-600",
   info: "bg-sky-500 text-white hover:bg-sky-600",
   link: "text-blue-600 underline hover:text-blue-800 p-0 h-auto",
+  update: "bg-gray-200 hover:bg-gray-100 text-black",
 };
 
 export const Button: React.FC<ButtonProps> = ({

@@ -217,6 +217,11 @@ export type appSliceProps = {
   isTyping: string;
   isTypingRoomId: string | null;
   messageInfo: GroupMessageProps | null;
+  unreadCount: {
+    directChats: number;
+    groupChats: number;
+    total: number;
+  };
 };
 
 // type for conversationSlice
