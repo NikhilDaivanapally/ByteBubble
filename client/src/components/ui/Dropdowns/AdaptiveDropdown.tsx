@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState, ReactNode } from "react";
+import useClickOutside from "../../../hooks/use-clickoutside";
 
 interface DropdownAction {
   name: string;
@@ -9,8 +10,8 @@ interface DropdownAction {
 }
 
 interface AdaptiveDropdownProps {
-  children: ReactNode; // Trigger element (button/icon/etc.)
-  actions: DropdownAction[]; // Actions shown in dropdown
+  children: ReactNode;
+  actions: DropdownAction[];
   className: string;
 }
 
@@ -44,26 +45,13 @@ export const AdaptiveDropdown = ({
     }
   }, [showDropdown]);
 
-  // Outside click handler
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node) &&
-        triggerRef.current &&
-        !triggerRef.current.contains(e.target as Node)
-      ) {
-        closeDropdown();
-      }
-    };
-
-    if (showDropdown) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showDropdown]);
+  useClickOutside(
+    [triggerRef, dropdownRef],
+    () => {
+      closeDropdown();
+    },
+    { closeOnEscape: true }
+  );
 
   return (
     <div className={`relative inline-block ${className}`} ref={triggerRef}>

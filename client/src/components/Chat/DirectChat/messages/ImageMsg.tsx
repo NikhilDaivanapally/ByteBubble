@@ -4,7 +4,7 @@ import { setfullImagePreview } from "../../../../store/slices/conversation";
 import { Icons } from "../../../../icons";
 import Loader from "../../../ui/Loader";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
-import { MessageActions } from "../../../ui/Dropdowns/actions/MessageActions";
+import { DirectMessageActions } from "../../../ui/Dropdowns/actions/DirectMessageActions";
 
 export const DirectImageMsg = ({
   el,
@@ -22,7 +22,7 @@ export const DirectImageMsg = ({
         !el.isIncoming ? "ml-auto" : ""
       }`}
     >
-      {!el.isIncoming && <MessageActions message={el} />}
+      {!el.isIncoming && <DirectMessageActions message={el} />}
 
       <div className={`p-1 rounded-xl space-y-1`}>
         <div

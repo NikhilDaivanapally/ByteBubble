@@ -90,6 +90,7 @@ export type DirectMessageProps = {
   isOutgoing: boolean;
   status: string;
   isRead: boolean;
+  readAt: string;
   conversationId: string;
   deletedFor: string[];
   isDeletedForEveryone: boolean;
@@ -216,7 +217,8 @@ export type appSliceProps = {
   mediaPreviewUrls: previewObj[];
   isTyping: string;
   isTypingRoomId: string | null;
-  messageInfo: GroupMessageProps | null;
+  directMessageInfo: DirectMessageProps | null;
+  groupMessageInfo: GroupMessageProps | null;
   unreadCount: {
     directChats: number;
     groupChats: number;

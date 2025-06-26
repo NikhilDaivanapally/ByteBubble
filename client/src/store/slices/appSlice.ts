@@ -13,7 +13,8 @@ const initialState: appSliceProps = {
   mediaPreviewUrls: [],
   isTyping: "",
   isTypingRoomId: null,
-  messageInfo: null,
+  directMessageInfo: null,
+  groupMessageInfo: null,
   unreadCount: {
     directChats: 0,
     groupChats: 0,
@@ -79,8 +80,11 @@ const slice = createSlice({
       state.isTyping = userName;
       state.isTypingRoomId = roomId;
     },
-    setMessageInfo(state, action) {
-      state.messageInfo = action.payload;
+    setDirectMessageInfo(state, action) {
+      state.directMessageInfo = action.payload;
+    },
+    setGroupMessageInfo(state, action) {
+      state.groupMessageInfo = action.payload;
     },
     setUnreadCount(state, action) {
       state.unreadCount = action.payload;
@@ -103,8 +107,9 @@ export const {
   removeUserFromUsers,
   removeRequestFromFriendRequests,
   setIsTyping,
-  setMessageInfo,
   setUnreadCount,
+  setDirectMessageInfo,
+  setGroupMessageInfo,
 } = slice.actions;
 
 export default slice.reducer;

@@ -14,6 +14,7 @@ const formatDirectMessages = (
       isOutgoing: el?.sender.toString() == authUserId,
       status: "sent",
       isRead: el?.isRead,
+      readAt:el?.readAt,
       conversationId: el?.conversationId,
       deletedFor: el?.deletedFor,
       isDeletedForEveryone: el?.isDeletedForEveryone,

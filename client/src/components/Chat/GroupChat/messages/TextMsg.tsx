@@ -1,7 +1,7 @@
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import { MessageStatus } from "../../../MessageStatus";
 import { GroupMessageProps } from "../../../../types";
-import { MessageActions } from "../../../ui/Dropdowns/actions/MessageActions";
+import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageActions";
 
 export const GroupTextMsg = ({
   el,
@@ -19,7 +19,7 @@ export const GroupTextMsg = ({
         !el.isIncoming ? "ml-auto" : ""
       }`}
     >
-      {!el.isIncoming && <MessageActions message={el} />}
+      {!el.isIncoming && <GroupMessageActions message={el} />}
       {el.isIncoming && (
         <div className="user_profile mr-2 w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
           <img

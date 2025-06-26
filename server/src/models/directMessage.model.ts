@@ -21,6 +21,7 @@ const directMessageSchema = new Schema<DirectMessageDoc>(
     },
     messageType: { type: String, enum: messageTypes, required: true },
     isRead: { type: Boolean, default: false },
+    readAt: { type: Date, default: null },
     deletedFor: [{ type: Schema.Types.ObjectId, ref: "User" }],
     isDeletedForEveryone: { type: Boolean, default: false },
     reactions: [
@@ -30,7 +31,7 @@ const directMessageSchema = new Schema<DirectMessageDoc>(
       },
     ],
     isEdited: { type: Boolean, default: false },
-    editedAt: { type: Date },
+    editedAt: { type: Date, default: null },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },

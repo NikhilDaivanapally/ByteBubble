@@ -20,7 +20,7 @@ const GroupChat = () => {
 
   const { group_chat } = useSelector((state: RootState) => state.conversation);
   const { user } = useSelector((state: RootState) => state.auth);
-  const { activeChatId, chatType, isCameraOpen, messageInfo } = useSelector(
+  const { activeChatId, chatType, isCameraOpen, groupMessageInfo } = useSelector(
     (state: RootState) => state.app
   );
   const { mediaPreviewUrls } = useSelector((state: RootState) => state.app);
@@ -75,7 +75,7 @@ const GroupChat = () => {
         showDetails={showDetails}
         handleCloseShowDetails={handleCloseShowDetails}
       />
-      {messageInfo && <GroupMessageInfo />}
+      {groupMessageInfo && <GroupMessageInfo />}
     </div>
   ) : (
     <PageLoader />

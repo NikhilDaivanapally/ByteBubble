@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import { DirectConversationDoc } from "../types/model/conversation/direct-conversation-model.type";
 
-const DirectConversationSchema = new Schema<DirectConversationDoc>(
+const directConversationSchema = new Schema<DirectConversationDoc>(
   {
     participants: {
       type: [Schema.Types.ObjectId],
@@ -30,6 +30,6 @@ const DirectConversationSchema = new Schema<DirectConversationDoc>(
   { timestamps: true }
 );
 
-DirectConversationSchema.index({ participants: 1 });
+directConversationSchema.index({ participants: 1 });
 
-export default model<DirectConversationDoc>("DirectConversation", DirectConversationSchema);
+export default model<DirectConversationDoc>("DirectConversation", directConversationSchema);

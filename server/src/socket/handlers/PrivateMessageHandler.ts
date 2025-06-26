@@ -111,7 +111,7 @@ export async function handleMessageSeen(messagePayload: any, io: Server) {
   }
   await DirectMessage.findOneAndUpdate(
     { _id: messagePayload?._id },
-    { $set: { isRead: true } }
+    { $set: { isRead: true, readAt: new Date().toISOString() } }
   );
 }
 
@@ -133,6 +133,6 @@ export async function handleMessageUnreadClear(data: any, io: Server) {
   }
   await DirectMessage.updateMany(
     { conversationId, recipient },
-    { $set: { isRead: true } }
+    { $set: { isRead: true, readAt: new Date().toISOString() } }
   );
 }

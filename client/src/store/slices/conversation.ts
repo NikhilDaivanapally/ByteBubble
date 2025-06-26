@@ -113,7 +113,7 @@ const slice = createSlice({
     updateDirectMessagesSeen(state, _) {
       let messages = state.direct_chat.current_direct_messages;
       let new_messages = messages.map((el) => {
-        return { ...el, isRead: true };
+        return { ...el, isRead: true, readAt: new Date().toISOString() };
       });
 
       state.direct_chat.current_direct_messages = new_messages;
@@ -141,7 +141,7 @@ const slice = createSlice({
       let messages = state.direct_chat.current_direct_messages;
       let new_messages = messages.map((el) => {
         if (el?._id == action.payload?._id) {
-          return { ...el, isRead: true };
+          return { ...el, isRead: true, readAt: new Date().toISOString() };
         }
         return el;
       });

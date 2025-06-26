@@ -113,7 +113,13 @@ export const useMessageEvents = (enabled: boolean) => {
       );
       if (!conversation) return;
 
-      dispatch(updateDirectConversation({ ...conversation, isRead: true }));
+      dispatch(
+        updateDirectConversation({
+          ...conversation,
+          isRead: true,
+          readAt: new Date().toISOString(),
+        })
+      );
       dispatch(updateDirectMessagesSeen({}));
     },
     [dispatch, direct_chat]

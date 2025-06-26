@@ -3,18 +3,56 @@ import { Icons } from "../icons";
 import React, { useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { setMessageInfo } from "../store/slices/appSlice";
+import { setGroupMessageInfo } from "../store/slices/appSlice";
 import { formatTo12HourTime, formatToReadableDate } from "../utils/dateUtils";
 import { Avatar } from "./ui/Avatar";
+import { GroupImageMsg } from "./Chat/GroupChat/messages/ImageMsg";
+import { GroupAudioMsg } from "./Chat/GroupChat/messages/AudioMsg";
+import { GroupSystemMsg } from "./Chat/GroupChat/messages/SystemMsg";
+import { GroupTextMsg } from "./Chat/GroupChat/messages/TextMsg";
 
 const GroupMessageInfo = () => {
   const dispatch = useDispatch();
   const { current_group_conversation } = useSelector(
     (state: RootState) => state.conversation.group_chat
   );
-  const { messageInfo } = useSelector((state: RootState) => state.app);
+  const { groupMessageInfo } = useSelector((state: RootState) => state.app);
 
-  const handleClose = () => dispatch(setMessageInfo(null));
+  const message = useMemo(() => {
+    switch (groupMessageInfo?.messageType) {
+      case "image":
+        return (
+          <GroupImageMsg
+            el={groupMessageInfo}
+            usersLength={
+              (current_group_conversation?.users.length as number) - 1
+            }
+            scrollToBottom={() => {}}
+          />
+        );
+      case "audio":
+        return (
+          <GroupAudioMsg
+            el={groupMessageInfo}
+            usersLength={
+              (current_group_conversation?.users.length as number) - 1
+            }
+          />
+        );
+      case "system":
+        return <GroupSystemMsg el={groupMessageInfo} />;
+      case "text":
+        return (
+          <GroupTextMsg
+            el={groupMessageInfo}
+            usersLength={
+              (current_group_conversation?.users.length as number) - 1
+            }
+          />
+        );
+    }
+  }, [groupMessageInfo, dispatch]);
+  const handleClose = () => dispatch(setGroupMessageInfo(null));
 
   const currentGroupConversationRef = useRef(current_group_conversation);
 
@@ -24,16 +62,17 @@ const GroupMessageInfo = () => {
 
   const recipients = useMemo(() => {
     const users = currentGroupConversationRef.current?.users || [];
-    if (!messageInfo?.from?._id) return users;
+    if (!groupMessageInfo?.from?._id) return users;
     return users.filter(
-      (user) => user?._id?.toString() !== messageInfo?.from?._id?.toString()
+      (user) =>
+        user?._id?.toString() !== groupMessageInfo?.from?._id?.toString()
     );
-  }, [messageInfo?.from]);
+  }, [groupMessageInfo?.from]);
 
   const { seenBy, deliveredTo } = useMemo(() => {
     return recipients.reduce(
       (acc: { seenBy: any[]; deliveredTo: any[] }, user) => {
-        const seen = messageInfo?.readBy?.find(
+        const seen = groupMessageInfo?.readBy?.find(
           (seenUser) => seenUser?.userId?.toString() === user?._id?.toString()
         );
 
@@ -57,11 +96,11 @@ const GroupMessageInfo = () => {
       },
       { seenBy: [], deliveredTo: [] }
     );
-  }, [messageInfo, recipients]);
+  }, [groupMessageInfo, recipients]);
 
   return (
     <AnimatePresence>
-      {messageInfo && (
+      {groupMessageInfo && (
         <motion.div
           key="profile-panel"
           initial={{ x: "100%" }}
@@ -73,7 +112,7 @@ const GroupMessageInfo = () => {
           <button onClick={handleClose}>
             <Icons.XMarkIcon className="w-8 p-1 rounded-full cursor-pointer hover:bg-gray-200 transition" />
           </button>
-
+          {message}
           {/* Seen By */}
           {seenBy.length > 0 && (
             <div>
@@ -91,7 +130,8 @@ const GroupMessageInfo = () => {
                     <div>
                       <p>{user.userName}</p>
                       <span className="text-black/60 text-sm">
-                        {formatToReadableDate(user.seenAt)} at {formatTo12HourTime(user.seenAt)}
+                        {formatToReadableDate(user.seenAt)} at{" "}
+                        {formatTo12HourTime(user.seenAt)}
                       </span>
                     </div>
                   </li>
@@ -117,7 +157,8 @@ const GroupMessageInfo = () => {
                     <div>
                       <p>{user.userName}</p>
                       <span className="text-black/60 text-sm">
-                        {formatToReadableDate(user.deliveredAt)} at {formatTo12HourTime(user.deliveredAt)}
+                        {formatToReadableDate(user.deliveredAt)} at{" "}
+                        {formatTo12HourTime(user.deliveredAt)}
                       </span>
                     </div>
                   </li>

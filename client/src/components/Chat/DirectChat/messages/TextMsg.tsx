@@ -1,7 +1,7 @@
 import { DirectMessageProps } from "../../../../types";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import { MessageStatus } from "../../../MessageStatus";
-import { MessageActions } from "../../../ui/Dropdowns/actions/MessageActions";
+import { DirectMessageActions } from "../../../ui/Dropdowns/actions/DirectMessageActions";
 
 export const DirectTextMsg = ({ el }: { el: DirectMessageProps }) => {
   const time = formatTo12HourTime(el.createdAt);
@@ -12,7 +12,7 @@ export const DirectTextMsg = ({ el }: { el: DirectMessageProps }) => {
         !el.isIncoming ? "ml-auto" : ""
       }`}
     >
-      {!el.isIncoming && <MessageActions message={el} />}
+      {!el.isIncoming && <DirectMessageActions message={el} />}
       <div className="space-y-1">
         <div
           className={`px-2 py-1 rounded-xl ${

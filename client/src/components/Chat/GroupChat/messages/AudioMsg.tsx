@@ -3,7 +3,7 @@ import { GroupMessageProps } from "../../../../types";
 import { Icons } from "../../../../icons";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import WaveSurfer from "wavesurfer.js";
-import { MessageActions } from "../../../ui/Dropdowns/actions/MessageActions";
+import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageActions";
 
 export const GroupAudioMsg = ({
   el,
@@ -94,7 +94,7 @@ export const GroupAudioMsg = ({
         !el.isIncoming ? "ml-auto" : ""
       }`}
     >
-      {!el.isIncoming && <MessageActions message={el} />}
+      {!el.isIncoming && <GroupMessageActions message={el} />}
       {el.isIncoming && (
         <div className="user_profile mr-2 w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
           <img

@@ -128,7 +128,7 @@ const TextInputForm = ({
           isEdited: false,
         })
       );
-
+      
       socket.emit("message:send", {
         ...messagePayload,
         senderId: auth?._id,

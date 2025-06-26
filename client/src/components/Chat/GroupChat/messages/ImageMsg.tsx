@@ -4,7 +4,7 @@ import { setfullImagePreview } from "../../../../store/slices/conversation";
 import { Icons } from "../../../../icons";
 import Loader from "../../../ui/Loader";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
-import { MessageActions } from "../../../ui/Dropdowns/actions/MessageActions";
+import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageActions";
 
 export const GroupImageMsg = ({
   el,
@@ -26,7 +26,7 @@ export const GroupImageMsg = ({
         !el.isIncoming ? "ml-auto" : ""
       }`}
     >
-      {!el.isIncoming && <MessageActions message={el} />}
+      {!el.isIncoming && <GroupMessageActions message={el} />}
 
       {el.isIncoming && (
         <div className="user_profile mr-2 w-8 h-8 rounded-full bg-gray-400 overflow-hidden">

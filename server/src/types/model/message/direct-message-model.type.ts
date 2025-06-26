@@ -11,6 +11,7 @@ export interface DirectMessageDoc extends Document {
   messageType: MessageType;
   message: MessageContent;
   isRead: boolean;
+  readAt: Date;
   deletedFor: Types.ObjectId[];
   isDeletedForEveryone: boolean;
   reactions: {

@@ -11,6 +11,7 @@ import DirectMessageList from "./DirectMessageList";
 import DirectChatHeader from "../Header/DirectChatHeader";
 import DirectProfileDetails from "../SidePanels/DirectProfilePanel/DirectProfileDetails";
 import FileSendPreview from "../../FileSendPreview";
+import DirectMessageInfo from "../../DirectMessageInfo";
 
 const DirectChat = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,9 +20,8 @@ const DirectChat = () => {
 
   const { direct_chat } = useSelector((state: RootState) => state.conversation);
   const { user } = useSelector((state: RootState) => state.auth);
-  const { activeChatId, chatType, isCameraOpen } = useSelector(
-    (state: RootState) => state.app
-  );
+  const { activeChatId, chatType, isCameraOpen, directMessageInfo } =
+    useSelector((state: RootState) => state.app);
   const { mediaPreviewUrls } = useSelector((state: RootState) => state.app);
 
   useLoadChatMessages({
@@ -69,6 +69,7 @@ const DirectChat = () => {
         showDetails={showDetails}
         handleCloseShowDetails={handleCloseShowDetails}
       />
+      {directMessageInfo && <DirectMessageInfo />}
     </div>
   ) : (
     <PageLoader />
