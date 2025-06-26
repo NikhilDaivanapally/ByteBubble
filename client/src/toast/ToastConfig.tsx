@@ -5,19 +5,14 @@ const ToastConfig = () => {
   return (
     <Toaster
       gutter={-8}
-      position="bottom-right"
+      position="top-center"
       reverseOrder={false}
       toastOptions={{
         style: {
           fontSize: ".85rem",
-          // fontfamily: "Poppins",
         },
         success: {
           duration: 2000,
-          theme: {
-            primary: "green",
-            secondary: "black",
-          },
           icon: (
             <Icons.CheckIcon
               style={{ color: "lightgreen", fontSize: "1.3rem", width: "20px" }}
