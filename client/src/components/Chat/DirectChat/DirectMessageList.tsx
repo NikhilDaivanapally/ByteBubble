@@ -5,6 +5,7 @@ import { DirectImageMsg } from "./messages/ImageMsg";
 import { DirectAudioMsg } from "./messages/AudioMsg";
 import { DirectTextMsg } from "./messages/TextMsg";
 import { DirectSystemMsg } from "./messages/SystemMsg";
+import DirectDocumentMsg from "./messages/documentMsg";
 
 interface DirectMessageListProps {
   sortedDates: string[];
@@ -35,6 +36,14 @@ const DirectMessageList = forwardRef<HTMLUListElement, DirectMessageListProps>(
                   );
                 case "audio":
                   return <DirectAudioMsg el={el} key={index} />;
+                case "document":
+                  return (
+                    <DirectDocumentMsg
+                      el={el}
+                      scrollToBottom={() => {}}
+                      key={index}
+                    />
+                  );
                 case "system":
                   return <DirectSystemMsg key={index} el={el} />;
                 default:

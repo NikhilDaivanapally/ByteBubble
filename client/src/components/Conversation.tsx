@@ -216,7 +216,7 @@ export const GroupConversation = React.memo(
       }
     }, [activeChatId, dispatch, GroupConversations, _id]);
     const isActive = activeChatId === _id;
-    const istyping = isTypingRoomId === _id;
+    const isSomeOneTyping = isTypingRoomId === _id;
 
     return (
       <motion.li
@@ -256,15 +256,15 @@ export const GroupConversation = React.memo(
         {/* Group Name and getFormattedMessage */}
         <div className="info flex-1 min-w-0">
           <p className="friend_name">{name}</p>
-          {istyping ? (
+          {isSomeOneTyping ? (
             <p className="text-sm text-green-500 truncate">
               {isTyping} is typing ...
             </p>
           ) : (
             from &&
             message?.message && (
-              <div className="text-black/60 text-sm flex items-center truncate">
-                {isOutgoing ? "You - " : `${from?.userName} - `}
+              <div className="text-black/60 text-sm flex items-center gap-1 truncate">
+                {isOutgoing ? "You " : `${from?.userName}`} <span>-</span>
                 <span className="block truncate">{message.message}</span>
               </div>
             )

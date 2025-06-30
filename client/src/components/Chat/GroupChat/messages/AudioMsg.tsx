@@ -4,6 +4,7 @@ import { Icons } from "../../../../icons";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import WaveSurfer from "wavesurfer.js";
 import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageActions";
+import { useGetFileQuery } from "../../../../store/slices/apiSlice";
 
 export const GroupAudioMsg = ({
   el,
@@ -12,9 +13,9 @@ export const GroupAudioMsg = ({
   el: GroupMessageProps;
   usersLength: number;
 }) => {
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -23,22 +24,21 @@ export const GroupAudioMsg = ({
   const time = formatTo12HourTime(el?.createdAt);
   const readUsers = el.readBy?.length ?? 0;
   const seen = usersLength > 0 && readUsers >= usersLength;
+  const isPending = el.status === "pending";
+  const audioId = el.message?.audioId;
+
+  const { data: audioBlob, isSuccess } = useGetFileQuery(audioId!, {
+    skip: isPending || !audioId,
+  });
+
   useEffect(() => {
-    if (el.status === "sent" && el?.message?.audioId) {
-      fetch(`http://localhost:8000/api/audio/${el.message.audioId}`)
-        .then((response) => {
-          if (!response.ok) throw new Error("Audio not found");
-          return response.blob();
-        })
-        .then((audioBlob) => {
-          const url = URL.createObjectURL(audioBlob);
-          setAudioUrl(url);
-        })
-        .catch((error) => console.error("Error fetching audio:", error));
+    if (el.status === "sent" && isSuccess && audioBlob instanceof Blob) {
+      const url = URL.createObjectURL(audioBlob);
+      setAudioUrl(url);
     } else if (el.status === "pending") {
       setAudioUrl(el.message.audioId || null);
     }
-  }, [el.status, el.message.audioId]);
+  }, [el.status, el.message.audioId, isSuccess, audioBlob]);
 
   useEffect(() => {
     if (waveformRef.current && audioUrl) {
@@ -48,7 +48,6 @@ export const GroupAudioMsg = ({
         progressColor: "#a294f9",
         cursorColor: "transparent",
         height: 20,
-        // responsive: true,
         interact: true,
         barWidth: 2,
         barRadius: 5,
@@ -68,6 +67,8 @@ export const GroupAudioMsg = ({
 
       waveSurferRef.current.on("finish", () => {
         setIsPlaying(false);
+        setCurrentTime(0); // reset time
+        waveSurferRef.current?.seekTo(0); // reset waveform UI
       });
 
       return () => {
@@ -81,11 +82,18 @@ export const GroupAudioMsg = ({
     if (!waveSurferRef.current) return;
     if (isPlaying) {
       waveSurferRef.current.pause();
-      setIsPlaying(false);
     } else {
       waveSurferRef.current.play();
-      setIsPlaying(true);
     }
+    setIsPlaying((prev) => !prev);
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   return (
@@ -127,11 +135,7 @@ export const GroupAudioMsg = ({
                 </span>
                 <div ref={waveformRef} id="waveform" className="flex-1"></div>
                 <span className="text-sm">
-                  {`00:${Math.floor(
-                    isPlaying ? duration - currentTime : duration
-                  )
-                    .toString()
-                    .padStart(2, "0")}`}
+                  {formatTime(Math.max(duration - currentTime, 0))}
                 </span>
               </div>
             ) : (

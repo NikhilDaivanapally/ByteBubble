@@ -1,8 +1,14 @@
 export type MessageContent = {
-  text?: string;
-  audioId?: string;
+  text: string;
+  audioId: string;
+  imageUrl: string;
   description?: string;
-  imageUrl?: string;
+  fileId: string;
+  fileName: string;
+  fileType: string;
+  size: number;
+  previewUrl: string;
+  pdfPreviewUrl?: string;
 };
 
 export type DirectMessage = {
@@ -56,6 +62,7 @@ export type MessageType =
   | "audio"
   | "image"
   | "video"
+  | "document"
   | "reply"
   | "system";
 export type DirectSystemEventType =
@@ -199,10 +206,8 @@ export type GroupConversationProps = {
 // type for appSlice
 
 export type previewObj = {
-  name: string;
-  size: number;
   url: string;
-  blob: Blob;
+  file: File;
 };
 
 export type appSliceProps = {
@@ -214,7 +219,7 @@ export type appSliceProps = {
   chatType: "direct" | "group" | null;
   isCameraOpen: boolean;
   mediaFiles: File[] | File | null;
-  mediaPreviewUrls: previewObj[];
+  mediaFilePreviews: previewObj[];
   isTyping: string;
   isTypingRoomId: string | null;
   directMessageInfo: DirectMessageProps | null;
@@ -240,4 +245,5 @@ export type conversationSliceProps = {
     current_group_messages: GroupMessageProps[] | [];
   };
   fullImagePreview: DirectMessageProps | GroupMessageProps | null;
+  pdfPreview: DirectMessageProps | GroupMessageProps | null;
 };

@@ -10,7 +10,7 @@ const initialState: appSliceProps = {
   chatType: null,
   isCameraOpen: false,
   mediaFiles: null,
-  mediaPreviewUrls: [],
+  mediaFilePreviews: [],
   isTyping: "",
   isTypingRoomId: null,
   directMessageInfo: null,
@@ -47,8 +47,8 @@ const slice = createSlice({
         : null;
       state.mediaFiles = files;
     },
-    updateMediaPreviewUrls(state, action) {
-      state.mediaPreviewUrls = action.payload;
+    updateMediaFilePreviews(state, action) {
+      state.mediaFilePreviews = action.payload;
     },
     setUsers(state, action) {
       state.users = action.payload;
@@ -98,7 +98,7 @@ export const {
   selectConversation,
   updateChatType,
   updateMediaFiles,
-  updateMediaPreviewUrls,
+  updateMediaFilePreviews,
   setUsers,
   setFriends,
   setFriendRequests,

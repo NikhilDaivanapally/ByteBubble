@@ -1,5 +1,4 @@
-import mongoose, { Types } from "mongoose";
-import { filterObj } from "../utils/filterObj";
+import mongoose from "mongoose";
 import { uploadCloudinary } from "../utils/cloudinary";
 import User from "../models/user.model";
 import { NextFunction, Request, Response } from "express";
@@ -19,6 +18,11 @@ import { DirectConversationResponse } from "../types/response/conversation/direc
 import { GroupConversationResponse } from "../types/response/conversation/group-conversation-response.type";
 import { DirectMessage } from "../models/directMessage.model";
 import { GroupMessage } from "../models/groupMessage.model";
+import { v2 } from "cloudinary";
+import fs from "fs";
+import { gridFSBucket } from "../db/connectDB";
+import { convertPdfFirstPageToImage } from "../utils/convertPdfFirstPageToImage";
+import { ObjectId } from "bson";
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -487,6 +491,125 @@ const createGroup = async (
   }
 };
 
+const handleUpload = async (req: AuthenticatedRequest, res: Response) => {
+  const filePath = req?.file?.path;
+  const originalName = req?.file?.originalname as string;
+  const mimeType = req?.file?.mimetype;
+
+  try {
+    let previewUrl = null;
+    let fileUrl = null;
+
+    if (mimeType?.startsWith("image/") && filePath) {
+      const uploadResult = await v2.uploader.upload(filePath, {
+        folder: "chat-media",
+        resource_type: "image",
+        use_filename: true,
+      });
+      previewUrl = uploadResult.secure_url;
+      fileUrl = previewUrl;
+      fs.unlinkSync(filePath);
+      return res.status(200).json({
+        success: true,
+        message: {
+          imageUrl: fileUrl,
+          description: null,
+        },
+      });
+    } else if (mimeType == "application/pdf" && filePath) {
+      previewUrl = await convertPdfFirstPageToImage(filePath);
+    }
+    //  All other files (DOCX, MP3, ZIP, MP4, etc.)
+    // GridFS storage
+    const uploadStream = gridFSBucket.openUploadStream(originalName, {
+      contentType: mimeType,
+    });
+    if (!filePath) return;
+
+    fs.createReadStream(filePath).pipe(uploadStream);
+
+    uploadStream.on("finish", () => {
+      fs.unlinkSync(filePath);
+
+      res.json({
+        success: true,
+        message: {
+          fileId: uploadStream.id,
+          fileName: originalName,
+          fileType: mimeType,
+          size: uploadStream.length,
+          previewUrl,
+        },
+      });
+    });
+  } catch (error) {
+    console.log(error);
+    fs.unlinkSync(filePath as string);
+    res.status(500).json({ success: false, error: "Upload failed" });
+  }
+};
+
+// const getAudio = async (req: AuthenticatedRequest, res: Response) => {
+//   const fileId = req.params.id;
+//   try {
+//     const objectId = new ObjectId(fileId);
+//     const downloadStream = gridFSBucket!.openDownloadStream(objectId);
+//     res.set("Content-Type", "audio/webm");
+//     downloadStream.pipe(res);
+//     downloadStream.on("error", (err: Error) => {
+//       res.status(404).send({ error: "Audio not found", details: err.message });
+//     });
+//   } catch (err: any) {
+//     res.status(400).send({ error: "Invalid audio ID", details: err.message });
+//   }
+// };
+
+// const getDocument = async (req: AuthenticatedRequest, res: Response) => {
+//   const fileId = req.params.id;
+//   try {
+//     const objectId = new ObjectId(fileId);
+//     const downloadStream = gridFSBucket!.openDownloadStream(objectId);
+//     res.set("Content-Type", "audio/webm");
+//     downloadStream.pipe(res);
+//     downloadStream.on("error", (err: Error) => {
+//       res.status(404).send({ error: "Audio not found", details: err.message });
+//     });
+//   } catch (err: any) {
+//     res.status(400).send({ error: "Invalid audio ID", details: err.message });
+//   }
+// };
+
+const getFile = async (req: AuthenticatedRequest, res: Response) => {
+  const fileId = req.params.id;
+  try {
+    const objectId = new ObjectId(fileId);
+    // get file metadata first
+    const file = await gridFSBucket!.find({ _id: objectId }).toArray();
+    if (!file || file.length === 0) {
+      res.status(404).json({ success: false, error: "File not found" });
+      return;
+    }
+    const fileInfo = file[0];
+    const mimeType = fileInfo.contentType;
+    const downloadStream = gridFSBucket!.openDownloadStream(objectId);
+    res.set("Content-Type", mimeType);
+    downloadStream.pipe(res);
+    downloadStream.on("error", (err: Error) => {
+      res.status(400).send({
+        success: false,
+        error: "Something went wrong",
+        message: err.message,
+      });
+    });
+  } catch (err: any) {
+    res.status(400).send({
+      success: false,
+      error: "Something went wrong",
+      details: err.message,
+    });
+  }
+};
+
 export {
   getUsers,
   getFriends,
@@ -499,4 +622,6 @@ export {
   createGroup,
   updateUserProfile,
   updateUserPassword,
+  handleUpload,
+  getFile,
 };

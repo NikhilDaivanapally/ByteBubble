@@ -79,6 +79,13 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
+    uploadMessageFile: builder.mutation({
+      query: (data) => ({
+        url: `/v1/upload`,
+        method: "POST",
+        body: data,
+      }),
+    }),
     fetchUsers: builder.query({
       query: () => "/v1/user/get_users",
       keepUnusedDataFor: 2, // cache duration in seconds
@@ -110,6 +117,13 @@ export const apiSlice = createApi({
         body: data,
       }),
     }),
+    getFile: builder.query<Blob, string>({
+      query: (fileId) => ({
+        url: `/v1/upload/${fileId}`,
+        method: "GET",
+        responseHandler: (response) => response.blob(), // 👈 important
+      }),
+    }),
   }),
 });
 export const {
@@ -131,4 +145,6 @@ export const {
   useUpdatePasswordMutation,
   useLazySuccessQuery,
   useFetchUnreadMessagesCountQuery,
+  useUploadMessageFileMutation,
+  useGetFileQuery,
 } = apiSlice;

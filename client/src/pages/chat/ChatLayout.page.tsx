@@ -30,6 +30,7 @@ import {
   useDirectSystemEvents,
   useGroupSystemEvents,
 } from "../../hooks/use-system-events";
+import PdfPreview from "../../components/PdfPreview";
 
 const useRegisterSocketEvents = (isConnected: boolean) => {
   useFriendRequestEvents(isConnected);
@@ -101,6 +102,7 @@ const ChatLayout = () => {
         <Outlet />
       </div>
       <ImagePreview />
+      <PdfPreview />
     </div>
   );
 };

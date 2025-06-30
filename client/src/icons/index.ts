@@ -37,6 +37,8 @@ import {
   MinusCircleIcon,
   NoSymbolIcon,
   BellIcon,
+  MusicalNoteIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/16/solid";
 import { LuClock4, LuSend, LuSmile } from "react-icons/lu";
 import { RiAttachment2 } from "react-icons/ri";
@@ -86,6 +88,8 @@ export const Icons = {
   MinusCircleIcon,
   NoSymbolIcon,
   BellIcon,
+  MusicalNoteIcon,
+  ArrowDownTrayIcon,
   UserShield: LiaUserShieldSolid,
   ClockIcon: LuClock4,
   SendIcon: LuSend,

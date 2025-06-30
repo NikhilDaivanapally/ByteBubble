@@ -4,6 +4,7 @@ export const messageTypes = [
   "image",
   "link",
   "video",
+  "document",
   "reply",
   "system",
 ] as const;

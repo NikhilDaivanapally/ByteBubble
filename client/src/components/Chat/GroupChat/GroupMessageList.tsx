@@ -5,6 +5,7 @@ import { GroupAudioMsg } from "./messages/AudioMsg";
 import { GroupTextMsg } from "./messages/TextMsg";
 import { GroupTimelineMsg } from "./messages/TimelineMsg";
 import { GroupSystemMsg } from "./messages/SystemMsg";
+import GroupDocumentMsg from "./messages/documentMsg";
 
 interface GroupMessageListProps {
   sortedDates: string[];
@@ -41,6 +42,15 @@ const GroupMessageList = forwardRef<HTMLUListElement, GroupMessageListProps>(
                       el={el}
                       key={index}
                       usersLength={usersLength - 1}
+                    />
+                  );
+                case "document":
+                  return (
+                    <GroupDocumentMsg
+                      el={el}
+                      scrollToBottom={() => {}}
+                      usersLength={usersLength - 1}
+                      key={index}
                     />
                   );
                 case "system":

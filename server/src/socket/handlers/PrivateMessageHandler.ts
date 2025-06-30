@@ -13,18 +13,15 @@ import {
 import User from "../../models/user.model";
 import { DirectMessageResponse } from "../../types/response/message/direct-message-response.type";
 import { ObjectId } from "bson";
+import { MessageType } from "../../constants/message-types";
+import { MessageContent } from "../../types/message-content-type";
 
 type MessageProps = {
   _id: string;
   senderId: string;
   recipientId: string;
-  messageType: "link" | "text" | "image" | "audio" | "system";
-  message: {
-    text?: string;
-    audioId?: string;
-    imageUrl?: string;
-    description?: string;
-  };
+  messageType: MessageType;
+  message: MessageContent;
   conversationId: string;
   createdAt: string;
   updatedAt: string;
@@ -96,10 +93,15 @@ export async function handleAudioMessage(messagePayload: any, io: Server) {
       ...messagePayload,
       message: { audioId: uploadStream.id },
     };
-    console.log(message, "message");
     await emitToPrivate({ senderId, recipientId, message, io });
     await DirectAudioMessage.create(buildMessage(message));
   });
+}
+
+export async function handleMessage(messagePayload: any, io: Server) {
+  const { senderId, recipientId } = messagePayload;
+  await emitToPrivate({ senderId, recipientId, message: messagePayload, io });
+  await DirectMessage.create(buildMessage(messagePayload));
 }
 
 export async function handleMessageSeen(messagePayload: any, io: Server) {

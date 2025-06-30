@@ -22,7 +22,7 @@ const DirectChat = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const { activeChatId, chatType, isCameraOpen, directMessageInfo } =
     useSelector((state: RootState) => state.app);
-  const { mediaPreviewUrls } = useSelector((state: RootState) => state.app);
+  const { mediaFiles } = useSelector((state: RootState) => state.app);
 
   useLoadChatMessages({
     activeChatId,
@@ -54,9 +54,7 @@ const DirectChat = () => {
     <div className="w-full h-full relative flex gap-2 overflow-hidden">
       <div className="flex flex-col flex-1 h-full relative overflow-hidden">
         {isCameraOpen && <CameraModule />}
-        {mediaPreviewUrls && mediaPreviewUrls?.length > 0 && (
-          <FileSendPreview files={mediaPreviewUrls} />
-        )}
+        {mediaFiles && <FileSendPreview />}
         <DirectChatHeader handleOpenShowDetails={handleOpenShowDetails} />
         <DirectMessageList
           ref={messagesListRef}

@@ -13,6 +13,7 @@ const initialState: conversationSliceProps = {
     current_group_messages: [],
   },
   fullImagePreview: null,
+  pdfPreview: null,
 };
 const slice = createSlice({
   name: "conversation",
@@ -46,7 +47,6 @@ const slice = createSlice({
 
     // updating a conversation
     updateDirectConversation(state, action) {
-      console.log(action, "triggered by");
       const updatedList = (state.direct_chat?.DirectConversations || []).map(
         (el) => (el?._id !== action.payload?._id ? el : action.payload)
       );
@@ -197,6 +197,9 @@ const slice = createSlice({
     setfullImagePreview(state, action) {
       state.fullImagePreview = action.payload.fullviewImg;
     },
+    setPdfPreview(state, action) {
+      state.pdfPreview = action.payload;
+    },
   },
 });
 
@@ -216,6 +219,7 @@ export const {
   ResetDirectChat,
   ResetGroupChat,
   setfullImagePreview,
+  setPdfPreview,
   updateDirectMessagesSeen,
   updateGroupMessagesSeen,
   updateDirectMessageSeenStatus,

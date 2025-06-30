@@ -107,7 +107,6 @@ export async function handleStartConversation(
       conversation,
       from
     );
-    console.log({ to, from }, formattedConversations);
 
     socket.emit("chat:start", formattedConversations[0]);
   } catch (error) {

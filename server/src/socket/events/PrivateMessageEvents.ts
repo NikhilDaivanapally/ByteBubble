@@ -7,6 +7,7 @@ import {
   handleMessageUnreadUpdate,
   handleImageMessage,
   handleTextMessage,
+  handleMessage,
 } from "../handlers/PrivateMessageHandler";
 
 export default function registerPrivateMessageEvents(
@@ -16,20 +17,24 @@ export default function registerPrivateMessageEvents(
   socket.on("messages:get", async (data, callback) => {
     handleGetDirectMessages(data, callback);
   });
+  // socket.on("message:send", async (messagePayload) => {
+  //   switch (messagePayload.messageType) {
+  //     case "text":
+  //       await handleTextMessage(messagePayload, io);
+  //       break;
+  //     case "image":
+  //       await handleImageMessage(messagePayload, io);
+  //       break;
+  //     case "audio":
+  //       await handleAudioMessage(messagePayload, io);
+  //       break;
+  //     default:
+  //       console.warn("Unknown message type:", messagePayload.messageType);
+  //   }
+  // });
+
   socket.on("message:send", async (messagePayload) => {
-    switch (messagePayload.messageType) {
-      case "text":
-        await handleTextMessage(messagePayload, io);
-        break;
-      case "image":
-        await handleImageMessage(messagePayload, io);
-        break;
-      case "audio":
-        await handleAudioMessage(messagePayload, io);
-        break;
-      default:
-        console.warn("Unknown message type:", messagePayload.messageType);
-    }
+    handleMessage(messagePayload, io);
   });
 
   socket.on("message:seen", async (messagePayload) => {

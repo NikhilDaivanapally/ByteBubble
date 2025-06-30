@@ -93,7 +93,6 @@ export async function handleAddMembersToGroup(data: any, io: Server) {
   );
 
   const socketIds = await Promise.all(socketPromises);
-  console.log(socketIds);
   socketIds.forEach((socketId) => {
     if (socketId) {
       io.to(socketId).emit("group:new:members", data);

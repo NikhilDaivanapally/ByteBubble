@@ -7,7 +7,9 @@ import { selectConversation } from "../../../store/slices/appSlice";
 
 const GroupChatHeader = ({ handleOpenShowDetails = () => {} }) => {
   const dispatch = useDispatch();
-  const { isTyping } = useSelector((state: RootState) => state.app);
+  const { isTyping, isTypingRoomId } = useSelector(
+    (state: RootState) => state.app
+  );
   const { user: auth } = useSelector((state: RootState) => state.auth);
   const { current_group_conversation } = useSelector(
     (state: RootState) => state.conversation.group_chat
@@ -25,6 +27,7 @@ const GroupChatHeader = ({ handleOpenShowDetails = () => {} }) => {
       return ` ${name}${i < arr.length - 1 ? ", " : ""}`;
     });
 
+  const isSomeOneTyping = isTypingRoomId === current_group_conversation?._id;
   return (
     <nav className="h-15 w-full flex sm:gap-4 items-center p-2 bg-white rounded-xl">
       <Icons.ArrowLeftIcon
@@ -45,7 +48,7 @@ const GroupChatHeader = ({ handleOpenShowDetails = () => {} }) => {
           <p className="text-base font-medium text-gray-900 truncate">
             {current_group_conversation?.name}
           </p>
-          {isTyping ? (
+          {isSomeOneTyping ? (
             <p className="text-sm text-green-500 truncate">
               {isTyping} is typing
             </p>

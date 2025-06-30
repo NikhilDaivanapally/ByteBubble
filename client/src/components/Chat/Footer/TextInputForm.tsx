@@ -21,10 +21,8 @@ import {
 } from "../../../store/slices/conversation";
 import {
   updateMediaFiles,
-  updateMediaPreviewUrls,
   updateOpenCamera,
 } from "../../../store/slices/appSlice";
-import { parseFiles } from "../../../utils/parse-files";
 import { Icons } from "../../../icons";
 import useClickOutside from "../../../hooks/use-clickoutside";
 import { Button } from "../../ui/Button";
@@ -128,7 +126,7 @@ const TextInputForm = ({
           isEdited: false,
         })
       );
-      
+
       socket.emit("message:send", {
         ...messagePayload,
         senderId: auth?._id,
@@ -160,6 +158,7 @@ const TextInputForm = ({
           avatar: auth?.avatar,
         },
       });
+      playSound("messageSend");
     }
 
     setMessage("");
@@ -174,28 +173,43 @@ const TextInputForm = ({
     {
       icon: <Icons.DocumentIcon className="w-5 text-violet-400" />,
       title: "Documents",
-      accept: ".pdf, .doc, .docx, .xls, .xlsx",
+      accept: ".pdf, .doc, .docx, .xls, .xlsx, .zip",
+      multiple: false,
       onChange: (e: ChangeEvent<HTMLInputElement>) => {
-        dispatch(updateMediaFiles(e.target.files));
+        const files = e.target.files;
+        if (!files) return;
+        setAttachmentVisible(false);
+        dispatch(updateMediaFiles(files));
       },
     },
     {
       icon: <Icons.PhotoIcon className="w-5 text-blue-400" />,
       title: "Photos & Videos",
-      accept: "image/*",
+      accept: "image/*,video/mp4,video/3gpp,video/quicktime",
+      multiple: true,
       onChange: async (e: ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files) return;
         setAttachmentVisible(false);
-        const fileArray = Array.from(files);
-        dispatch(updateMediaFiles(fileArray));
-        const previewUrls = await parseFiles(fileArray);
-        dispatch(updateMediaPreviewUrls(previewUrls));
+        dispatch(updateMediaFiles(files));
+      },
+    },
+    {
+      icon: <Icons.MusicalNoteIcon className="w-5" />,
+      title: "Audios",
+      accept: "audio/wav,audio/mp3,audio/ogg,audio/aac,audio/mpeg",
+      multiple: false,
+      onChange: async (e: ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files) return;
+        setAttachmentVisible(false);
+        dispatch(updateMediaFiles(files));
       },
     },
     {
       icon: <Icons.CameraIcon className="w-5 text-red-400" />,
       title: "Camera",
+      multiple: false,
       onClick: () => {
         dispatch(updateOpenCamera(true));
         setAttachmentVisible(false);
@@ -329,7 +343,7 @@ const TextInputForm = ({
             >
               <ul className="whitespace-nowrap">
                 {attachments.map(
-                  ({ icon, title, accept, onChange, onClick }, i) => (
+                  ({ icon, title, accept, multiple, onChange, onClick }, i) => (
                     <li key={i} className="list-none">
                       {onChange ? (
                         <label className="flex gap-2 p-2 text-sm rounded-md hover:bg-gray-200 cursor-pointer">
@@ -339,7 +353,7 @@ const TextInputForm = ({
                             type="file"
                             hidden
                             accept={accept}
-                            multiple
+                            multiple={multiple}
                             onChange={onChange}
                           />
                         </label>

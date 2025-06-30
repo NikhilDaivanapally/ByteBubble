@@ -20,10 +20,9 @@ const GroupChat = () => {
 
   const { group_chat } = useSelector((state: RootState) => state.conversation);
   const { user } = useSelector((state: RootState) => state.auth);
-  const { activeChatId, chatType, isCameraOpen, groupMessageInfo } = useSelector(
+  const { activeChatId, chatType, isCameraOpen } = useSelector(
     (state: RootState) => state.app
   );
-  const { mediaPreviewUrls } = useSelector((state: RootState) => state.app);
 
   const currentGroup = group_chat.GroupConversations?.find(
     (c) => c._id === activeChatId
@@ -59,9 +58,7 @@ const GroupChat = () => {
     <div className="w-full h-full relative flex gap-2 overflow-hidden">
       <div className="flex flex-col flex-1 h-full relative overflow-hidden">
         {isCameraOpen && <CameraModule />}
-        {mediaPreviewUrls && mediaPreviewUrls?.length > 0 && (
-          <FileSendPreview files={mediaPreviewUrls} />
-        )}
+        <FileSendPreview />
         <GroupChatHeader handleOpenShowDetails={handleOpenShowDetails} />
         <GroupMessageList
           ref={messagesListRef}
@@ -75,7 +72,7 @@ const GroupChat = () => {
         showDetails={showDetails}
         handleCloseShowDetails={handleCloseShowDetails}
       />
-      {groupMessageInfo && <GroupMessageInfo />}
+      <GroupMessageInfo />
     </div>
   ) : (
     <PageLoader />

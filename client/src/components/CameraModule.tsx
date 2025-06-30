@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { useCallback, useEffect, useRef } from "react";
 import {
+  updateMediaFiles,
   updateMediaPreviewUrls,
   updateOpenCamera,
 } from "../store/slices/appSlice";
@@ -49,14 +50,18 @@ const CameraModule = () => {
       canvas.toBlob(
         async (blob) => {
           if (blob) {
-            const parsed = await parseFiles([blob]);
-            dispatch(updateMediaPreviewUrls(parsed));
+            const file = new File([blob], `photo-${Date.now()}.webp`, {
+              type: "image/webp",
+              lastModified: Date.now(),
+            });
+
+            dispatch(updateMediaFiles([file])); // Wrap in array since it expects File[]
             dispatch(updateOpenCamera(false));
           }
         },
         "image/webp",
         0.92
-      ); // use WebP format
+      );
     }
   };
 

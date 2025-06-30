@@ -8,6 +8,7 @@ import { userSnapshotSchema } from "../types/message-schemas/userSnapshot.schema
 import { messageTypes } from "../constants/message-types";
 import { linkSchema } from "../types/message-schemas/link.schema";
 import { safeDiscriminator } from "../utils/safeDiscriminator";
+import { documentSchema } from "../types/message-schemas/document.schema";
 
 const directMessageSchema = new Schema<DirectMessageDoc>(
   {
@@ -96,10 +97,20 @@ const DirectLinkMessage = safeDiscriminator(
   "link"
 );
 
+const DirectDocumentMessage = safeDiscriminator(
+  DirectMessage,
+  "DirectDocument",
+  new Schema({
+    message: { type: documentSchema, required: true },
+  }),
+  "document"
+);
+
 export {
   DirectMessage,
   DirectTextMessage,
   DirectAudioMessage,
   DirectImageMessage,
   DirectLinkMessage,
+  DirectDocumentMessage
 };

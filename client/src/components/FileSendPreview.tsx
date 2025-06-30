@@ -1,59 +1,134 @@
-import { useDispatch } from "react-redux";
-import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useCallback, useEffect } from "react";
 import SendMediaMessage from "./SendMediaMessage";
 import {
+  updateMediaFilePreviews,
   updateMediaFiles,
-  updateMediaPreviewUrls,
 } from "../store/slices/appSlice";
 import { Icons } from "../icons";
-import { previewObj } from "../types";
+import { RootState } from "../store/store";
 
-type FileSendPreviewProps = {
-  files: previewObj[];
-};
-
-const FileSendPreview = ({ files }: FileSendPreviewProps) => {
+const FileSendPreview = () => {
   const dispatch = useDispatch();
-  const [activeIndex, setActiveIndex] = useState(0);
-  useEffect(() => {
-    if (files.length > 0) {
-      setActiveIndex(files.length - 1);
-    }
-  }, [files]);
+  const { mediaFiles, mediaFilePreviews } = useSelector(
+    (state: RootState) => state.app
+  );
 
-  const handleResetmediaFiles_mediaPreviewUrls = useCallback(() => {
+  useEffect(() => {
+    if (!mediaFiles) return;
+
+    const filesArray = Array.isArray(mediaFiles) ? mediaFiles : [mediaFiles];
+    const previews = filesArray.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+    dispatch(updateMediaFilePreviews(previews));
+
+    return () => {
+      previews.forEach((p) => URL.revokeObjectURL(p.url));
+    };
+  }, [mediaFiles]);
+
+  const handleReset = useCallback(() => {
+    console.log("clicking");
     dispatch(updateMediaFiles(null));
-    dispatch(updateMediaPreviewUrls(null));
-  }, []);
+  }, [dispatch]);
+
+  const getFileExtension = (filename: string) => {
+    return filename.split(".").pop()?.toLowerCase() || "";
+  };
+
+  const renderPreview = (file: File, url: string, index: number) => {
+    const type = file.type;
+    const ext = getFileExtension(file.name);
+
+    if (type.startsWith("image/")) {
+      return (
+        <img
+          key={index}
+          src={url}
+          alt={`image-${index}`}
+          className="w-full max-h-100 object-contain rounded-lg"
+        />
+      );
+    }
+
+    if (type.startsWith("audio/")) {
+      return (
+        <audio
+          key={index}
+          controls
+          src={url}
+          className="w-full max-w-sm rounded border"
+        />
+      );
+    }
+
+    if (type.startsWith("video/")) {
+      return (
+        <video
+          key={index}
+          controls
+          src={url}
+          className="w-full object-contain rounded-lg"
+        />
+      );
+    }
+
+    if (type === "application/pdf") {
+      return (
+        <iframe
+          key={index}
+          src={url}
+          className="w-full h-200 rounded border"
+          title={`pdf-${index}`}
+        />
+      );
+    }
+
+    const docTypes = ["doc", "docx", "txt", "rtf", "xlsx", "zip"];
+    if (docTypes.includes(ext)) {
+      return (
+        <div
+          key={index}
+          className="p-4 border rounded max-w-xs bg-gray-100 text-center"
+        >
+          <p className="mb-2">{file.name}</p>
+          <a href={url} download className="text-blue-600 underline text-sm">
+            Download {ext.toUpperCase()} File
+          </a>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        key={index}
+        className="p-4 border rounded max-w-xs bg-gray-100 text-center"
+      >
+        <p className="mb-2">Unsupported: {file.name}</p>
+        <a href={url} download className="text-blue-600 underline text-sm">
+          Download File
+        </a>
+      </div>
+    );
+  };
+
+  if (!mediaFiles || mediaFilePreviews.length === 0) return null;
 
   return (
-    <div className="absolute inset-0 flex-center flex-col gap-10 backdrop-blur z-50">
+    <div className="absolute inset-0 flex-center flex-col gap-4 backdrop-blur z-50">
       <Icons.XMarkIcon
-        className="w-8 absolute top-0 right-0 ml-auto cursor-pointer"
-        onClick={handleResetmediaFiles_mediaPreviewUrls}
-      />
-      {/* main Image */}
-      <img
-        src={files[activeIndex]?.url}
-        // alt={mediaPreviewUrls[activeIndex]?.file}
-        className="w-full max-w-xl mx-auto max-h-1/2"
+        className="w-8 absolute top-4 right-4 ml-auto cursor-pointer"
+        onClick={handleReset}
       />
 
-      {/* previews list */}
-      <ul className="flex-center gap-4">
-        {files?.map((media, i) => {
-          return (
-            <li key={i} className="w-16 h-16 rounded-md">
-              <img src={media.url} alt="" className="w-full h-full" />
-            </li>
-          );
-        })}
-        <label className="w-16 h-16 border-2 flex-center border-gray-400 rounded-md cursor-pointer">
-          <Icons.PlusIcon className="w-8 text-gray-400" />
-          <input type="text" />
-        </label>
-      </ul>
-      {/* send Media btn */}
+      <div className="flex flex-wrap w-full justify-center gap-4 overflow-hidden p-4">
+        {mediaFilePreviews.map(({ file, url }, index) =>
+          renderPreview(file, url, index)
+        )}
+      </div>
+
       <SendMediaMessage />
     </div>
   );

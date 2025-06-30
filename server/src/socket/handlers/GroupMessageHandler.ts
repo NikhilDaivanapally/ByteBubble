@@ -13,17 +13,15 @@ import {
 import User from "../../models/user.model";
 import { GroupMessageResponse } from "../../types/response/message/group-message-response.type";
 import { ObjectId } from "bson";
+import { MessageType } from "../../constants/message-types";
+import { MessageContent } from "../../types/message-content-type";
 
 type GroupMessageProps = {
   _id: string;
   senderId: string;
-  recipientsIds: string;
-  messageType: "link" | "text" | "image" | "audio" | "system";
-  message: {
-    text?: string;
-    audioId?: string;
-  };
-  conversationType: string;
+  recipientsIds: string[];
+  messageType: MessageType;
+  message: MessageContent;
   conversationId: string;
   createdAt: string;
   updatedAt: string;
@@ -115,6 +113,12 @@ export async function handleGroupAudioMessage(messagePayload: any, io: Server) {
   });
 }
 
+export async function handleMessage(messagePayload: any, io: Server) {
+  const { senderId, recipientsIds } = messagePayload;
+  await emitToGroup({ senderId, recipientsIds, message: messagePayload, io });
+  await GroupMessage.create(buildGroupMessage(messagePayload));
+}
+
 export async function handleGroupMessageSeen(messagePayload: any, io: Server) {
   const sender = await User.findById(messagePayload?.senderId).select(
     "socketId -_id"
@@ -151,7 +155,6 @@ export async function handleGroupMessageUnreadUpdate(
 
 export async function handleGroupMessageUnreadClear(data: any, io: Server) {
   const { conversationId, recipient, sender, user } = data;
-  console.log(data);
   const Sender = await User.findById(sender);
   if (Sender?.socketId) {
     io.to(Sender?.socketId!).emit("group:messages:status:seen", {

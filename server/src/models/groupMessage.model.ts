@@ -1,5 +1,3 @@
-// models/GroupMessage.ts
-
 import mongoose, { model, Schema } from "mongoose";
 import { GroupMessageDoc } from "../types/model/message/group-message-model.type";
 import { textSchema } from "../types/message-schemas/text.schema";
@@ -10,6 +8,7 @@ import { groupEventTypes } from "../constants/system-event-types";
 import { messageTypes } from "../constants/message-types";
 import { linkSchema } from "../types/message-schemas/link.schema";
 import { safeDiscriminator } from "../utils/safeDiscriminator";
+import { documentSchema } from "../types/message-schemas/document.schema";
 
 export const ReadBySchema = new Schema(
   {
@@ -105,10 +104,20 @@ const GroupLinkMessage = safeDiscriminator<GroupMessageDoc>(
   "link"
 );
 
+const GroupDocumentMessage = safeDiscriminator(
+  GroupMessage,
+  "GroupDocument",
+  new Schema({
+    message: { type: documentSchema, required: true },
+  }),
+  "document"
+);
+
 export {
   GroupMessage,
   GroupTextMessage,
   GroupAudioMessage,
   GroupImageMessage,
   GroupLinkMessage,
+  GroupDocumentMessage,
 };

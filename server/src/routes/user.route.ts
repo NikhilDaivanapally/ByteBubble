@@ -6,12 +6,14 @@ import {
   createGroup,
   getDirectConversation,
   getDirectConversations,
+  getFile,
   getFriendrequest,
   getFriends,
   getGroupConversation,
   getGroupConversations,
   getUnreadMessagesCount,
   getUsers,
+  handleUpload,
   updateUserPassword,
   updateUserProfile,
 } from "../controllers/user.controller";
@@ -70,6 +72,14 @@ router.post(
   upload.single("avatar"),
   createGroup as RequestHandler
 );
+router.post(
+  "/upload",
+  ensureAuthenticated,
+  upload.single("file"),
+  handleUpload as RequestHandler
+);
+
+router.get("/file/:id", ensureAuthenticated, getFile as RequestHandler);
 
 router.post("/addrequest", async (req, res) => {
   const { sender, recipient } = req.body;
