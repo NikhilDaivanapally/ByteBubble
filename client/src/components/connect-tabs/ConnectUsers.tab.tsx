@@ -1,5 +1,4 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useFetchUsersQuery } from "../../store/slices/apiSlice";
 import { AppDispatch, RootState } from "../../store/store";
 import { useCallback, useEffect } from "react";
 import { setUsers } from "../../store/slices/appSlice";
@@ -8,12 +7,13 @@ import { motion, AnimatePresence } from "motion/react";
 import { socket } from "../../socket";
 import PageLoader from "../Loaders/PageLoader";
 import { Avatar } from "../ui/Avatar";
+import { useGetUsersQuery } from "../../store/slices/api";
 
 const ConnectUsers = () => {
   const dispatch = useDispatch<AppDispatch>();
   const authUser = useSelector((state: RootState) => state.auth.user);
   const { users } = useSelector((state: RootState) => state.app);
-  const { isLoading, data } = useFetchUsersQuery({});
+  const { isLoading, data } = useGetUsersQuery({});
   useEffect(() => {
     if (!data?.data) return;
     dispatch(setUsers(data?.data));

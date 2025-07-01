@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
-import { useSignupMutation } from "../../store/slices/apiSlice";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import OtpComponent from "../../components/OtpComponent";
 import GoogleAuth from "../../components/GoogleAuth";
 import toast from "react-hot-toast";
 import Textarea from "../../components/ui/Textarea";
 import ImageUpload from "../../components/ui/ImageUpload";
+import { useSignupMutation } from "../../store/slices/api";
 type SignupProps = {
   avatar: File | null;
   userName: string;

@@ -1,10 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useLazySuccessQuery } from "../../store/slices/apiSlice";
 import { RootState } from "../../store/store";
 import { useEffect, useState } from "react";
 import { setUser } from "../../store/slices/authSlice";
 import { Navigate } from "react-router-dom";
 import PageLoader from "../../components/Loaders/PageLoader";
+import { useLazySuccessQuery } from "../../store/slices/api";
 
 export function ProtectedPage({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch();

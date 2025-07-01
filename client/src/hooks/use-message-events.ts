@@ -16,11 +16,11 @@ import {
   updateGroupMessageSeenStatus,
   updateGroupMessagesSeen,
 } from "../store/slices/conversation";
+import { playSound } from "../utils/soundPlayer";
 import {
   useGetDirectConversationMutation,
   useGetGroupConversationMutation,
-} from "../store/slices/apiSlice";
-import { playSound } from "../utils/soundPlayer";
+} from "../store/slices/api";
 
 // Private message events
 export const useMessageEvents = (enabled: boolean) => {
@@ -69,14 +69,14 @@ export const useMessageEvents = (enabled: boolean) => {
             isIncoming: true,
             isOutgoing: false,
             isRead: true,
-            readAt:null,
+            readAt: null,
             status: "sent",
             conversationId,
             deletedFor: [],
             isDeletedForEveryone: [],
             reactions: [],
             isEdited: false,
-            editedAt:null,
+            editedAt: null,
             createdAt,
             updatedAt,
           })

@@ -4,11 +4,6 @@ import { Outlet, useLocation } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { socket } from "../../socket";
 import ImagePreview from "../../components/ImagePreview";
-import {
-  useFetchDirectConversationsQuery,
-  useFetchFriendsQuery,
-  useFetchUnreadMessagesCountQuery,
-} from "../../store/slices/apiSlice";
 import { setDirectConversations } from "../../store/slices/conversation";
 import {
   setUnreadCount,
@@ -31,6 +26,11 @@ import {
   useGroupSystemEvents,
 } from "../../hooks/use-system-events";
 import PdfPreview from "../../components/PdfPreview";
+import {
+  useGetConnectionsQuery,
+  useGetDirectConversationsQuery,
+  useGetUnreadMessagesCountQuery,
+} from "../../store/slices/api";
 
 const useRegisterSocketEvents = (isConnected: boolean) => {
   useFriendRequestEvents(isConnected);
@@ -51,9 +51,9 @@ const ChatLayout = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const { friends } = useSelector((state: RootState) => state.app);
 
-  const { data: unreadCountdata } = useFetchUnreadMessagesCountQuery({});
-  const { data: directConversationData } = useFetchDirectConversationsQuery({});
-  const { data: friendsData } = useFetchFriendsQuery({});
+  const { data: unreadCountdata } = useGetUnreadMessagesCountQuery({});
+  const { data: directConversationData } = useGetDirectConversationsQuery({});
+  const { data: friendsData } = useGetConnectionsQuery({});
 
   useEffect(() => {
     if (!unreadCountdata?.data) return;

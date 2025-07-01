@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Icons } from "../icons";
 import { motion, AnimatePresence } from "motion/react";
 import { direct } from "../utils/conversation-types";
-import { useGetFileQuery } from "../store/slices/apiSlice";
+import { useGetFileQuery } from "../store/slices/api";
 
 const PdfPreview = () => {
   const dispatch = useDispatch();

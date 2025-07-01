@@ -3,8 +3,8 @@ import { Button } from "../../components/ui/Button";
 import { useCallback, useEffect, useState } from "react";
 import Input from "../../components/ui/Input";
 import { EnvelopeIcon, KeyIcon } from "@heroicons/react/16/solid";
-import { useForgotpassMutation } from "../../store/slices/apiSlice";
 import toast from "react-hot-toast";
+import { useForgotPasswordMutation } from "../../store/slices/api";
 
 type Error = {
   data: {
@@ -14,7 +14,8 @@ type Error = {
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [forgotpass, { isLoading, error, data }] = useForgotpassMutation();
+  const [forgotPassword, { isLoading, error, data }] =
+    useForgotPasswordMutation();
   useEffect(() => {
     if (data) {
       toast.success(data.message);
@@ -32,7 +33,7 @@ const ForgotPassword = () => {
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (email) {
-        await forgotpass({ email });
+        await forgotPassword({ email });
       } else {
         toast("Enter your email to Reset password");
       }

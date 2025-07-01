@@ -20,11 +20,8 @@ import {
 import { Icons } from "../icons";
 import { direct, group } from "../utils/conversation-types";
 import { ObjectId } from "bson";
-import {
-  useUpdateuserMutation,
-  useUploadMessageFileMutation,
-} from "../store/slices/apiSlice";
 import { getFirstPagePreviewUrl } from "../utils/getFirstPagePreviewUrl";
+import { useUploadMessageFileMutation } from "../store/slices/api";
 
 const SendMediaMessage = () => {
   const dispatch = useDispatch();

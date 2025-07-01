@@ -3,8 +3,8 @@ import { Button } from "../ui/Button";
 import { Icons } from "../../icons";
 import Input from "../ui/Input";
 import { motion } from "motion/react";
-import { useUpdatePasswordMutation } from "../../store/slices/apiSlice";
 import toast from "react-hot-toast";
+import { useUpdatePasswordMutation } from "../../store/slices/api";
 
 type UpdatePasswordProps = {
   onClose: () => void;

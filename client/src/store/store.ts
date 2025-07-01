@@ -1,6 +1,6 @@
 import { configureStore, Middleware } from "@reduxjs/toolkit";
 import { rootReducer } from "./rootReducer";
-import { apiSlice } from "./slices/apiSlice";
+import { apiSlice } from "./slices/api";
 
 const store = configureStore({
   reducer: rootReducer,

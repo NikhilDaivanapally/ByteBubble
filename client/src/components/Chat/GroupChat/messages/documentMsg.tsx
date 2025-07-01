@@ -1,7 +1,6 @@
 import { GroupMessageProps } from "../../../../types";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import { Icons } from "../../../../icons";
-import { useGetFileQuery } from "../../../../store/slices/apiSlice";
 import { useEffect, useMemo, useState } from "react";
 import { setPdfPreview } from "../../../../store/slices/conversation";
 import { useDispatch } from "react-redux";
@@ -9,6 +8,7 @@ import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageA
 import Loader from "../../../ui/Loader";
 import { formatBytes, truncateFilename } from "../../../../utils/fileUtils";
 import { useFileIcon } from "../../../../hooks/use-fileicon";
+import { useGetFileQuery } from "../../../../store/slices/api";
 
 const GroupDocumentMsg = ({
   el,

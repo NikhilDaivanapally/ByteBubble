@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+
+# Vite env files
+.env               # ignore the base .env
+.env.local         # always ignore local overrides
+.env.*.local       # ignore local env for specific modes
+!.env.example      # keep this to document required env variables
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

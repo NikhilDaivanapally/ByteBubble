@@ -1,5 +1,4 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useFriendrequestsQuery } from "../../store/slices/apiSlice";
 import { AppDispatch, RootState } from "../../store/store";
 import { useCallback, useEffect } from "react";
 import { setFriendRequests } from "../../store/slices/appSlice";
@@ -9,12 +8,13 @@ import { socket } from "../../socket";
 import { Icons } from "../../icons";
 import PageLoader from "../Loaders/PageLoader";
 import { Avatar } from "../ui/Avatar";
+import { useGetConnectionRequestsQuery } from "../../store/slices/api";
 
 const Requests = () => {
   const dispatch = useDispatch<AppDispatch>();
   const authUser = useSelector((state: RootState) => state.auth.user);
   const { friendRequests } = useSelector((state: RootState) => state.app);
-  const { isLoading, data } = useFriendrequestsQuery({});
+  const { isLoading, data } = useGetConnectionRequestsQuery({});
   useEffect(() => {
     if (!data?.data) return;
     dispatch(setFriendRequests(data?.data));

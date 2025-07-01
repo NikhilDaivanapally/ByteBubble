@@ -5,8 +5,8 @@ import { selectConversation } from "../store/slices/appSlice";
 import { GroupConversationProps, UserProps } from "../types";
 import { addGroupConversation } from "../store/slices/conversation";
 import { RootState } from "../store/store";
-import { useGetGroupConversationMutation } from "../store/slices/apiSlice";
 import { group } from "../utils/conversation-types";
+import { useGetGroupConversationMutation } from "../store/slices/api";
 
 type NewMembersProps = {
   _id: string;

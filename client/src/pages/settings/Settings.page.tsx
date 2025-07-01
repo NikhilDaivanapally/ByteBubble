@@ -6,8 +6,8 @@ import Section from "../../components/Settings/Section";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { setActiveSettingPage } from "../../store/slices/settingsSlice";
-import { apiSlice, useLogoutMutation } from "../../store/slices/apiSlice";
 import { Button } from "../../components/ui/Button";
+import { apiSlice, useLogoutMutation } from "../../store/slices/api";
 
 const Settings = () => {
   const dispatch = useDispatch();

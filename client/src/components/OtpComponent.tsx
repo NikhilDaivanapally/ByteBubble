@@ -8,13 +8,13 @@ import React, {
   KeyboardEvent,
 } from "react";
 import { Button } from "./ui/Button";
-import { useOtpsubmitMutation } from "../store/slices/apiSlice";
 import { setUser } from "../store/slices/authSlice";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { SerializedError } from "@reduxjs/toolkit";
+import { useOtpsubmitMutation } from "../store/slices/api";
 
 type OtpComponentProps = {
   email?: string;

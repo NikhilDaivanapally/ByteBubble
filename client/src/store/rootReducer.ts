@@ -3,10 +3,10 @@ import themeReducer from "./slices/themeSlice";
 import authReducer from "./slices/authSlice";
 import appReducer from "./slices/appSlice";
 import settingsReducer from "./slices/settingsSlice";
-import { apiSlice } from "./slices/apiSlice";
 import conversationReducer from "./slices/conversation";
+import { apiSlice } from "./slices/api";
 
-// ✅ Combine reducers
+//  Combine reducers
 const combinedReducer = combineReducers({
   [apiSlice.reducerPath]: apiSlice.reducer,
   theme: themeReducer,
@@ -18,7 +18,7 @@ const combinedReducer = combineReducers({
 
 type RootState = ReturnType<typeof combinedReducer>;
 
-// ✅ Typed RootReducer with reset logic
+// Typed RootReducer with reset logic
 const rootReducer: Reducer<RootState> = (state, action) => {
   if (action.type === "RESET_STORE") {
     state = undefined;

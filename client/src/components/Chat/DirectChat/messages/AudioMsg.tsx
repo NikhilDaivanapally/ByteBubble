@@ -4,7 +4,7 @@ import { Icons } from "../../../../icons";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import WaveSurfer from "wavesurfer.js";
 import { DirectMessageActions } from "../../../ui/Dropdowns/actions/DirectMessageActions";
-import { useGetFileQuery } from "../../../../store/slices/apiSlice";
+import { useGetFileQuery } from "../../../../store/slices/api";
 
 export const DirectAudioMsg = ({ el }: { el: DirectMessageProps }) => {
   const [isPlaying, setIsPlaying] = useState(false);

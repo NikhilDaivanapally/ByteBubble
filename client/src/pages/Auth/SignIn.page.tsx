@@ -3,10 +3,10 @@ import { Button } from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLoginMutation } from "../../store/slices/apiSlice";
 import GoogleAuth from "../../components/GoogleAuth";
 import { setUser } from "../../store/slices/authSlice";
 import toast from "react-hot-toast";
+import { useSiginMutation } from "../../store/slices/api";
 
 type Error = {
   data?: {
@@ -27,10 +27,10 @@ const SignIn = () => {
     password: "",
   });
 
-  // local login
-  const [login, { isLoading, error, data }] = useLoginMutation();
+  // local sigin
+  const [sigin, { isLoading, error, data }] = useSiginMutation();
 
-  // Hook for local login success
+  // Hook for local sigin success
   useEffect(() => {
     if (data) {
       console.log(data);
@@ -47,12 +47,12 @@ const SignIn = () => {
       e.preventDefault();
 
       if (!Object.values(signinFormData).some((val) => val === "")) {
-        await login(signinFormData);
+        await sigin(signinFormData);
       } else {
         // toast.error("All Fields are Required");
       }
     },
-    [signinFormData, login]
+    [signinFormData, sigin]
   );
 
   const handleInputChange = useCallback(

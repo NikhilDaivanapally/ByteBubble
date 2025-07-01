@@ -1,5 +1,4 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useFetchFriendsQuery } from "../../store/slices/apiSlice";
 import { AppDispatch, RootState } from "../../store/store";
 import { useEffect } from "react";
 import { setFriends } from "../../store/slices/appSlice";
@@ -10,12 +9,13 @@ import { socket } from "../../socket";
 import { useNavigate } from "react-router-dom";
 import PageLoader from "../Loaders/PageLoader";
 import { Avatar } from "../ui/Avatar";
+import { useGetConnectionsQuery } from "../../store/slices/api";
 const Friends = () => {
   const Navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const authUser = useSelector((state: RootState) => state.auth.user);
   const { friends } = useSelector((state: RootState) => state.app);
-  const { isLoading, data } = useFetchFriendsQuery({});
+  const { isLoading, data } = useGetConnectionsQuery({});
   useEffect(() => {
     if (!data?.data) return;
     dispatch(setFriends(data?.data));

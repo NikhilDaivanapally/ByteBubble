@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import Input from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
-import { useResetpassMutation } from "../../store/slices/apiSlice";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { CheckBadgeIcon, LockClosedIcon } from "@heroicons/react/16/solid";
+import { useResetPasswordMutation } from "../../store/slices/api";
 type Error = {
   data: {
     message: string;
@@ -17,13 +17,14 @@ const ResetPassword = () => {
     confirmNewPassword: "",
   });
 
-  const [resetpass, { isLoading, error, data }] = useResetpassMutation();
+  const [resetPassword, { isLoading, error, data }] =
+    useResetPasswordMutation();
 
   const handleFormSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!Object.values(resetFormData).some((val) => val == "")) {
-        await resetpass(resetFormData);
+        await resetPassword(resetFormData);
       } else {
         toast.error("All Fields are Required");
       }

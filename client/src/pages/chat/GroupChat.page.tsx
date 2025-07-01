@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { GroupConversation } from "../../components/Conversation";
-import { useLazyFetchGroupConversationsQuery } from "../../store/slices/apiSlice";
 import {
   ResetGroupChat,
   setGroupConversations,
@@ -20,6 +19,7 @@ import CreateGroup from "../../components/CreateGroup";
 import NoChat from "../../components/ui/NoChat";
 import Dialog from "../../components/ui/Dialog/Dialog";
 import Chat from "../../components/Chat/GroupChat/GroupChat";
+import { useLazyGetGroupConversationsQuery } from "../../store/slices/api";
 const GroupChat = () => {
   const dispatch = useDispatch();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -36,8 +36,9 @@ const GroupChat = () => {
     GroupConversationProps[]
   >(GroupConversations || []);
 
-  const [fetchGroupConversations, { data }] =
-    useLazyFetchGroupConversationsQuery({});
+  const [fetchGroupConversations, { data }] = useLazyGetGroupConversationsQuery(
+    {}
+  );
 
   useEffect(() => {
     if (!GroupConversations) return;

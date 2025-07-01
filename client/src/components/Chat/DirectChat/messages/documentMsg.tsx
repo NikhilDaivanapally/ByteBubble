@@ -2,13 +2,13 @@ import { DirectMessageProps } from "../../../../types";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import { DirectMessageActions } from "../../../ui/Dropdowns/actions/DirectMessageActions";
 import { Icons } from "../../../../icons";
-import { useGetFileQuery } from "../../../../store/slices/apiSlice";
 import { useEffect, useMemo, useState } from "react";
 import { setPdfPreview } from "../../../../store/slices/conversation";
 import { useDispatch } from "react-redux";
 import Loader from "../../../ui/Loader";
 import { useFileIcon } from "../../../../hooks/use-fileicon";
 import { formatBytes, truncateFilename } from "../../../../utils/fileUtils";
+import { useGetFileQuery } from "../../../../store/slices/api";
 const DirectDocumentMsg = ({
   el,
   scrollToBottom,

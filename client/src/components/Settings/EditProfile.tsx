@@ -7,9 +7,9 @@ import { clearActiveSettingPage } from "../../store/slices/settingsSlice";
 import { Icons } from "../../icons";
 import { motion } from "motion/react";
 import toast from "react-hot-toast";
-import { useUpdateuserMutation } from "../../store/slices/apiSlice";
 import { setUser } from "../../store/slices/authSlice";
 import { useNavigate } from "react-router-dom";
+import { useUpdateUserMutation } from "../../store/slices/api";
 
 const MAX_IMAGE_SIZE_MB = 2;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
@@ -28,7 +28,7 @@ const EditProfile = () => {
   });
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  const [updateUser, { isLoading, data, error }] = useUpdateuserMutation();
+  const [updateUser, { isLoading, data, error }] = useUpdateUserMutation();
 
   // Pre-fill fields with current user info
   useEffect(() => {

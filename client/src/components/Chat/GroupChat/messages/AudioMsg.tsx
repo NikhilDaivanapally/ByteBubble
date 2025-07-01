@@ -4,7 +4,7 @@ import { Icons } from "../../../../icons";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import WaveSurfer from "wavesurfer.js";
 import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageActions";
-import { useGetFileQuery } from "../../../../store/slices/apiSlice";
+import { useGetFileQuery } from "../../../../store/slices/api";
 
 export const GroupAudioMsg = ({
   el,
