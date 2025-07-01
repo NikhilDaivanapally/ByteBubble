@@ -99,7 +99,7 @@ const OtpComponent: React.FC<OtpComponentProps> = ({ email, length }) => {
       if (otp.every((val) => val.trim() !== "")) {
         await otpsubmit({ email, otp: otp.join("") });
       } else {
-        // toast.error("All fields must be filled");
+        toast.error("All fields must be filled");
       }
     },
     [otp, email, otpsubmit]
@@ -120,42 +120,52 @@ const OtpComponent: React.FC<OtpComponentProps> = ({ email, length }) => {
 
   return (
     <section className="w-full h-full flex-center flex-col gap-2">
-      <h1 className="lg:hidden absolute top-4 left-4 text-xl font-semibold">
-        Byte_Messenger
-      </h1>
-      <h1 className="font-semibold text-2xl text-center">Verify OTP</h1>
-      <p className="text-center text-sm text-gray-600">
-        We have sent a verification code to{" "}
-        <span className="font-semibold text-black underline">{email}</span>
-      </p>
-      <form onSubmit={handleOtpsubmit} className="w-full space-y-2">
-        <div className="flex gap-2 my-8 justify-center">
-          {otp.map((value, index) => (
-            <input
-              key={`input_${index}`}
-              ref={(el) => {
-                inputRefs.current[index] = el;
-              }}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={value}
-              onClick={() => handleClick(index)}
-              onChange={(e) => handleOtpChange(index, e)}
-              onKeyDown={(e) => handleKeydown(index, e)}
-              className="w-full h-12 sm:w-14 sm:h-14 text-xl text-center border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-btn-primary transition"
-            />
-          ))}
-        </div>
-        <Button
-          variant="primary"
-          fullWidth
-          type="submit"
-          loading={isOtpSubmitLoading}
-        >
-          Verify Otp
-        </Button>
-      </form>
+      {/* Header */}
+      <header>
+        {/* App name for mobile */}
+        <h1 className="lg:hidden absolute top-4 left-4 text-xl font-semibold">
+          Byte_Messenger
+        </h1>
+        <h1 className="font-semibold text-2xl text-center">Verify OTP</h1>
+        <p className="text-center text-sm text-gray-600">
+          We have sent a verification code to{" "}
+          <span className="font-semibold text-black underline">{email}</span>
+        </p>
+      </header>
+      {/* OTP Form */}
+      <section aria-label="OTP verification">
+        <label htmlFor="otp" className="sr-only">
+          Enter the 6-digit verification code
+        </label>
+        <form onSubmit={handleOtpsubmit} className="w-full space-y-2">
+          <div className="flex gap-2 my-8 justify-center">
+            {otp.map((value, index) => (
+              <input
+                key={`input_${index}`}
+                ref={(el) => {
+                  inputRefs.current[index] = el;
+                }}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={value}
+                onClick={() => handleClick(index)}
+                onChange={(e) => handleOtpChange(index, e)}
+                onKeyDown={(e) => handleKeydown(index, e)}
+                className="w-full h-12 sm:w-14 sm:h-14 text-xl text-center border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-btn-primary transition"
+              />
+            ))}
+          </div>
+          <Button
+            variant="primary"
+            fullWidth
+            type="submit"
+            loading={isOtpSubmitLoading}
+          >
+            Verify Otp
+          </Button>
+        </form>
+      </section>
     </section>
   );
 };

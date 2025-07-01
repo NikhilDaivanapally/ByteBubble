@@ -85,7 +85,6 @@ const SignUp = () => {
         signupFormData.confirmPassword,
       ].some((val) => val == "");
 
-      console.log(testCase, signupFormData);
       if (!testCase) {
         const data = new FormData();
         for (const key in signupFormData) {
@@ -97,7 +96,7 @@ const SignUp = () => {
 
         await signup(data);
       } else {
-        // toast.error("Star marked fields are required !");
+        toast.error("Star marked fields are required !");
       }
     },
     [signupFormData]
@@ -124,72 +123,83 @@ const SignUp = () => {
     [avatarUrl, signupFormData]
   );
 
-  return (
-    <div className="w-full h-full px-6 sm:px-10 md:px-16 lg:px-20 xl:px-24 select-none">
-      {!data ? (
-        <section className="w-full h-full flex-center flex-col gap-2">
-          {/* Show app name only on smaller screens */}
-          <h1 className="lg:hidden absolute top-4 left-4 text-xl font-semibold">
-            Byte_Messenger
-          </h1>
-          <div>
-            <h1 className="font-semibold text-2xl  text-center">
-              Create an account
-            </h1>
-            <p className="text-center text-sm text-gray-600">
-              Enter your details below to create your account
-            </p>
-          </div>
-          <form onSubmit={handleFormSubmit} className="w-full space-y-2">
-            {/* Input fields */}
-
-            <ImageUpload
-              onChange={handleImageUpload}
-              value={avatarUrl}
-              name={"Upload Image"}
-            />
-
-            {arrayOfKeys?.map((object: any, i: number) => {
-              return <Input key={i} {...object} />;
-            })}
-
-            <Textarea
-              rows={2}
-              placeholder="About"
-              name="about"
-              id=""
-              onChange={handleInputChange}
-              value={signupFormData["about"]}
-            />
-            <Button
-              variant="primary"
-              fullWidth
-              type="submit"
-              loading={isLoading}
-            >
-              Sign up
-            </Button>
-          </form>
-
-          <div className="w-full flex-center relative before:absolute before:content-[] before:w-full before:h-[1px] before:top-1/2 before:left-0 before:bg-gray-200">
-            {" "}
-            <span className="bg-light dark:bg-dark z-5 px-2 text-xs">
-              OR CONTINUE WITH
-            </span>
-          </div>
-          <GoogleAuth />
-
-          <p className="text-sm">
-            Already have an account?{" "}
-            <Link to={"/signin"} className="underline">
-              Sign in
-            </Link>
-          </p>
-        </section>
-      ) : (
+  if (!data) {
+    return (
+      <section className="w-full h-full px-6 sm:px-10 md:px-16 lg:px-20 xl:px-24 select-none">
         <OtpComponent length={6} email={signupFormData.email} />
-      )}
-    </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="w-full h-full px-6 sm:px-10 md:px-16 lg:px-20 xl:px-24 select-none flex-center flex-col gap-2">
+      {/* Header */}
+      <header>
+        {/* App name for mobile */}
+        <h1 className="lg:hidden absolute top-4 left-4 text-xl font-semibold">
+          Byte_Messenger
+        </h1>
+        <h2 className="font-semibold text-xl md:text-2xl  text-center">
+          Create an account
+        </h2>
+        <p className="text-center text-sm text-gray-600">
+          Enter your details below to create your account
+        </p>
+      </header>
+      {/* signup Form section */}
+      <section className="w-full">
+        <form onSubmit={handleFormSubmit} className="w-full space-y-2">
+          {/* Input fields */}
+
+          <ImageUpload
+            onChange={handleImageUpload}
+            value={avatarUrl}
+            name={"Upload Image"}
+          />
+
+          {arrayOfKeys?.map((object: any, i: number) => {
+            return <Input key={i} {...object} />;
+          })}
+
+          <Textarea
+            rows={2}
+            placeholder="About"
+            name="about"
+            id=""
+            onChange={handleInputChange}
+            value={signupFormData["about"]}
+          />
+          <Button variant="primary" fullWidth type="submit" loading={isLoading}>
+            Sign up
+          </Button>
+        </form>
+      </section>
+      {/* OR Divider */}
+      <section className="w-full">
+        <div className="w-full flex-center relative before:absolute before:content-[] before:w-full before:h-[1px] before:top-1/2 before:left-0 before:bg-gray-200">
+          <span className="bg-light dark:bg-dark z-5 px-2 text-xs">
+            OR CONTINUE WITH
+          </span>
+        </div>
+      </section>
+      {/* Google Auth */}
+      <section
+        aria-label="singup with google"
+        className="w-full
+      "
+      >
+        <GoogleAuth />
+      </section>
+      {/* footer */}
+      <footer className="text-sm text-center">
+        <p>
+          Already have an account?{" "}
+          <Link to={"/signin"} className="underline">
+            Sign in
+          </Link>
+        </p>
+      </footer>
+    </section>
   );
 };
 

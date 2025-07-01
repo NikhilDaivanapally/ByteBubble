@@ -40,7 +40,7 @@ const IndividualChat = () => {
       return;
 
     const lastMsg = current_direct_messages[current_direct_messages.length - 1];
-    console.log(lastMsg,'lastmsg');
+    console.log(lastMsg, "lastmsg");
     dispatch(
       updateDirectConversation({
         ...current_direct_conversation,

@@ -54,7 +54,11 @@ const GroupChat = () => {
   const handleOpenShowDetails = () => setShowDetails(true);
   const handleCloseShowDetails = () => setShowDetails(false);
 
-  return !isLoading ? (
+  if (isLoading) {
+    return <PageLoader />;
+  }
+
+  return (
     <div className="w-full h-full relative flex gap-2 overflow-hidden">
       <div className="flex flex-col flex-1 h-full relative overflow-hidden">
         {isCameraOpen && <CameraModule />}
@@ -74,8 +78,6 @@ const GroupChat = () => {
       />
       <GroupMessageInfo />
     </div>
-  ) : (
-    <PageLoader />
   );
 };
 

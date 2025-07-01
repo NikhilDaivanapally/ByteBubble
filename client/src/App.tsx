@@ -37,7 +37,7 @@ const App = () => {
   const router = useMemo(() => createBrowserRouter(appRoutes), []);
 
   return (
-    <div className="w-full h-[100dvh] bg-light dark:bg-dark font-gilroy tracking-wide">
+    <main className="w-full h-[100dvh] bg-light dark:bg-dark font-gilroy tracking-wide">
       {/* <ErrorBoundary fallback={<div className="text-center p-6">Something went wrong.</div>}> */}
       <Suspense
         fallback={
@@ -50,7 +50,7 @@ const App = () => {
         <RouterProvider router={router} />
       </Suspense>
       {/* </ErrorBoundary> */}
-    </div>
+    </main>
   );
 };
 

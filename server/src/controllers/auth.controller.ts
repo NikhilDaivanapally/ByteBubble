@@ -8,17 +8,8 @@ import { OTP } from "../Templates/Mail/otp";
 import { ResetPassord } from "../Templates/Mail/resetPassword";
 import passport from "passport";
 import { NextFunction, Request, Response } from "express";
-import { Error, Types } from "mongoose";
+import { Error } from "mongoose";
 import { User as UserType } from "../types/model/user-model.type";
-
-interface RegisterUserProps {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  about: string;
-  gender: string;
-}
 
 export interface AuthenticateRequest extends Request {
   userId?: string | undefined | unknown; // or a more specific type like ObjectId
@@ -47,7 +38,7 @@ const registerUser = async (
     ) {
       res.status(400).json({
         status: "error",
-        message: "All fields are required.",
+        message: "All fields are required to proceed.",
       });
       return;
     }
@@ -56,7 +47,7 @@ const registerUser = async (
     if (password !== confirmPassword) {
       res.status(400).json({
         status: "error",
-        message: "Password and Confirm Password must match.",
+        message: "Password and confirm password must match.",
       });
       return;
     }
@@ -66,7 +57,7 @@ const registerUser = async (
     if (existingUser) {
       res.status(409).json({
         status: "error",
-        message: "Email already in use. Please login.",
+        message: "This email address is already registered. Please sign in.",
       });
       return;
     }
@@ -100,7 +91,8 @@ const registerUser = async (
   } catch (error) {
     res.status(500).json({
       status: "error",
-      message: "Something went wrong during registration.",
+      message:
+        "An unexpected error occurred during registration. Please try again later.",
     });
     return;
   }
@@ -126,7 +118,7 @@ const sendOtp = async (req: AuthenticateRequest, res: Response) => {
     if (!user) {
       res.status(404).json({
         status: "error",
-        message: "User Not found!",
+        message: "User not found",
       });
       return;
     }
@@ -143,19 +135,20 @@ const sendOtp = async (req: AuthenticateRequest, res: Response) => {
     if (!emailSent) {
       res.status(500).json({
         status: "error",
-        message: "Failed to send OTP",
+        message: "Failed to send OTP. Please try again.",
       });
       return;
     }
 
     res.status(200).json({
       status: "success",
-      message: "OTP sent successfully!",
+      message: "OTP sent successfully.",
     });
   } catch (error) {
     res.status(500).json({
       status: "error",
-      message: "Failed to send OTP",
+      message:
+        "An error occurred while sending OTP. Please try again.",
     });
   }
 };
@@ -171,14 +164,14 @@ const verifyOtp = async (req: Request, res: Response, next: NextFunction) => {
   if (!user) {
     res.status(400).json({
       status: "error",
-      message: "Email is invalid or OTP expired",
+      message: "Invalid email or the OTP has expired.",
     });
     return;
   }
   if (user.verified) {
     res.status(400).json({
       status: "error",
-      message: "Email is already verified",
+      message: "This email address has already been verified.",
     });
     return;
   }
@@ -186,7 +179,7 @@ const verifyOtp = async (req: Request, res: Response, next: NextFunction) => {
   if (!isValid) {
     res.status(400).json({
       status: "error",
-      message: "OTP is incorrect",
+      message: "The OTP entered is incorrect.",
     });
     return;
   }
@@ -211,7 +204,7 @@ const verifyOtp = async (req: Request, res: Response, next: NextFunction) => {
       .json({
         status: "success",
         user: user,
-        message: "OTP verified and User signup Successful",
+        message: "OTP verified. Signup completed successfully.",
       });
   });
   return;
@@ -230,7 +223,7 @@ const loginUser = async (
 
     if (!user) {
       return res.status(401).json({
-        message: "email or password is incorrect",
+        message: "Email or password is incorrect.",
       });
     }
 
@@ -248,7 +241,7 @@ const loginUser = async (
         .json({
           status: "success",
           user: user,
-          message: "User logged in Successfully",
+          message: "User logged in successfully.",
         });
     });
   })(req, res, next); // Pass req, res, and next to the authenticate function
@@ -276,7 +269,7 @@ const forgotPassword = async (req: Request, res: Response) => {
   if (!isvalidemailformat) {
     res.status(404).json({
       status: "error",
-      message: "Invalid email address",
+      message: "Invalid email address.",
     });
     return;
   }
@@ -287,7 +280,7 @@ const forgotPassword = async (req: Request, res: Response) => {
     // res No User found with this Email
     res.status(404).json({
       status: "error",
-      message: "There is no user with email address.",
+      message: "No user found with the provided email address.",
     });
     return;
   }
@@ -306,15 +299,15 @@ const forgotPassword = async (req: Request, res: Response) => {
     // res Reset Password Link sent to Email
     res.status(200).json({
       status: "success",
-      message: "Password Reset URL is sent to email!",
+      message: "Password reset link has been sent to your email address.",
     });
   } catch (error) {
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
-    // res Error occured While Sending the Email
     res.status(500).json({
-      message: "There was an error sending the email. Try again later!",
+      message:
+        "There was an error sending the reset email. Please try again later.",
     });
   }
 };
@@ -328,7 +321,7 @@ const resetPassword = async (req: Request, res: Response) => {
     if (!token || typeof token !== "string") {
       res.status(400).json({
         status: "error",
-        message: "Reset token is missing or invalid",
+        message: "Reset token is missing or invalid.",
       });
       return;
     }
@@ -359,7 +352,7 @@ const resetPassword = async (req: Request, res: Response) => {
     if (!user) {
       res.status(400).json({
         status: "error",
-        message: "Token is invalid or has expired",
+        message: "The token is invalid or has expired.",
       });
       return;
     }
@@ -371,13 +364,14 @@ const resetPassword = async (req: Request, res: Response) => {
 
     res.status(200).json({
       status: "success",
-      message: "Password has been reset successfully",
+      message: "Your password has been reset successfully.",
     });
     return;
   } catch (error) {
     res.status(400).json({
       status: "error",
-      message: "Something went wrong while reseting the password",
+      message:
+        "An error occurred while resetting your password. Please try again.",
     });
     return;
   }
@@ -390,7 +384,7 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
     }
     res.status(200).json({
       status: "success",
-      message: "User logout Successfully",
+      message: "User logged out successfully.",
     });
   });
 };

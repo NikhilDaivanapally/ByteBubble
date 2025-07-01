@@ -33,7 +33,6 @@ const SignIn = () => {
   // Hook for local sigin success
   useEffect(() => {
     if (data) {
-      console.log(data);
       dispatch(setUser(data.user));
       toast.success(data.message);
       Navigate("/chat");
@@ -49,7 +48,7 @@ const SignIn = () => {
       if (!Object.values(signinFormData).some((val) => val === "")) {
         await sigin(signinFormData);
       } else {
-        // toast.error("All Fields are Required");
+        toast.error("All Fields are Required");
       }
     },
     [signinFormData, sigin]
@@ -78,49 +77,64 @@ const SignIn = () => {
   );
 
   return (
-    <div className="w-full backdrop-blur flex-center flex-col  px-6 sm:px-10 md:px-16 lg:px-20 xl:px-24 gap-4 py-10">
-      {/* Show app name only on smaller screens */}
-      <h1 className="lg:hidden absolute top-4 left-4 text-xl font-semibold">
-        Byte_Messenger
-      </h1>
+    <section className="w-full backdrop-blur flex-center flex-col  px-6 sm:px-10 md:px-16 lg:px-20 xl:px-24 gap-3 py-10">
+      {/* Header */}
+      <header className="mb-4">
+        {/* App name for mobile */}
+        <h1 className="lg:hidden absolute top-4 left-4 text-xl font-semibold">
+          Byte_Messenger
+        </h1>
+        <h2 className="font-semibold text-2xl text-center">
+          Sign In to Continue
+        </h2>
+        <p className="text-center text-sm text-gray-600">
+          Enter your email & password below to sign in
+        </p>
+      </header>
+      {/* signin Form section */}
+      <section className="w-full">
+        <form onSubmit={handleFormSubmit} className="w-full space-y-4">
+          {arrayOfKeys?.map((object: {}, i: number) => {
+            return <Input key={i} {...object} />;
+          })}
 
-      <h1 className="font-semibold text-2xl text-center">
-        Sign In to Continue
-      </h1>
-      <p className="text-center text-sm text-gray-600">
-        Enter your email & password below to sign in
-      </p>
-
-      <form onSubmit={handleFormSubmit} className="w-full space-y-4">
-        {arrayOfKeys?.map((object: {}, i: number) => {
-          return <Input key={i} {...object} />;
-        })}
-
-        <Link
-          to={"/forgot-password"}
-          className="inline-block ml-auto text-sm underline"
-        >
-          Forgot password
-        </Link>
-        <Button variant="primary" type="submit" fullWidth loading={isLoading}>
-          Sign in
-        </Button>
-      </form>
-      <div className="w-full flex-center relative before:absolute before:content-[] before:w-full before:h-[1px] before:top-1/2 before:left-0 before:bg-gray-200">
-        {" "}
-        <span className="bg-light dark:bg-dark z-5 px-2 text-xs">
-          OR CONTINUE WITH
-        </span>
-      </div>
-      <GoogleAuth />
-
-      <p className="text-sm">
-        Don't have an account?{" "}
-        <Link to={"/signup"} className="underline">
-          Create
-        </Link>
-      </p>
-    </div>
+          <Link
+            to={"/forgot-password"}
+            className="inline-block ml-auto text-sm underline"
+          >
+            Forgot password
+          </Link>
+          <Button variant="primary" type="submit" fullWidth loading={isLoading}>
+            Sign in
+          </Button>
+        </form>
+      </section>
+      {/* OR Divider */}
+      <section className="w-full">
+        <div className="w-full flex-center relative before:absolute before:content-[] before:w-full before:h-[1px] before:top-1/2 before:left-0 before:bg-gray-200">
+          <span className="bg-light dark:bg-dark z-5 px-2 text-xs">
+            OR CONTINUE WITH
+          </span>
+        </div>
+      </section>
+      {/* Google Auth */}
+      <section
+        aria-label="singup with google"
+        className="w-full
+      "
+      >
+        <GoogleAuth />
+      </section>
+      {/* footer */}
+      <footer className="text-sm text-center">
+        <p>
+          Don't have an account?{" "}
+          <Link to={"/signup"} className="underline">
+            Create
+          </Link>
+        </p>
+      </footer>
+    </section>
   );
 };
 
