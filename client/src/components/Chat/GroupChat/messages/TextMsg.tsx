@@ -5,21 +5,24 @@ import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageA
 
 export const GroupTextMsg = ({
   el,
+  groupName,
   usersLength,
 }: {
   el: GroupMessageProps;
+  groupName: string;
   usersLength: number;
 }) => {
   const readUsers = el.readBy?.length ?? 0;
   const seen = usersLength > 0 && readUsers >= usersLength;
+  const isOutgoing = !el?.isIncoming;
   const time = formatTo12HourTime(el.createdAt);
   return (
     <div
       className={`Text_msg relative w-fit flex group items-start ${
-        !el.isIncoming ? "ml-auto" : ""
+        isOutgoing ? "ml-auto" : ""
       }`}
     >
-      {!el.isIncoming && <GroupMessageActions message={el} />}
+      {isOutgoing && <GroupMessageActions message={el} />}
       {el.isIncoming && (
         <div className="user_profile mr-2 w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
           <img
@@ -29,28 +32,38 @@ export const GroupTextMsg = ({
           />
         </div>
       )}
-      <div className="space-y-1">
+      <section
+        className="space-y-1"
+        aria-label={`Message in ${groupName} from ${el.from?.userName} at ${time}`}
+      >
+        {/* Header & Message content */}
         <div
           className={`px-2 py-1 rounded-xl ${
-            !el.isIncoming
+            isOutgoing
               ? "bg-gray-300 rounded-br-none"
               : "bg-white rounded-bl-none"
           }`}
         >
-          {el.isIncoming && (
-            <p className="userName text-black/60 text-sm">
-              {el.from?.userName}
-            </p>
-          )}
+          {/* header */}
+          <header>
+            {el.isIncoming && (
+              <p className="userName text-black/60 text-sm">
+                {el.from?.userName}
+              </p>
+            )}
+          </header>
+          {/* Message content */}
           <p>{el.message?.text}</p>
         </div>
+
+        {/* footer */}
         <MessageStatus
           isIncoming={el.isIncoming}
           status={el.status}
           seen={seen}
           time={time}
         />
-      </div>
+      </section>
     </div>
   );
 };

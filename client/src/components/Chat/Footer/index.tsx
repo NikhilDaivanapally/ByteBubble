@@ -26,21 +26,25 @@ const MessageInputBar = () => {
 
   if (!isChatActive) return null;
 
-  return isRecording ? (
-    <AudioRecorderUI
-      audioUrl={audioUrl}
-      recordingTime={recordingTime}
-      currentTime={currentTime}
-      isPlaying={isPlaying}
-      recordingState={recordingState}
-      audioRef={audioRef}
-      canvasRef={canvasRef}
-      handlePlayPauseAudio={handlePlayPauseAudio}
-      handleRecording={handleRecording}
-      handleSendAudio={handleSendAudio}
-    />
-  ) : (
-    <TextInputForm handleRecording={handleRecording} />
+  return (
+    <footer>
+      {isRecording ? (
+        <AudioRecorderUI
+          audioUrl={audioUrl}
+          recordingTime={recordingTime}
+          currentTime={currentTime}
+          isPlaying={isPlaying}
+          recordingState={recordingState}
+          audioRef={audioRef}
+          canvasRef={canvasRef}
+          handlePlayPauseAudio={handlePlayPauseAudio}
+          handleRecording={handleRecording}
+          handleSendAudio={handleSendAudio}
+        />
+      ) : (
+        <TextInputForm handleRecording={handleRecording} />
+      )}
+    </footer>
   );
 };
 

@@ -5,8 +5,15 @@ import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import WaveSurfer from "wavesurfer.js";
 import { DirectMessageActions } from "../../../ui/Dropdowns/actions/DirectMessageActions";
 import { useGetFileQuery } from "../../../../store/slices/api";
+import { MessageStatus } from "../../../MessageStatus";
 
-export const DirectAudioMsg = ({ el }: { el: DirectMessageProps }) => {
+export const DirectAudioMsg = ({
+  el,
+  from,
+}: {
+  el: DirectMessageProps;
+  from: string;
+}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -17,6 +24,7 @@ export const DirectAudioMsg = ({ el }: { el: DirectMessageProps }) => {
   const waveSurferRef = useRef<WaveSurfer | null>(null);
   const time = formatTo12HourTime(el?.createdAt);
   const isPending = el.status === "pending";
+  const isOutgoing = !el?.isIncoming;
   const audioId = el.message?.audioId;
 
   const { data: audioBlob, isSuccess } = useGetFileQuery(audioId!, {
@@ -91,20 +99,26 @@ export const DirectAudioMsg = ({ el }: { el: DirectMessageProps }) => {
   return (
     <div
       className={`Audio_msg relative w-fit flex group items-start ${
-        !el.isIncoming ? "ml-auto" : ""
+        isOutgoing ? "ml-auto" : ""
       }`}
     >
-      {!el.isIncoming && <DirectMessageActions message={el} />}
+      {isOutgoing && <DirectMessageActions message={el} />}
 
       {el.message?.audioId && (
-        <div className="space-y-1">
+        <section
+          aria-label={`Message from ${from} at ${time}`}
+          className="space-y-1"
+        >
+          
+          {/* Message content */}
           <div
             className={`p-2 rounded-xl ${
-              !el.isIncoming
+              isOutgoing
                 ? "bg-gray-300 rounded-br-none"
                 : "bg-white rounded-bl-none"
             }`}
           >
+            {/* custom ui for audio player */}
             {audioUrl ? (
               <div className="w-50 flex items-center gap-2">
                 <span className="w-5" onClick={handlePlayPauseAudio}>
@@ -120,32 +134,16 @@ export const DirectAudioMsg = ({ el }: { el: DirectMessageProps }) => {
             )}
           </div>
 
-          <div className="w-fit ml-auto flex gap-2">
-            {!el?.isIncoming ? (
-              el?.status === "pending" ? (
-                <Icons.ClockIcon />
-              ) : (
-                <div className="flex-center gap-1">
-                  <div
-                    className={`w-2 h-2  rounded-full ${
-                      el.isRead ? "bg-green-600" : "bg-gray-300"
-                    }`}
-                  ></div>
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      el.isRead ? "bg-green-600" : "bg-gray-300"
-                    }`}
-                  ></div>
-                </div>
-              )
-            ) : (
-              ""
-            )}
-            <p className="text-xs text-black/60">{time}</p>
-          </div>
-        </div>
+          {/* footer */}
+          <MessageStatus
+            isIncoming={el.isIncoming}
+            status={el.status}
+            isRead={el.isRead}
+            time={time}
+          />
+        </section>
       )}
-
+      {/* audio player hidden */}
       <audio
         ref={audioRef}
         hidden

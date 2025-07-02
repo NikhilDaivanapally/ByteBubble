@@ -97,7 +97,9 @@ const ChatLayout = () => {
 
   return (
     <div className="h-full bg-light overflow-y-hidden dark:bg-dark flex flex-col-reverse lg:flex-row">
+      {/* App Navigation */}
       <LayoutNavbar />
+      {/* Chat List & Active Chat Window */}
       <div className="flex-1 overflow-hidden bg-light border-b md:border-l border-gray-300 lg:py-3">
         <Outlet />
       </div>

@@ -15,18 +15,13 @@ import FileSendPreview from "../../FileSendPreview";
 
 const GroupChat = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const messagesListRef = useRef<HTMLUListElement | null>(null);
-
+  const [isShowChatDetails, setShowChatDetails] = useState(false);
+  const messagesListRef = useRef<HTMLElement | null>(null);
   const { group_chat } = useSelector((state: RootState) => state.conversation);
   const { user } = useSelector((state: RootState) => state.auth);
-  const { activeChatId, chatType, isCameraOpen } = useSelector(
-    (state: RootState) => state.app
-  );
-
-  const currentGroup = group_chat.GroupConversations?.find(
-    (c) => c._id === activeChatId
-  );
+  const { activeChatId, chatType, isCameraOpen, groupMessageInfo } =
+    useSelector((state: RootState) => state.app);
+  const { mediaFiles } = useSelector((state: RootState) => state.app);
 
   useLoadChatMessages({
     activeChatId,
@@ -51,33 +46,35 @@ const GroupChat = () => {
     [group_chat.current_group_messages]
   );
 
-  const handleOpenShowDetails = () => setShowDetails(true);
-  const handleCloseShowDetails = () => setShowDetails(false);
+  const handleOpenShowDetails = () => setShowChatDetails(true);
+  const handleCloseShowDetails = () => setShowChatDetails(false);
 
   if (isLoading) {
     return <PageLoader />;
   }
 
   return (
-    <div className="w-full h-full relative flex gap-2 overflow-hidden">
+    <section className="w-full h-full relative flex gap-2 overflow-hidden">
       <div className="flex flex-col flex-1 h-full relative overflow-hidden">
-        {isCameraOpen && <CameraModule />}
-        <FileSendPreview />
         <GroupChatHeader handleOpenShowDetails={handleOpenShowDetails} />
         <GroupMessageList
           ref={messagesListRef}
           sortedDates={DatesArray}
           groupedMessages={MessagesObject}
-          usersLength={currentGroup?.users?.length ?? 0}
+          usersLength={
+            group_chat?.current_group_conversation?.users?.length ?? 0
+          }
         />
         <MessageInputBar />
       </div>
       <GroupProfileDetails
-        showDetails={showDetails}
+        showDetails={isShowChatDetails}
         handleCloseShowDetails={handleCloseShowDetails}
       />
-      <GroupMessageInfo />
-    </div>
+      {isCameraOpen && <CameraModule />}
+      {mediaFiles && <FileSendPreview />}
+      {groupMessageInfo && <GroupMessageInfo />}
+    </section>
   );
 };
 

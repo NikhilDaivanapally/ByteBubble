@@ -5,12 +5,15 @@ import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import WaveSurfer from "wavesurfer.js";
 import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageActions";
 import { useGetFileQuery } from "../../../../store/slices/api";
+import { MessageStatus } from "../../../MessageStatus";
 
 export const GroupAudioMsg = ({
   el,
+  groupName,
   usersLength,
 }: {
   el: GroupMessageProps;
+  groupName: string;
   usersLength: number;
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -25,6 +28,7 @@ export const GroupAudioMsg = ({
   const readUsers = el.readBy?.length ?? 0;
   const seen = usersLength > 0 && readUsers >= usersLength;
   const isPending = el.status === "pending";
+  const isOutgoing = !el?.isIncoming;
   const audioId = el.message?.audioId;
 
   const { data: audioBlob, isSuccess } = useGetFileQuery(audioId!, {
@@ -99,10 +103,11 @@ export const GroupAudioMsg = ({
   return (
     <div
       className={`Audio_msg relative w-fit flex group items-start ${
-        !el.isIncoming ? "ml-auto" : ""
+        isOutgoing ? "ml-auto" : ""
       }`}
     >
-      {!el.isIncoming && <GroupMessageActions message={el} />}
+      {isOutgoing && <GroupMessageActions message={el} />}
+      {/*  */}
       {el.isIncoming && (
         <div className="user_profile mr-2 w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
           <img
@@ -113,21 +118,29 @@ export const GroupAudioMsg = ({
         </div>
       )}
 
+      {/* custom ui for audio player */}
       {el.message?.audioId && (
-        <div className="space-y-1">
+        <section
+          className="space-y-1"
+          aria-label={`Message in ${groupName} from ${el.from?.userName} at ${time}`}
+        >
           <div
             className={`p-2 rounded-xl ${
-              !el.isIncoming
+              isOutgoing
                 ? "bg-gray-300 rounded-br-none"
                 : "bg-white rounded-bl-none"
             }`}
           >
-            {el.isIncoming && (
-              <p className="userName text-black/60 text-sm">
-                {el.from?.userName}
-              </p>
-            )}
+            {/* header */}
+            <header>
+              {el.isIncoming && (
+                <p className="userName text-black/60 text-sm">
+                  {el.from?.userName}
+                </p>
+              )}
+            </header>
 
+            {/* Message content */}
             {audioUrl ? (
               <div className="w-50 flex items-center gap-2">
                 <span className="w-5" onClick={handlePlayPauseAudio}>
@@ -143,32 +156,17 @@ export const GroupAudioMsg = ({
             )}
           </div>
 
-          <div className="w-fit ml-auto flex gap-2">
-            {!el?.isIncoming ? (
-              el?.status === "pending" ? (
-                <Icons.ClockIcon />
-              ) : (
-                <div className="flex-center gap-1">
-                  <div
-                    className={`w-2 h-2  rounded-full ${
-                      seen ? "bg-green-600" : "bg-gray-300"
-                    }`}
-                  ></div>
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      seen ? "bg-green-600" : "bg-gray-300"
-                    }`}
-                  ></div>
-                </div>
-              )
-            ) : (
-              ""
-            )}
-            <p className="text-xs text-black/60">{time}</p>
-          </div>
-        </div>
+          {/* footer */}
+          <MessageStatus
+            isIncoming={el.isIncoming}
+            status={el.status}
+            seen={seen}
+            time={time}
+          />
+        </section>
       )}
 
+      {/* Audio Player hidden */}
       <audio
         ref={audioRef}
         hidden

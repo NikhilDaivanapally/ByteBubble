@@ -15,9 +15,8 @@ import DirectMessageInfo from "../../DirectMessageInfo";
 
 const DirectChat = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const messagesListRef = useRef<HTMLUListElement | null>(null);
-
+  const [isShowChatDetails, setIsShowChatDetails] = useState(false);
+  const messagesListRef = useRef<HTMLElement | null>(null);
   const { direct_chat } = useSelector((state: RootState) => state.conversation);
   const { user } = useSelector((state: RootState) => state.auth);
   const { activeChatId, chatType, isCameraOpen, directMessageInfo } =
@@ -47,18 +46,16 @@ const DirectChat = () => {
     [direct_chat.current_direct_messages]
   );
 
-  const handleOpenShowDetails = () => setShowDetails(true);
-  const handleCloseShowDetails = () => setShowDetails(false);
+  const handleOpenShowDetails = () => setIsShowChatDetails(true);
+  const handleCloseShowDetails = () => setIsShowChatDetails(false);
 
   if (isLoading) {
     return <PageLoader />;
   }
 
   return (
-    <div className="w-full h-full relative flex gap-2 overflow-hidden">
+    <section className="w-full h-full relative flex gap-2 overflow-hidden">
       <div className="flex flex-col flex-1 h-full relative overflow-hidden">
-        {isCameraOpen && <CameraModule />}
-        {mediaFiles && <FileSendPreview />}
         <DirectChatHeader handleOpenShowDetails={handleOpenShowDetails} />
         <DirectMessageList
           ref={messagesListRef}
@@ -68,11 +65,13 @@ const DirectChat = () => {
         <MessageInputBar />
       </div>
       <DirectProfileDetails
-        showDetails={showDetails}
+        showDetails={isShowChatDetails}
         handleCloseShowDetails={handleCloseShowDetails}
       />
+      {isCameraOpen && <CameraModule />}
+      {mediaFiles && <FileSendPreview />}
       {directMessageInfo && <DirectMessageInfo />}
-    </div>
+    </section>
   );
 };
 

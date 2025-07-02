@@ -17,13 +17,7 @@ import { getConversationTime } from "../utils/dateUtils";
 import { Avatar } from "./ui/Avatar";
 
 export const DirectConversation = React.memo(
-  ({
-    conversation,
-    index,
-  }: {
-    conversation: DirectConversationProps;
-    index: number;
-  }) => {
+  ({ conversation }: { conversation: DirectConversationProps }) => {
     const {
       _id,
       userId,
@@ -77,13 +71,9 @@ export const DirectConversation = React.memo(
     const isActive = activeChatId === _id;
     const istyping = isTypingRoomId === _id;
     return (
-      <motion.li
+      <div
         role="button"
         tabIndex={0}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ delay: index * 0.1, duration: 0.3 }}
         className={`w-full flex gap-x-4 py-2 rounded-lg px-2 relative overflow-hidden ${
           isActive ? "bg-btn-primary/30" : ""
         } hover:bg-btn-primary/20 cursor-pointer`}
@@ -145,19 +135,13 @@ export const DirectConversation = React.memo(
             </span>
           ) : null}
         </div>
-      </motion.li>
+      </div>
     );
   }
 );
 
 export const GroupConversation = React.memo(
-  ({
-    conversation,
-    index,
-  }: {
-    conversation: GroupConversationProps;
-    index: number;
-  }) => {
+  ({ conversation }: { conversation: GroupConversationProps }) => {
     const {
       _id,
       name,
@@ -219,13 +203,9 @@ export const GroupConversation = React.memo(
     const isSomeOneTyping = isTypingRoomId === _id;
 
     return (
-      <motion.li
+      <div
         role="button"
         tabIndex={0}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ delay: index * 0.1, duration: 0.3 }}
         className={`w-full flex gap-x-4 py-2 rounded-lg px-2 relative overflow-hidden ${
           isActive ? "bg-btn-primary/30" : ""
         } hover:bg-btn-primary/20 cursor-pointer`}
@@ -304,7 +284,7 @@ export const GroupConversation = React.memo(
             </span>
           ) : null}
         </div>
-      </motion.li>
+      </div>
     );
   }
 );

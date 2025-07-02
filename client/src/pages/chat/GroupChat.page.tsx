@@ -95,38 +95,41 @@ const GroupChat = () => {
 
   return (
     <div className="h-full flex">
-      <div
-        className={`flex flex-col gap-3 px-4 flex-1 md:flex-none min-w-[340px] md:w-[370px]
+      {/* Chat List */}
+      <aside
+        className={`flex flex-col gap-2 sm:gap-3 px-4 flex-1 md:flex-none min-w-[340px] md:w-[370px]
               ${activeChatId ? "hidden md:flex" : ""}
               md:h-full overflow-y-hidden
             `}
       >
-        <Dialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
-          <CreateGroup
-            availableMembers={friends}
-            onClose={() => setIsDialogOpen(false)}
+        <header className="space-y-2 sm:space-y-3">
+          <div className="pt-3 flex justify-between items-start">
+            <h1 className="text-2xl font-semibold">Groups</h1>
+            {/* Create group */}
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setIsDialogOpen(true)}
+              icon={<Icons.PlusIcon className="w-5" />}
+              iconPosition="left"
+            >
+              Create Group
+            </Button>
+          </div>
+          {/* Search input */}
+          <SearchInput
+            conversations={GroupConversations || []}
+            setFilteredConversations={setFilteredConversations}
           />
-        </Dialog>
-
-        <div className="pt-4 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold">Groups</h1>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setIsDialogOpen(true)}
-            icon={<Icons.PlusIcon className="w-5" />}
-            iconPosition="left"
-          >
-            Create Group
-          </Button>
-        </div>
-        <SearchInput
-          conversations={GroupConversations || []}
-          setFilteredConversations={setFilteredConversations}
-        />
-        <ShowOfflineStatus />
-        <h3 className="">Last Chats</h3>
-        <ul className="overflow-y-auto scrollbar-custom flex-1 flex flex-col gap-4">
+          {/* Offline status indicator */}
+          <ShowOfflineStatus />
+          <h3 className="">Last Chats</h3>
+        </header>
+        <ul
+          role="list"
+          aria-label="Recent Group Conversations"
+          className="overflow-y-auto scrollbar-custom flex-1 flex flex-col gap-4"
+        >
           {GroupConversations === null ? (
             // Still loading
             [...Array(5)].map((_, i) => (
@@ -136,17 +139,21 @@ const GroupChat = () => {
             ))
           ) : filteredConversations?.length > 0 ? (
             // Loaded and has results
-            filteredConversations?.map((conversation, i) => (
-              <motion.div
-                key={conversation._id ?? i}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ delay: i * 0.02, duration: 0.3 }}
-              >
-                <GroupConversation conversation={conversation} index={i} />
-              </motion.div>
-            ))
+            filteredConversations?.map((conversation, index) => {
+              return (
+                <motion.li
+                  key={index}
+                  role="listitem"
+                  aria-label={`Open Chat with ${conversation?.name}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ delay: index * 0.02, duration: 0.3 }}
+                >
+                  <GroupConversation conversation={conversation} />
+                </motion.li>
+              );
+            })
           ) : (
             // Loaded but empty
             <div className="w-full h-1/2 flex justify-center items-end text-center text-sm text-gray-500 py-8">
@@ -154,9 +161,9 @@ const GroupChat = () => {
             </div>
           )}
         </ul>
-      </div>
+      </aside>
 
-      {/* Chat Window */}
+      {/*Active Chat Window */}
       <div
         className={`flex-1 bg-gray-200 dark:bg-[#1E1E1E] rounded-2xl p-2 ${
           activeChatId ? "block" : "hidden"
@@ -164,6 +171,14 @@ const GroupChat = () => {
       >
         {activeChatId ? <Chat /> : <NoChat />}
       </div>
+
+      {/* Create Group Dialog */}
+      <Dialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
+        <CreateGroup
+          availableMembers={friends}
+          onClose={() => setIsDialogOpen(false)}
+        />
+      </Dialog>
     </div>
   );
 };

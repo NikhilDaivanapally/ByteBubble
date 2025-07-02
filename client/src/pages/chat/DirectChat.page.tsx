@@ -68,21 +68,30 @@ const IndividualChat = () => {
 
   return (
     <div className="h-full flex">
-      {/* Sidebar */}
-      <div
+      {/* Chat List */}
+      <aside
+        aria-label="Direct Chat List"
         className={`flex flex-col gap-2 sm:gap-3 px-4 flex-1 md:flex-none min-w-[340px] md:w-[370px]
         ${activeChatId ? "hidden md:flex" : ""}
         md:h-full overflow-y-hidden`}
       >
-        <h1 className="text-2xl font-semibold pt-3">Chats</h1>
+        <header className="space-y-2 sm:space-y-3">
+          <h1 className="text-2xl font-semibold pt-3">Chats</h1>
+          {/* Search input */}
+          <SearchInput
+            conversations={DirectConversations || []}
+            setFilteredConversations={setFilteredConversations}
+          />
+          {/* Offline status indicator */}
+          <ShowOfflineStatus />
+          <h3 className="">Last Chats</h3>
+        </header>
 
-        <SearchInput
-          conversations={DirectConversations || []}
-          setFilteredConversations={setFilteredConversations}
-        />
-        <ShowOfflineStatus />
-        <h3 className="">Last Chats</h3>
-        <ul className="overflow-y-auto scrollbar-custom flex-1 flex flex-col gap-4">
+        <ul
+          role="list"
+          aria-label="Recent Direct Conversations"
+          className="overflow-y-auto scrollbar-custom flex-1 flex flex-col gap-4"
+        >
           {DirectConversations === null ? (
             // Still loading
             [...Array(5)].map((_, i) => (
@@ -92,27 +101,31 @@ const IndividualChat = () => {
             ))
           ) : filteredConversations.length > 0 ? (
             // Loaded and has results
-            filteredConversations.map((conversation, i) => (
-              <motion.div
-                key={conversation._id ?? i}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ delay: i * 0.02, duration: 0.3 }}
-              >
-                <DirectConversation conversation={conversation} index={i} />
-              </motion.div>
-            ))
+            filteredConversations.map((conversation, index) => {
+              return (
+                <motion.li
+                  key={index}
+                  role="listitem"
+                  aria-label={`Open Chat with ${conversation?.name}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ delay: index * 0.02, duration: 0.3 }}
+                >
+                  <DirectConversation conversation={conversation} />
+                </motion.li>
+              );
+            })
           ) : (
             // Loaded but empty
-            <div className="w-full h-1/2 flex justify-center items-end text-center text-sm text-gray-500 py-8">
+            <li className="w-full h-1/2 flex justify-center items-end text-center text-sm text-gray-500 py-8">
               No conversations found.
-            </div>
+            </li>
           )}
         </ul>
-      </div>
+      </aside>
 
-      {/* Chat Window */}
+      {/*Active Chat Window */}
       <div
         className={`flex-1 bg-gray-200 dark:bg-[#1E1E1E] rounded-2xl p-2 ${
           activeChatId ? "block" : "hidden"

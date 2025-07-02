@@ -3,17 +3,27 @@ import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import { MessageStatus } from "../../../MessageStatus";
 import { DirectMessageActions } from "../../../ui/Dropdowns/actions/DirectMessageActions";
 
-export const DirectTextMsg = ({ el }: { el: DirectMessageProps }) => {
+export const DirectTextMsg = ({
+  el,
+  from,
+}: {
+  el: DirectMessageProps;
+  from: string;
+}) => {
+  const isOutgoing = !el?.isIncoming;
   const time = formatTo12HourTime(el.createdAt);
-
   return (
     <div
       className={`Text_msg relative w-fit flex group items-start ${
-        !el.isIncoming ? "ml-auto" : ""
+        isOutgoing ? "ml-auto" : ""
       }`}
     >
-      {!el.isIncoming && <DirectMessageActions message={el} />}
-      <div className="space-y-1">
+      {isOutgoing && <DirectMessageActions message={el} />}
+      <section
+        aria-label={`Message from ${from} at ${time}`}
+        className="space-y-1"
+      >
+        {/* Message content */}
         <div
           className={`px-2 py-1 rounded-xl ${
             !el.isIncoming
@@ -23,13 +33,15 @@ export const DirectTextMsg = ({ el }: { el: DirectMessageProps }) => {
         >
           <p>{el.message?.text}</p>
         </div>
+
+        {/* footer */}
         <MessageStatus
           isIncoming={el.isIncoming}
           status={el.status}
           isRead={el.isRead}
           time={time}
         />
-      </div>
+      </section>
     </div>
   );
 };

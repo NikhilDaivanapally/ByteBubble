@@ -6,6 +6,8 @@ import { GroupTextMsg } from "./messages/TextMsg";
 import { GroupTimelineMsg } from "./messages/TimelineMsg";
 import { GroupSystemMsg } from "./messages/SystemMsg";
 import GroupDocumentMsg from "./messages/documentMsg";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store/store";
 
 interface GroupMessageListProps {
   sortedDates: string[];
@@ -15,59 +17,79 @@ interface GroupMessageListProps {
   usersLength: number;
 }
 
-const GroupMessageList = forwardRef<HTMLUListElement, GroupMessageListProps>(
+const GroupMessageList = forwardRef<HTMLElement, GroupMessageListProps>(
   ({ sortedDates, groupedMessages, usersLength }, ref) => {
+    const currentConversation = useSelector(
+      (state: RootState) =>
+        state.conversation.group_chat.current_group_conversation
+    );
+    const groupName = currentConversation?.name ?? "group";
     return (
-      <ul
+      <article
+        aria-live="polite"
+        className="flex-1 overflow-x-hidden mt-1 scrollbar-custom px-2 sm:px-4"
         ref={ref}
-        className="flex-1 overflow-x-hidden mt-1 scrollbar-custom px-2 sm:px-4 space-y-2"
       >
-        {sortedDates.map((date) => (
-          <div key={`${date}_GroupMsgs`} className="datewise_msgs space-y-2">
-            <GroupTimelineMsg date={date} />
-            {groupedMessages[date].map((el, index) => {
-              switch (el.messageType) {
-                case "image":
-                  return (
-                    <GroupImageMsg
-                      el={el}
-                      key={index}
-                      usersLength={usersLength - 1}
-                      scrollToBottom={() => {}}
-                    />
-                  );
-                case "audio":
-                  return (
-                    <GroupAudioMsg
-                      el={el}
-                      key={index}
-                      usersLength={usersLength - 1}
-                    />
-                  );
-                case "document":
-                  return (
-                    <GroupDocumentMsg
-                      el={el}
-                      scrollToBottom={() => {}}
-                      usersLength={usersLength - 1}
-                      key={index}
-                    />
-                  );
-                case "system":
-                  return <GroupSystemMsg key={index} el={el} />;
-                default:
-                  return (
-                    <GroupTextMsg
-                      el={el}
-                      key={index}
-                      usersLength={usersLength - 1}
-                    />
-                  );
-              }
-            })}
-          </div>
-        ))}
-      </ul>
+        <ul className="space-y-2">
+          {sortedDates.map((date) => (
+            <li key={`${date}_GroupMsgs`} className="space-y-2">
+              <GroupTimelineMsg date={date} />
+              <ul className="space-y-2">
+                {groupedMessages[date].map((el, index) => {
+                  switch (el.messageType) {
+                    case "text":
+                      return (
+                        <li key={index}>
+                          <GroupTextMsg
+                            el={el}
+                            groupName={groupName}
+                            usersLength={usersLength - 1}
+                          />
+                        </li>
+                      );
+                    case "image":
+                      return (
+                        <li key={index}>
+                          <GroupImageMsg
+                            el={el}
+                            groupName={groupName}
+                            usersLength={usersLength - 1}
+                            scrollToBottom={() => {}}
+                          />
+                        </li>
+                      );
+                    case "audio":
+                      return (
+                        <li key={index}>
+                          <GroupAudioMsg
+                            el={el}
+                            groupName={groupName}
+                            usersLength={usersLength - 1}
+                          />
+                        </li>
+                      );
+                    case "document":
+                      return (
+                        <li key={index}>
+                          <GroupDocumentMsg
+                            el={el}
+                            groupName={groupName}
+                            scrollToBottom={() => {}}
+                            usersLength={usersLength - 1}
+                          />
+                        </li>
+                      );
+                    case "system":
+                      return <GroupSystemMsg key={index} el={el} />;
+                    default:
+                      return <li key={index}>Invalid Message</li>;
+                  }
+                })}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      </article>
     );
   }
 );

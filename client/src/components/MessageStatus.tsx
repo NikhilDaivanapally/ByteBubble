@@ -1,6 +1,5 @@
 import { Icons } from "../icons";
 
-// components/MessageStatus.tsx
 export const MessageStatus = ({
   isIncoming,
   status,
@@ -19,7 +18,8 @@ export const MessageStatus = ({
   }
 
   return (
-    <div className="w-fit ml-auto flex gap-2">
+    <footer className="w-fit ml-auto flex gap-2">
+      {/* Message status indicator */}
       {status === "pending" ? (
         <Icons.ClockIcon />
       ) : (
@@ -36,7 +36,9 @@ export const MessageStatus = ({
           />
         </div>
       )}
-      <p className="text-xs text-black/60">{time}</p>
-    </div>
+      <time dateTime={time} className="text-xs text-black/60">
+        {time}
+      </time>
+    </footer>
   );
 };

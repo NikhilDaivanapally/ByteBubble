@@ -18,7 +18,7 @@ const DirectChatHeader = ({ handleOpenShowDetails = () => {} }) => {
   };
 
   return (
-    <nav className="h-15 w-full flex sm:gap-4 items-center p-2 bg-white rounded-xl">
+    <header className="h-15 w-full flex sm:gap-4 items-center p-2 bg-white rounded-xl">
       <Icons.ArrowLeftIcon
         className="w-8 p-1 md:hidden hover:bg-gray-200 rounded-full cursor-pointer"
         onClick={handleGoBack}
@@ -56,7 +56,7 @@ const DirectChatHeader = ({ handleOpenShowDetails = () => {} }) => {
           onClick={handleOpenShowDetails}
         />
       </div>
-    </nav>
+    </header>
   );
 };
 

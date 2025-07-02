@@ -9,13 +9,16 @@ import Loader from "../../../ui/Loader";
 import { formatBytes, truncateFilename } from "../../../../utils/fileUtils";
 import { useFileIcon } from "../../../../hooks/use-fileicon";
 import { useGetFileQuery } from "../../../../store/slices/api";
+import { MessageStatus } from "../../../MessageStatus";
 
 const GroupDocumentMsg = ({
   el,
+  groupName,
   scrollToBottom,
   usersLength,
 }: {
   el: GroupMessageProps;
+  groupName: string;
   scrollToBottom: () => void;
   usersLength: number;
 }) => {
@@ -75,7 +78,11 @@ const GroupDocumentMsg = ({
           </div>
         )}
 
-        <div className="rounded-xl space-y-1">
+        <section
+          className="rounded-xl space-y-1"
+          aria-label={`Message in ${groupName} from ${el.from?.userName} at ${time}`}
+        >
+          {/* Header & Message content */}
           <div
             className={`Media_Container p-1 relative border shadow rounded-lg ${
               isOutgoing
@@ -83,11 +90,16 @@ const GroupDocumentMsg = ({
                 : "bg-white rounded-bl-none border-gray-200"
             }`}
           >
-            {el.isIncoming && (
-              <p className="userName text-black/60 text-sm px-1 py-0.5">
-                {el.from?.userName}
-              </p>
-            )}
+            {/* header */}
+            <header>
+              {el.isIncoming && (
+                <p className="userName text-black/60 text-sm px-1 py-0.5">
+                  {el.from?.userName}
+                </p>
+              )}
+            </header>
+
+            {/* Message content */}
             <div className="cursor-pointer relative w-70 h-42">
               {/* Only preview for PDF */}
               {isPdf && el?.message?.previewUrl && (
@@ -139,28 +151,14 @@ const GroupDocumentMsg = ({
             </div>
           </div>
 
-          {/* Status & Time */}
-          <div className="w-fit ml-auto flex gap-2 items-center justify-end">
-            {isOutgoing &&
-              (el?.status === "pending" ? (
-                <Icons.ClockIcon className="w-4 h-4 text-gray-500" />
-              ) : (
-                <div className="flex gap-1">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      seen ? "bg-green-600" : "bg-gray-300"
-                    }`}
-                  />
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      seen ? "bg-green-600" : "bg-gray-300"
-                    }`}
-                  />
-                </div>
-              ))}
-            <p className="text-xs text-gray-500">{time}</p>
-          </div>
-        </div>
+          {/* footer */}
+          <MessageStatus
+            isIncoming={el.isIncoming}
+            status={el.status}
+            seen={seen}
+            time={time}
+          />
+        </section>
       </div>
     );
   }
@@ -220,27 +218,13 @@ const GroupDocumentMsg = ({
           </div>
         </div>
 
-        {/* Status & Time */}
-        <div className="w-fit ml-auto flex gap-2 items-center justify-end">
-          {isOutgoing &&
-            (el?.status === "pending" ? (
-              <Icons.ClockIcon className="w-4 h-4 text-gray-500" />
-            ) : (
-              <div className="flex gap-1">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    seen ? "bg-green-600" : "bg-gray-300"
-                  }`}
-                />
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    seen ? "bg-green-600" : "bg-gray-300"
-                  }`}
-                />
-              </div>
-            ))}
-          <p className="text-xs text-gray-500">{time}</p>
-        </div>
+        {/* footer */}
+        <MessageStatus
+          isIncoming={el.isIncoming}
+          status={el.status}
+          seen={seen}
+          time={time}
+        />
       </div>
     </div>
   );
