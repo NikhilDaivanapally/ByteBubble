@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DirectMessageProps } from "../../../../types";
 import { Icons } from "../../../../icons";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
@@ -6,6 +6,8 @@ import WaveSurfer from "wavesurfer.js";
 import { DirectMessageActions } from "../../../ui/Dropdowns/actions/DirectMessageActions";
 import { useGetFileQuery } from "../../../../store/slices/api";
 import { MessageStatus } from "../../../MessageStatus";
+import { formatBytes, truncateFilename } from "../../../../utils/fileUtils";
+import Loader from "../../../ui/Loader";
 
 export const DirectAudioMsg = ({
   el,
@@ -15,7 +17,6 @@ export const DirectAudioMsg = ({
   from: string;
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
 
@@ -27,8 +28,9 @@ export const DirectAudioMsg = ({
   const isOutgoing = !el?.isIncoming;
   const fileId = el.message?.fileId;
   const fileName = el.message?.fileName;
-  const size = el.message.size;
-  const audioDuration = el.message?.duration;
+  const shortName = truncateFilename(fileName, 50); // you can adjust 50 to your need
+  const fileSizeReadable = formatBytes(el?.message?.size || 0);
+  const duration = el?.message?.duration || 0;
   const isUploadedAudio = el.message?.source === "uploaded";
 
   const { data: audioBlob, isSuccess } = useGetFileQuery(fileId!, {
@@ -60,10 +62,6 @@ export const DirectAudioMsg = ({
       });
 
       waveSurferRef.current.load(audioUrl);
-
-      waveSurferRef.current.on("ready", () => {
-        setDuration(waveSurferRef.current?.getDuration() || 0);
-      });
 
       waveSurferRef.current.on("audioprocess", () => {
         setCurrentTime(waveSurferRef.current?.getCurrentTime() || 0);
@@ -99,6 +97,11 @@ export const DirectAudioMsg = ({
       .toString()
       .padStart(2, "0")}`;
   };
+  // Get file extension
+  const fileExt = useMemo(() => {
+    const parts = fileName.split(".");
+    return parts.length > 1 ? parts.pop()?.toLowerCase() : "";
+  }, [fileName]);
 
   return (
     <div
@@ -113,6 +116,16 @@ export const DirectAudioMsg = ({
           aria-label={`Message from ${from} at ${time}`}
           className="space-y-1"
         >
+          <div
+            className={`text-xs font-medium w-fit ml-auto px-2 py-0.5 rounded-md ${
+              isUploadedAudio
+                ? "bg-green-100 text-green-800"
+                : "bg-blue-100 text-blue-800"
+            }`}
+          >
+            {isUploadedAudio ? "Uploaded audio" : "Recorded audio"}
+          </div>
+
           {/* Message content */}
           <div
             className={`p-2 rounded-xl ${
@@ -122,18 +135,50 @@ export const DirectAudioMsg = ({
             }`}
           >
             {/* custom ui for audio player */}
-            {audioUrl ? (
-              <div className="w-50 flex items-center gap-2">
-                <span className="w-5" onClick={handlePlayPauseAudio}>
-                  {isPlaying ? <Icons.PauseIcon /> : <Icons.PlayIcon />}
-                </span>
-                <div ref={waveformRef} id="waveform" className="flex-1"></div>
-                <span className="text-sm">
-                  {formatTime(Math.max(duration - currentTime, 0))}
-                </span>
+            <div className="w-60 h-8 flex-center gap-2">
+              {audioUrl ? (
+                <>
+                  <span className="w-5" onClick={handlePlayPauseAudio}>
+                    {isPlaying ? <Icons.PauseIcon /> : <Icons.PlayIcon />}
+                  </span>
+                  <div ref={waveformRef} id="waveform" className="flex-1"></div>
+                  <span className="text-sm">
+                    {formatTime(Math.max(duration - currentTime, 0))}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <div className="scale-80">
+                    <Loader customColor />
+                  </div>
+                  <p>Loading audio...</p>
+                </>
+              )}
+            </div>
+            {isUploadedAudio && (
+              <div className="bg-btn-primary/30 p-1 flex gap-2 mt-2 items-center rounded-md">
+                <Icons.MusicalNoteIcon className="size-4 shrink-0" />
+                <div className="flex flex-col gap-0.5 w-full wrap-anywhere whitespace-normal">
+                  <p className="text-sm font-medium leading-tight">
+                    {shortName}
+                  </p>
+                  <div className="flex gap-3 text-xs opacity-80 flex-wrap">
+                    <p>{fileExt?.toUpperCase()}</p>
+                    <p>{fileSizeReadable}</p>
+                  </div>
+                </div>
+                {!audioUrl ? (
+                  <Loader />
+                ) : (
+                  <a
+                    href={audioUrl}
+                    download={fileName}
+                    className="download-btn inline-flex items-center"
+                  >
+                    <Icons.ArrowDownTrayIcon className="w-5" />
+                  </a>
+                )}
               </div>
-            ) : (
-              <p>Loading audio...</p>
             )}
           </div>
 
@@ -155,5 +200,5 @@ export const DirectAudioMsg = ({
         className="audioPlayer"
       />
     </div>
-  )
+  );
 };

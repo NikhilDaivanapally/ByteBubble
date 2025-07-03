@@ -9,7 +9,6 @@ export const formatBytes = (bytes: number, decimals = 1): string => {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 };
 
-
 export const truncateFilename = (filename: string, maxLength = 50): string => {
   if (filename.length <= maxLength) return filename;
 
@@ -21,4 +20,3 @@ export const truncateFilename = (filename: string, maxLength = 50): string => {
   const truncatedName = name.slice(0, maxLength - ext.length - 1); // leave space for ellipsis and extension
   return `${truncatedName}…${ext}`;
 };
-

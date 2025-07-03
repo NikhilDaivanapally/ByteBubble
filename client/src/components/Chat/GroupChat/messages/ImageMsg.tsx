@@ -25,7 +25,7 @@ export const GroupImageMsg = ({
   const seen = usersLength > 0 && readUsers >= usersLength;
   return (
     <div
-      className={`Media_msg relative w-fit flex group items-start  ${
+      className={`Media_msg relative w-fit max-w-[90%] md:max-w-[80%] lg:max-w-[60%] flex group items-start  ${
         isOutgoing ? "ml-auto" : ""
       }`}
     >
@@ -69,7 +69,7 @@ export const GroupImageMsg = ({
               onClick={() => dispatch(setfullImagePreview({ fullviewImg: el }))}
             >
               <img
-                className="h-40 w-auto rounded-lg"
+                className="max-h-70  w-auto rounded-lg"
                 src={el?.message?.imageUrl}
                 alt=""
                 onLoad={scrollToBottom}

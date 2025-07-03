@@ -14,7 +14,7 @@ export const DirectTextMsg = ({
   const time = formatTo12HourTime(el.createdAt);
   return (
     <div
-      className={`Text_msg relative w-fit flex group items-start ${
+      className={`Text_msg relative w-fit max-w-[90%] md:max-w-[80%] lg:max-w-[60%] flex group items-start ${
         isOutgoing ? "ml-auto" : ""
       }`}
     >
@@ -31,7 +31,7 @@ export const DirectTextMsg = ({
               : "bg-white rounded-bl-none"
           }`}
         >
-          <p>{el.message?.text}</p>
+          <p className="tracking-normal">{el.message?.text}</p>
         </div>
 
         {/* footer */}

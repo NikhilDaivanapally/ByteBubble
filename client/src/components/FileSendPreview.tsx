@@ -4,6 +4,7 @@ import SendMediaMessage from "./SendMediaMessage";
 import { updateMediaFiles } from "../store/slices/appSlice";
 import { Icons } from "../icons";
 import { RootState } from "../store/store";
+import { formatBytes, truncateFilename } from "../utils/fileUtils";
 
 const FileSendPreview = () => {
   const dispatch = useDispatch();
@@ -12,7 +13,6 @@ const FileSendPreview = () => {
   );
 
   const handleReset = useCallback(() => {
-    console.log("clicking");
     dispatch(updateMediaFiles(null));
   }, [dispatch]);
 
@@ -22,27 +22,41 @@ const FileSendPreview = () => {
 
   const renderPreview = (file: File, url: string, index: number) => {
     const type = file.type;
+    const shortName = truncateFilename(file.name);
+    const size = formatBytes(file.size);
     const ext = getFileExtension(file.name);
 
     if (type.startsWith("image/")) {
       return (
-        <img
-          key={index}
-          src={url}
-          alt={`image-${index}`}
-          className="w-full max-h-100 object-contain rounded-lg"
-        />
+        <div className="w-full flex-center flex-col">
+          <img
+            key={index}
+            src={url}
+            alt={`image-${index}`}
+            className="w-full max-h-100 object-contain rounded-lg"
+          />
+          <div className="flex gap-2 mt-2">
+            <p>{shortName}</p>
+            <p>{size}</p>
+          </div>
+        </div>
       );
     }
 
     if (type.startsWith("audio/")) {
       return (
-        <audio
-          key={index}
-          controls
-          src={url}
-          className="w-full max-w-sm rounded border"
-        />
+        <div className="w-full flex-center flex-col">
+          <audio
+            key={index}
+            controls
+            src={url}
+            className="w-full max-w-sm rounded"
+          />
+          <div className="flex gap-2 mt-2">
+            <p>{shortName}</p>
+            <p>{size}</p>
+          </div>
+        </div>
       );
     }
 
@@ -59,12 +73,18 @@ const FileSendPreview = () => {
 
     if (type === "application/pdf") {
       return (
-        <iframe
-          key={index}
-          src={url}
-          className="w-full h-200 rounded border"
-          title={`pdf-${index}`}
-        />
+        <div className="w-full h-full flex-center flex-col">
+          <iframe
+            key={index}
+            src={url}
+            className="w-full h-200 rounded border"
+            title={`pdf-${index}`}
+          />
+          <div className="flex gap-2 mt-2">
+            <p>{shortName}</p>
+            <p>{size}</p>
+          </div>
+        </div>
       );
     }
 

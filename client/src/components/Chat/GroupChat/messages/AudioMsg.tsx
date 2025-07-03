@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { GroupMessageProps } from "../../../../types";
 import { Icons } from "../../../../icons";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
@@ -6,6 +6,8 @@ import WaveSurfer from "wavesurfer.js";
 import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageActions";
 import { useGetFileQuery } from "../../../../store/slices/api";
 import { MessageStatus } from "../../../MessageStatus";
+import { formatBytes, truncateFilename } from "../../../../utils/fileUtils";
+import Loader from "../../../ui/Loader";
 
 export const GroupAudioMsg = ({
   el,
@@ -17,7 +19,6 @@ export const GroupAudioMsg = ({
   usersLength: number;
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
 
@@ -29,10 +30,15 @@ export const GroupAudioMsg = ({
   const seen = usersLength > 0 && readUsers >= usersLength;
   const isPending = el.status === "pending";
   const isOutgoing = !el?.isIncoming;
-  const audioId = el.message?.audioId;
-
-  const { data: audioBlob, isSuccess } = useGetFileQuery(audioId!, {
-    skip: isPending || !audioId,
+  const fileId = el.message?.fileId;
+  const fileName = el.message?.fileName;
+  const shortName = truncateFilename(fileName, 50); // you can adjust 50 to your need
+  const fileSizeReadable = formatBytes(el?.message?.size || 0);
+  const duration = el?.message?.duration || 0;
+  const isUploadedAudio = el.message?.source === "uploaded";
+  
+  const { data: audioBlob, isSuccess } = useGetFileQuery(fileId!, {
+    skip: isPending || !fileId,
   });
 
   useEffect(() => {
@@ -40,9 +46,9 @@ export const GroupAudioMsg = ({
       const url = URL.createObjectURL(audioBlob);
       setAudioUrl(url);
     } else if (el.status === "pending") {
-      setAudioUrl(el.message.audioId || null);
+      setAudioUrl(fileId || null);
     }
-  }, [el.status, el.message.audioId, isSuccess, audioBlob]);
+  }, [el.status, fileId, isSuccess, audioBlob]);
 
   useEffect(() => {
     if (waveformRef.current && audioUrl) {
@@ -60,10 +66,6 @@ export const GroupAudioMsg = ({
       });
 
       waveSurferRef.current.load(audioUrl);
-
-      waveSurferRef.current.on("ready", () => {
-        setDuration(waveSurferRef.current?.getDuration() || 0);
-      });
 
       waveSurferRef.current.on("audioprocess", () => {
         setCurrentTime(waveSurferRef.current?.getCurrentTime() || 0);
@@ -100,6 +102,12 @@ export const GroupAudioMsg = ({
       .padStart(2, "0")}`;
   };
 
+  // Get file extension
+  const fileExt = useMemo(() => {
+    const parts = fileName.split(".");
+    return parts.length > 1 ? parts.pop()?.toLowerCase() : "";
+  }, [fileName]);
+
   return (
     <div
       className={`Audio_msg relative w-fit flex group items-start ${
@@ -119,11 +127,20 @@ export const GroupAudioMsg = ({
       )}
 
       {/* custom ui for audio player */}
-      {el.message?.audioId && (
+      {el.message?.fileId && (
         <section
           className="space-y-1"
           aria-label={`Message in ${groupName} from ${el.from?.userName} at ${time}`}
         >
+          <div
+            className={`text-xs font-medium w-fit ml-auto px-2 py-0.5 rounded-md ${
+              isUploadedAudio
+                ? "bg-green-100 text-green-800"
+                : "bg-blue-100 text-blue-800"
+            }`}
+          >
+            {isUploadedAudio ? "Uploaded audio" : "Recorded audio"}
+          </div>
           <div
             className={`p-2 rounded-xl ${
               isOutgoing
@@ -141,18 +158,51 @@ export const GroupAudioMsg = ({
             </header>
 
             {/* Message content */}
-            {audioUrl ? (
-              <div className="w-50 flex items-center gap-2">
-                <span className="w-5" onClick={handlePlayPauseAudio}>
-                  {isPlaying ? <Icons.PauseIcon /> : <Icons.PlayIcon />}
-                </span>
-                <div ref={waveformRef} id="waveform" className="flex-1"></div>
-                <span className="text-sm">
-                  {formatTime(Math.max(duration - currentTime, 0))}
-                </span>
+            <div className="w-60 h-8 flex-center gap-2">
+              {audioUrl ? (
+                <>
+                  <span className="w-5" onClick={handlePlayPauseAudio}>
+                    {isPlaying ? <Icons.PauseIcon /> : <Icons.PlayIcon />}
+                  </span>
+                  <div ref={waveformRef} id="waveform" className="flex-1"></div>
+                  <span className="text-sm">
+                    {formatTime(Math.max(duration - currentTime, 0))}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <div className="scale-80">
+                    <Loader customColor />
+                  </div>
+                  <p>Loading audio...</p>
+                </>
+              )}
+            </div>
+
+            {isUploadedAudio && (
+              <div className="bg-btn-primary/30 p-1 flex gap-2 mt-2 items-center rounded-md">
+                <Icons.MusicalNoteIcon className="size-4 shrink-0" />
+                <div className="flex flex-col gap-0.5 w-full wrap-anywhere whitespace-normal">
+                  <p className="text-sm font-medium leading-tight">
+                    {shortName}
+                  </p>
+                  <div className="flex gap-3 text-xs opacity-80 flex-wrap">
+                    <p>{fileExt?.toUpperCase()}</p>
+                    <p>{fileSizeReadable}</p>
+                  </div>
+                </div>
+                {!audioUrl ? (
+                  <Loader />
+                ) : (
+                  <a
+                    href={audioUrl}
+                    download={fileName}
+                    className="download-btn inline-flex items-center"
+                  >
+                    <Icons.ArrowDownTrayIcon className="w-5" />
+                  </a>
+                )}
               </div>
-            ) : (
-              <p>Loading audio...</p>
             )}
           </div>
 

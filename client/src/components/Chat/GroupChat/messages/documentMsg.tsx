@@ -63,7 +63,7 @@ const GroupDocumentMsg = ({
   if (isPdf) {
     return (
       <div
-        className={`Media_msg relative w-fit flex group items-start ${
+        className={`Media_msg relative w-fit max-w-[90%] md:max-w-[80%] lg:max-w-[60%] flex group items-start ${
           isOutgoing ? "ml-auto" : ""
         }`}
       >
@@ -100,7 +100,7 @@ const GroupDocumentMsg = ({
             </header>
 
             {/* Message content */}
-            <div className="cursor-pointer relative w-70 h-42">
+            <div className="cursor-pointer relative max-h-54 aspect-video">
               {/* Only preview for PDF */}
               {isPdf && el?.message?.previewUrl && (
                 <div

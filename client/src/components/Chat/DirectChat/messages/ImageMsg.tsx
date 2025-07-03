@@ -21,7 +21,7 @@ export const DirectImageMsg = ({
 
   return (
     <div
-      className={`Media_msg relative w-fit flex group items-start ${
+      className={`Media_msg relative w-fit max-w-[90%] md:max-w-[80%] lg:max-w-[60%] flex group items-start ${
         isOutgoing ? "ml-auto" : ""
       }`}
     >
@@ -31,7 +31,6 @@ export const DirectImageMsg = ({
         aria-label={`Message from ${from} at ${time}`}
         className={`p-1 rounded-xl space-y-1`}
       >
-        
         {/* Message Content */}
         <div
           className={`Media_Container p-1 relative border-1  shadow rounded-lg ${
@@ -46,7 +45,7 @@ export const DirectImageMsg = ({
               onClick={() => dispatch(setfullImagePreview({ fullviewImg: el }))}
             >
               <img
-                className="h-40 w-auto rounded-lg"
+                className="max-h-70  w-auto rounded-lg"
                 src={el?.message?.imageUrl}
                 alt="Image Message"
                 onLoad={scrollToBottom}
