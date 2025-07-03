@@ -1,12 +1,14 @@
 export type MessageContent = {
   text: string;
-  audioId: string;
+  // audioId: string;
   imageUrl: string;
   description?: string;
   fileId: string;
   fileName: string;
   fileType: string;
   size: number;
+  duration: number;
+  source: string;
   previewUrl: string;
   pdfPreviewUrl?: string;
 };

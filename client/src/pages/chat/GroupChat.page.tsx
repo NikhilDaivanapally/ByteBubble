@@ -10,7 +10,10 @@ import { RootState } from "../../store/store";
 import ShowOfflineStatus from "../../components/ShowOfflineStatus";
 import SearchInput from "../../components/ui/SearchInput";
 import { motion } from "motion/react";
-import { selectConversation } from "../../store/slices/appSlice";
+import {
+  selectConversation,
+  updateMediaFilePreviews,
+} from "../../store/slices/appSlice";
 import { GroupConversationProps } from "../../types";
 import ConversationSkeleton from "../../components/Loaders/SkeletonLoaders/ConversationSkeleton";
 import { Button } from "../../components/ui/Button";
@@ -23,7 +26,7 @@ import { useLazyGetGroupConversationsQuery } from "../../store/slices/api";
 const GroupChat = () => {
   const dispatch = useDispatch();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { activeChatId, friends } = useSelector(
+  const { activeChatId, friends, mediaFiles, mediaFilePreviews } = useSelector(
     (state: RootState) => state.app
   );
 
@@ -87,9 +90,20 @@ const GroupChat = () => {
   }, [current_group_messages, dispatch]);
 
   useEffect(() => {
+    if (!mediaFiles) return;
+    const filesArray = Array.isArray(mediaFiles) ? mediaFiles : [mediaFiles];
+    const previews = filesArray.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+    dispatch(updateMediaFilePreviews(previews));
+  }, [mediaFiles]);
+
+  useEffect(() => {
     return () => {
       dispatch(selectConversation(null));
       dispatch(ResetGroupChat());
+      mediaFilePreviews?.forEach((p) => URL.revokeObjectURL(p.url));
     };
   }, []);
 

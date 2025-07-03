@@ -17,6 +17,7 @@
     "clsx": "^2.1.1",
     "emoji-picker-react": "^4.12.2",
     "motion": "^12.11.4",
+    "pdf2image": "^1.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@types/pdf2image": "^1.2.4",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@types/react-router-dom": "^5.3.3",

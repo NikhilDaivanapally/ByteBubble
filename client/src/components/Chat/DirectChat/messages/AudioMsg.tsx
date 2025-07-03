@@ -25,10 +25,14 @@ export const DirectAudioMsg = ({
   const time = formatTo12HourTime(el?.createdAt);
   const isPending = el.status === "pending";
   const isOutgoing = !el?.isIncoming;
-  const audioId = el.message?.audioId;
+  const fileId = el.message?.fileId;
+  const fileName = el.message?.fileName;
+  const size = el.message.size;
+  const audioDuration = el.message?.duration;
+  const isUploadedAudio = el.message?.source === "uploaded";
 
-  const { data: audioBlob, isSuccess } = useGetFileQuery(audioId!, {
-    skip: isPending || !audioId,
+  const { data: audioBlob, isSuccess } = useGetFileQuery(fileId!, {
+    skip: isPending || !fileId,
   });
 
   useEffect(() => {
@@ -36,9 +40,9 @@ export const DirectAudioMsg = ({
       const url = URL.createObjectURL(audioBlob);
       setAudioUrl(url);
     } else if (el.status === "pending") {
-      setAudioUrl(el.message.audioId || null);
+      setAudioUrl(fileId || null);
     }
-  }, [el.status, el.message.audioId, isSuccess, audioBlob]);
+  }, [el.status, fileId, isSuccess, audioBlob]);
 
   useEffect(() => {
     if (waveformRef.current && audioUrl) {
@@ -104,12 +108,11 @@ export const DirectAudioMsg = ({
     >
       {isOutgoing && <DirectMessageActions message={el} />}
 
-      {el.message?.audioId && (
+      {el.message?.fileId && (
         <section
           aria-label={`Message from ${from} at ${time}`}
           className="space-y-1"
         >
-          
           {/* Message content */}
           <div
             className={`p-2 rounded-xl ${
@@ -152,5 +155,5 @@ export const DirectAudioMsg = ({
         className="audioPlayer"
       />
     </div>
-  );
+  )
 };

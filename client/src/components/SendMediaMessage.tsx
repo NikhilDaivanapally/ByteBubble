@@ -20,36 +20,62 @@ import {
 import { Icons } from "../icons";
 import { direct, group } from "../utils/conversation-types";
 import { ObjectId } from "bson";
-import { getFirstPagePreviewUrl } from "../utils/getFirstPagePreviewUrl";
+import {
+  ensurePdfJsLoaded,
+  generatePdfThumbnail,
+} from "../utils/generate-pdf-thumbnail";
 import { useUploadMessageFileMutation } from "../store/slices/api";
+import { getAudioMetadata } from "../utils/get-audio-metadata";
 
-const SendMediaMessage = () => {
+const SendMediaMessage: React.FC = () => {
   const dispatch = useDispatch();
   const [isEmojiPickerActive, setIsEmojiPickerActive] = useState(false);
   const [message, setMessage] = useState("");
   const [firstPagePreviewUrl, setFirstPagePreviewUrl] = useState<string | null>(
     null
   );
+  const [isPdfJsLoading, setIsPdfJsLoading] = useState<boolean>(true);
+
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const auth = useSelector((state: RootState) => state.auth.user);
   const { activeChatId, chatType, mediaFiles, mediaFilePreviews } = useSelector(
     (state: RootState) => state.app
   );
+  const file = mediaFiles && Array.isArray(mediaFiles) && mediaFiles[0];
 
-  // useEffect(() => {
-  //   if (
-  //     mediaFiles &&
-  //     Array.isArray(mediaFiles) &&
-  //     mediaFiles[0].type == "application/pdf"
-  //   ) {
-  //     getFirstPagePreviewUrl(mediaFiles[0]).then((url) => {
-  //       console.log("Preview URL:", url);
-  //       setFirstPagePreviewUrl(url);
-  //       // Set it to local state, or use in an <img src={url} />
-  //     });
-  //   }
-  // }, [mediaFiles]);
+  // load PDF.js
+  useEffect(() => {
+    ensurePdfJsLoaded()
+      .then(() => setIsPdfJsLoading(false))
+      .catch((err) => {
+        console.error("Failed to initialize PDF.js:", err);
+        setIsPdfJsLoading(false);
+      });
+  }, []);
+ 
+  // generate thumbanil for pdf
+  const generatePdfThumbnailWrapper = useCallback(async () => {
+    if (!file || file.type !== "application/pdf") return;
+    try {
+      const imageUrl = await generatePdfThumbnail(file);
+      if (imageUrl) {
+        setFirstPagePreviewUrl(imageUrl);
+      } else {
+        throw new Error(
+          "Failed to generate thumbnail. Please ensure it is a valid PDF file."
+        );
+      }
+    } catch (error) {
+      console.error("Error in generating PDF thumbnail:", error);
+    }
+  }, [file]);
+
+  useEffect(() => {
+    if (!isPdfJsLoading && (file as File)?.type === "application/pdf") {
+      generatePdfThumbnailWrapper();
+    }
+  }, [mediaFiles, isPdfJsLoading, generatePdfThumbnailWrapper]);
 
   const { direct_chat, group_chat } = useSelector(
     (state: RootState) => state.conversation
@@ -112,7 +138,7 @@ const SendMediaMessage = () => {
     [handleToggleEmojiPicker]
   );
 
-  const buildMediaMessage = () => {
+  const buildMediaMessage = async () => {
     if (!fileType || !lastMedia?.url) return null;
 
     if (fileType.startsWith("image/")) {
@@ -121,18 +147,29 @@ const SendMediaMessage = () => {
         message: { imageUrl: lastMedia.url, description: message },
       };
     }
+
     if (fileType.startsWith("audio/")) {
+      const audioMetadata = await getAudioMetadata(lastMedia.file, auth?._id);
       return {
         messageType: "audio",
-        message: { audioId: lastMedia.url },
+        message: {
+          fileId: lastMedia.url,
+          fileName: lastMedia.file.name,
+          fileType: lastMedia.file.type,
+          size: lastMedia.file.size,
+          duration: audioMetadata?.duration,
+          source: "uploaded",
+        },
       };
     }
+
     if (fileType.startsWith("video/")) {
       return {
         messageType: "video",
         message: { videoUrl: lastMedia.url, description: message },
       };
     }
+
     if (
       fileType.startsWith("application/pdf") ||
       ["doc", "docx", "txt", "rtf", "xlsx", "zip"].includes(fileExt)
@@ -143,9 +180,9 @@ const SendMediaMessage = () => {
           previewUrl: firstPagePreviewUrl,
           pdfPreviewUrl: lastMedia.url,
           fileId: null,
-          fileName: Array.isArray(mediaFiles) && mediaFiles[0]?.name,
-          fileType: Array.isArray(mediaFiles) && mediaFiles[0]?.type,
-          size: Array.isArray(mediaFiles) && mediaFiles[0]?.size,
+          fileName: lastMedia.file.name,
+          fileType: lastMedia.file.type,
+          size: lastMedia.file.size,
         },
       };
     }
@@ -162,11 +199,17 @@ const SendMediaMessage = () => {
 
     const messageId = new ObjectId().toHexString();
     const timestamp = new Date().toISOString();
-    const msgData = buildMediaMessage();
-    const formData = new FormData();
-    formData.append("file", lastMedia.file); // backend expects "file"
+    const msgData: any = await buildMediaMessage();
 
     if (!msgData) return;
+
+    const formData = new FormData();
+    formData.append("file", lastMedia.file);
+
+    if (lastMedia.file.type.startsWith("audio")) {
+      formData.append("duration", msgData?.message.duration);
+      formData.append("source", "uploaded");
+    }
 
     setMessage("");
     dispatch(updateMediaFiles(null));
@@ -192,10 +235,8 @@ const SendMediaMessage = () => {
         conversationId: activeChatId,
         ...msgData,
       };
-
       dispatch(addDirectMessage(payload));
       const data = await uploadMedia(formData).unwrap();
-      console.log(data);
       if (!data) return;
       socket.emit("message:send", {
         _id: messageId,
@@ -218,7 +259,6 @@ const SendMediaMessage = () => {
         conversationId: activeChatId,
         ...msgData,
       };
-
       dispatch(addGroupMessage(payload));
       const data = await uploadMedia(formData).unwrap();
       if (!data) return;

@@ -8,42 +8,41 @@ import {
 } from "../store/slices/conversation";
 import { direct, group } from "../utils/conversation-types";
 import { ObjectId } from "bson";
+import { getAudioMetadata } from "../utils/get-audio-metadata";
+import { useUploadMessageFileMutation } from "../store/slices/api";
 
 const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
   const dispatch = useDispatch();
-
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const [recordingState, setRecordingState] = useState<"recording" | "pause">(
-    "recording"
-  );
-  const [currentTime, setCurrentTime] = useState(0);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
+  const auth = useSelector((state: RootState) => state.auth.user);
   const { chatType, activeChatId } = useSelector(
     (state: RootState) => state.app
   );
   const { direct_chat, group_chat } = useSelector(
     (state: RootState) => state.conversation
   );
-  const auth = useSelector((state: RootState) => state.auth.user);
+  const [uploadMedia] = useUploadMessageFileMutation();
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [recordingState, setRecordingState] = useState<"recording" | "pause">(
+    "recording"
+  );
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioBlobRef = useRef<Blob | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const AudioChunksRef = useRef<Blob[]>([]);
 
   const userList = useMemo(() => {
-    if (!group_chat.current_group_conversation?.admin) return [];
-    const users = group_chat.current_group_conversation.users || [];
-    const admin = group_chat.current_group_conversation.admin;
-    return [...users, admin]
-      .filter((el) => el._id !== auth?._id)
-      .map((el) => el._id);
-  }, [group_chat.current_group_conversation, auth?._id]);
+    const users = group_chat?.current_group_conversation?.users || [];
+    return users.filter((u) => u?._id !== auth?._id).map((u) => u?._id);
+  }, [group_chat, auth?._id]);
 
   const resetRecordingState = () => {
     mediaRecorderRef.current = null;
@@ -52,7 +51,7 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
     canvasRef.current = null;
     audioContextRef.current = null;
     analyserRef.current = null;
-    AudioChunksRef.current = [];
+    audioChunksRef.current = [];
 
     setIsRecording(false);
     setRecordingState("recording");
@@ -125,21 +124,24 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
 
         const mediaRecorder = new MediaRecorder(stream);
         mediaRecorderRef.current = mediaRecorder;
-
-        AudioChunksRef.current = [];
+        audioChunksRef.current = [];
 
         mediaRecorder.ondataavailable = (event: BlobEvent) => {
           if (event.data.size > 0) {
-            AudioChunksRef.current.push(event.data);
+            audioChunksRef.current.push(event.data);
           }
         };
 
         mediaRecorder.onstop = () => {
-          const audioBlob = new Blob(AudioChunksRef.current, {
-            type: "audio/wav",
-          });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          setAudioUrl(audioUrl);
+          const chunks = audioChunksRef.current;
+          if (!chunks.length) return;
+
+          const blob = new Blob(chunks, { type: "audio/webm" });
+          if (!blob || blob.size === 0) return;
+
+          const url = URL.createObjectURL(blob);
+          setAudioUrl(url);
+          audioBlobRef.current = blob;
 
           stream.getTracks().forEach((track) => track.stop());
           mediaRecorderRef.current = null;
@@ -147,14 +149,12 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
 
         mediaRecorder.start();
 
-        const intervalId = setInterval(() => {
+        (mediaRecorder as any).intervalId = setInterval(() => {
           setRecordingTime((prev) => prev + 1);
         }, 1000);
-        (mediaRecorder as any).intervalId = intervalId;
 
         setupAudioVisualization(stream); // ck
         setIsRecording(true);
-        if (recordingState === "pause") setRecordingState("recording");
       } else if (isRecording) {
         mediaRecorderRef.current?.stop();
         clearInterval((mediaRecorderRef.current as any).intervalId);
@@ -212,111 +212,120 @@ const useRecording = (canvasRef: React.RefObject<HTMLCanvasElement | null>) => {
     };
   }, [audioUrl]);
 
-  const handleSendAudio = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSendAudio = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (recordingState == "recording") {
-      handleRecording();
+    // if (recordingState == "recording") {
+    //   handleRecording();
+    // }
+
+    if (recordingState === "recording") {
+      mediaRecorderRef.current?.stop();
+      setRecordingState("pause");
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
 
+    const blob = audioBlobRef.current;
+    if (!blob || blob.size === 0) {
+      console.error("Audio blob is empty or invalid");
+      return;
+    }
     const messageId = new ObjectId().toHexString();
     const timestamp = new Date().toISOString();
 
-    switch (chatType) {
-      case direct:
-        dispatch(
-          addDirectMessage({
-            _id: messageId,
-            messageType: "audio",
-            message: {
-              audioId: audioUrl,
-            },
-            isIncoming: false,
-            isOutgoing: true,
-            status: "pending",
-            isRead: false,
-            conversationId: activeChatId,
-            deletedFor: [],
-            isDeletedForEveryone: false,
-            reactions: [],
-            isEdited: false,
-            createdAt: timestamp,
-            updatedAt: timestamp,
-          })
-        );
-        console.log({
-          _id: messageId,
-          messageType: "audio",
-          message: new Blob(AudioChunksRef.current, { type: "audio/wav" }),
-          conversationId: activeChatId,
-          createdAt: timestamp,
-          updatedAt: timestamp,
-          senderId: auth?._id,
-          recipientId: direct_chat.current_direct_conversation?.userId,
-        });
+    let metadata: any;
+    try {
+      metadata = await getAudioMetadata(blob, auth?._id);
+    } catch (err) {
+      console.error("Metadata extraction failed", err);
+      return;
+    }
 
-        const directAudioBlob = new Blob(AudioChunksRef.current, {
-          type: "audio/wav",
-        });
+    const file = new File([blob], metadata.fileName, {
+      type: metadata.fileType,
+    });
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("duration", metadata?.duration);
+    formData.append("source", "recorded");
 
-        directAudioBlob.arrayBuffer().then((arrayBuffer) => {
-          socket.emit("message:send", {
-            _id: messageId,
-            messageType: "audio",
-            message: arrayBuffer, // Send as ArrayBuffer
-            conversationId: activeChatId,
-            createdAt: timestamp,
-            updatedAt: timestamp,
-            senderId: auth?._id,
-            recipientId: direct_chat.current_direct_conversation?.userId,
-          });
-        });
+    const commonPayload = {
+      _id: messageId,
+      status: "pending",
+      isOutgoing: true,
+      isEdited: false,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
 
-        break;
-      case group:
-        dispatch(
-          addGroupMessage({
-            _id: messageId,
-            messageType: "audio",
-            message: {
-              audioId: audioUrl,
-            },
-            isIncoming: false,
-            isOutgoing: true,
-            status: "pending",
-            readBy: [],
-            conversationId: activeChatId,
-            deletedFor: [],
-            isDeletedForEveryone: [],
-            reactions: [],
-            isEdited: false,
-            createdAt: timestamp,
-            updatedAt: timestamp,
-          })
-        );
-
-        const groupAudioBlob = new Blob(AudioChunksRef.current, {
-          type: "audio/wav",
-        });
-
-        groupAudioBlob.arrayBuffer().then((arrayBuffer) => {
-          socket.emit("group:message:send", {
-            _id: messageId,
-            messageType: "audio",
-            message: arrayBuffer,
-            conversationId: activeChatId,
-            createdAt: timestamp,
-            updatedAt: timestamp,
-            senderId: auth?._id,
-            recipientsIds: userList,
-            from: {
-              _id: auth?._id,
-              userName: auth?.userName,
-              avatar: auth?.avatar,
-            },
-          });
-        });
-
-        break;
+    if (chatType === direct) {
+      const payload = {
+        ...commonPayload,
+        messageType: "audio",
+        message: {
+          fileId: audioUrl,
+          fileName: metadata.fileName,
+          fileType: metadata.fileType,
+          size: metadata.fileSize,
+          duration: metadata.duration,
+          source: "recorded",
+        },
+        isIncoming: false,
+        isRead: false,
+        deletedFor: [],
+        isDeletedForEveryone: false,
+        reactions: [],
+        conversationId: activeChatId,
+      };
+      dispatch(addDirectMessage(payload));
+      const data = await uploadMedia(formData).unwrap();
+      if (!data) return;
+      socket.emit("message:send", {
+        _id: messageId,
+        message: data?.message,
+        messageType: "audio",
+        conversationId: activeChatId,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        senderId: auth?._id,
+        recipientId: direct_chat.current_direct_conversation?.userId,
+      });
+    } else if (chatType === group) {
+      const payload = {
+        ...commonPayload,
+        messageType: "audio",
+        message: {
+          fileId: audioUrl,
+          fileName: metadata.fileName,
+          fileType: metadata.fileType,
+          size: metadata.fileSize,
+          duration: metadata.duration,
+          source: "recorded",
+        },
+        isIncoming: false,
+        readBy: [],
+        deletedFor: [],
+        isDeletedForEveryone: [],
+        reactions: [],
+        conversationId: activeChatId,
+      };
+      dispatch(addGroupMessage(payload));
+      const data = await uploadMedia(formData).unwrap();
+      if (!data) return;
+      socket.emit("group:message:send", {
+        _id: messageId,
+        messageType: "audio",
+        message: data?.message,
+        conversationId: activeChatId,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        senderId: auth?._id,
+        recipientsIds: userList,
+        from: {
+          _id: auth?._id,
+          userName: auth?.userName,
+          avatar: auth?.avatar,
+        },
+      });
     }
 
     resetRecordingState();

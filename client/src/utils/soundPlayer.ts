@@ -12,7 +12,6 @@ export const playSound = (
 
   const src = soundMap[type];
   if (!src) return;
-  console.log(src);
   const audio = new Audio(src);
   audio.volume = volume; // optional
   audio.play().catch((err) => {

@@ -55,7 +55,7 @@ const DirectMessageList = forwardRef<HTMLElement, DirectMessageListProps>(
                     case "audio":
                       return (
                         <li key={index}>
-                          <DirectAudioMsg from={from} el={el} />;
+                          <DirectAudioMsg from={from} el={el} />
                         </li>
                       );
 

@@ -112,7 +112,7 @@ app.post(
       } else if (mimeType == "application/pdf" && filePath) {
         previewUrl = await convertPdfFirstPageToImage(filePath);
       }
-      //  All other files (DOCX, MP3, ZIP, MP4, etc.)
+      //  All other files (DOCX, MP3, ZIP,MP3, MP4, etc.)
       // GridFS storage
       const uploadStream = gridFSBucket.openUploadStream(originalName, {
         contentType: mimeType,
@@ -124,6 +124,20 @@ app.post(
       uploadStream.on("finish", () => {
         fs.unlinkSync(filePath);
 
+        if (mimeType?.startsWith("audio/")) {
+          res.json({
+            success: true,
+            message: {
+              fileId: uploadStream.id,
+              fileName: originalName,
+              fileType: mimeType,
+              size: uploadStream.length,
+              duration: req.body?.duration,
+              source: req.body?.source,
+            },
+          });
+          return;
+        }
         res.json({
           success: true,
           message: {
@@ -134,6 +148,7 @@ app.post(
             previewUrl,
           },
         });
+        return;
       });
     } catch (error) {
       console.log(error);

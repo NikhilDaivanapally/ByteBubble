@@ -5,7 +5,10 @@ import {
   ResetDirectChat,
   updateDirectConversation,
 } from "../../store/slices/conversation";
-import { selectConversation } from "../../store/slices/appSlice";
+import {
+  selectConversation,
+  updateMediaFilePreviews,
+} from "../../store/slices/appSlice";
 import ShowOfflineStatus from "../../components/ShowOfflineStatus";
 import SearchInput from "../../components/ui/SearchInput";
 import { motion } from "motion/react";
@@ -17,7 +20,9 @@ import DirectChat from "../../components/Chat/DirectChat/DirectChat";
 
 const IndividualChat = () => {
   const dispatch = useDispatch();
-  const { activeChatId } = useSelector((state: RootState) => state.app);
+  const { activeChatId, mediaFiles, mediaFilePreviews } = useSelector(
+    (state: RootState) => state.app
+  );
   const {
     DirectConversations,
     current_direct_conversation,
@@ -38,9 +43,7 @@ const IndividualChat = () => {
   useEffect(() => {
     if (!current_direct_messages?.length || !current_direct_conversation)
       return;
-
     const lastMsg = current_direct_messages[current_direct_messages.length - 1];
-    console.log(lastMsg, "lastmsg");
     dispatch(
       updateDirectConversation({
         ...current_direct_conversation,
@@ -60,12 +63,22 @@ const IndividualChat = () => {
   }, [current_direct_messages, dispatch]);
 
   useEffect(() => {
+    if (!mediaFiles) return;
+    const filesArray = Array.isArray(mediaFiles) ? mediaFiles : [mediaFiles];
+    const previews = filesArray.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+    dispatch(updateMediaFilePreviews(previews));
+  }, [mediaFiles]);
+
+  useEffect(() => {
     return () => {
       dispatch(selectConversation(null));
       dispatch(ResetDirectChat());
+      mediaFilePreviews?.forEach((p) => URL.revokeObjectURL(p.url));
     };
   }, []);
-
   return (
     <div className="h-full flex">
       {/* Chat List */}

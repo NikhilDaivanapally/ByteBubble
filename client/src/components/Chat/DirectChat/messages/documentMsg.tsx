@@ -66,7 +66,6 @@ const DirectDocumentMsg = ({
           aria-label={`Message from ${from} at ${time}`}
           className="rounded-xl space-y-1"
         >
-          
           {/* Message content */}
           <div
             className={`Media_Container p-1 relative border shadow rounded-lg ${
@@ -146,7 +145,8 @@ const DirectDocumentMsg = ({
     >
       {isOutgoing && <DirectMessageActions message={el} />}
 
-      <div className="rounded-xl space-y-1">
+      <section className="rounded-xl space-y-1">
+        {/* Message content */}
         <div
           className={`Media_Container p-1 relative border shadow rounded-lg ${
             isOutgoing
@@ -179,28 +179,14 @@ const DirectDocumentMsg = ({
           </div>
         </div>
 
-        {/* Status & Time */}
-        <div className="w-fit ml-auto flex gap-2 items-center justify-end">
-          {isOutgoing &&
-            (el?.status === "pending" ? (
-              <Icons.ClockIcon className="w-4 h-4 text-gray-500" />
-            ) : (
-              <div className="flex gap-1">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    el.isRead ? "bg-green-600" : "bg-gray-300"
-                  }`}
-                />
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    el.isRead ? "bg-green-600" : "bg-gray-300"
-                  }`}
-                />
-              </div>
-            ))}
-          <p className="text-xs text-gray-500">{time}</p>
-        </div>
-      </div>
+        {/* footer */}
+        <MessageStatus
+          isIncoming={el.isIncoming}
+          status={el.status}
+          isRead={el.isRead}
+          time={time}
+        />
+      </section>
     </div>
   );
 };

@@ -1,10 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import SendMediaMessage from "./SendMediaMessage";
-import {
-  updateMediaFilePreviews,
-  updateMediaFiles,
-} from "../store/slices/appSlice";
+import { updateMediaFiles } from "../store/slices/appSlice";
 import { Icons } from "../icons";
 import { RootState } from "../store/store";
 
@@ -13,21 +10,6 @@ const FileSendPreview = () => {
   const { mediaFiles, mediaFilePreviews } = useSelector(
     (state: RootState) => state.app
   );
-
-  useEffect(() => {
-    if (!mediaFiles) return;
-
-    const filesArray = Array.isArray(mediaFiles) ? mediaFiles : [mediaFiles];
-    const previews = filesArray.map((file) => ({
-      file,
-      url: URL.createObjectURL(file),
-    }));
-    dispatch(updateMediaFilePreviews(previews));
-
-    return () => {
-      previews.forEach((p) => URL.revokeObjectURL(p.url));
-    };
-  }, [mediaFiles]);
 
   const handleReset = useCallback(() => {
     console.log("clicking");
@@ -114,7 +96,7 @@ const FileSendPreview = () => {
     );
   };
 
-  if (!mediaFiles || mediaFilePreviews.length === 0) return null;
+  if (!mediaFiles || mediaFilePreviews?.length === 0) return null;
 
   return (
     <div className="absolute inset-0 flex-center flex-col gap-4 backdrop-blur z-50">
@@ -124,7 +106,7 @@ const FileSendPreview = () => {
       />
 
       <div className="flex flex-wrap w-full justify-center gap-4 overflow-hidden p-4">
-        {mediaFilePreviews.map(({ file, url }, index) =>
+        {mediaFilePreviews?.map(({ file, url }, index) =>
           renderPreview(file, url, index)
         )}
       </div>
