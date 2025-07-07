@@ -41,13 +41,14 @@ import {
   ArrowDownTrayIcon,
 } from "@heroicons/react/16/solid";
 import { LuClock4, LuSend, LuSmile } from "react-icons/lu";
-import { RiAttachment2 } from "react-icons/ri";
+import { RiAttachment2, RiChat1Fill } from "react-icons/ri";
 import { IoMicOutline } from "react-icons/io5";
 import { FaPause } from "react-icons/fa6";
 import { MdDelete, MdOutlineCameraAlt } from "react-icons/md";
 import { IoMic, IoPlay } from "react-icons/io5";
 import { LiaUserShieldSolid } from "react-icons/lia";
-import { CiLock ,CiBellOn } from "react-icons/ci";
+import { CiLock, CiBellOn } from "react-icons/ci";
+import { FaInstagram, FaLinkedin, FaFacebook, FaYoutube } from "react-icons/fa";
 import { GoogleIcon } from "./SvgIcons";
 export const Icons = {
   XMarkIcon,
@@ -103,5 +104,10 @@ export const Icons = {
   CameraIconSecondary: MdOutlineCameraAlt,
   GoogleIcon,
   CiLock,
-  CiBellOn 
+  CiBellOn,
+  FaFacebook,
+  FaInstagram,
+  FaYoutube,
+  FaLinkedin,
+  RiChat1Fill,
 };

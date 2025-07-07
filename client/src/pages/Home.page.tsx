@@ -5,13 +5,25 @@ import {
   PlayIcon,
   UserCircleIcon,
 } from "@heroicons/react/16/solid";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { useCases, testimonials } from "../data/home.data";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import Footer from "../components/Footer";
 const Home = () => {
+  useGSAP(() => {
+    gsap.from(".msg", {
+      y: 20,
+      opacity: 0,
+      duration: 0.3,
+      stagger: 0.2,
+    });
+  });
+
   return (
     <div className="px-4 md:px-20">
       <Navbar />
@@ -43,7 +55,7 @@ const Home = () => {
               <div className="w-30"></div>
               <UserCircleIcon className="w-8" />
             </div>
-            <div className="msg bg-gray-200 p-2 w-fit rounded-xl rounded-bl-none mb-1 relative mr-auto">
+            <div className="msg bg-gray-200 p-1 w-fit rounded-xl rounded-bl-none mb-1 relative mr-auto">
               <img
                 className="aspect-video max-h-40 rounded-lg"
                 src="https://images.unsplash.com/photo-1746061641845-0825bf320bf1?q=80&w=2070&auto=format&fit=crop"
@@ -73,45 +85,78 @@ const Home = () => {
           <h2 className="text-3xl font-semibold text-center">Features</h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10 w-full md:w-3/4 mx-auto">
             <div className="lg:col-span-2 bg-gray-100 p-6 rounded-xl border border-gray-300">
-              <h3 className="text-xl font-semibold">🟢 Online Status</h3>
+              <h3 className="text-xl font-semibold">💬 Real-Time Messaging</h3>
               <p className="mt-2 font-semibold">
-                See who's active in real-time.
+                Chat smoothly and intuitively.
               </p>
               <p className="text-sm">
-                Stay connected with presence indicators so you know when your
-                friends or teammates are available to chat.
+                Enjoy fast, real-time conversations with typing indicators, read
+                receipts, emoji reactions, threaded replies, and the ability to
+                edit or delete messages — everything for modern chatting.
               </p>
             </div>
+
+            <div className="bg-gray-100 p-6 rounded-xl border border-gray-300">
+              <h3 className="text-xl font-semibold">🖼️ Media Sharing</h3>
+              <p className="mt-2 font-semibold">
+                Send files, images, and audio effortlessly.
+              </p>
+              <p className="text-sm">
+                Share documents, images, audio clips, and more directly in the
+                chat. Includes previews and thumbnails so you know what you're
+                sending or receiving before opening it.
+              </p>
+            </div>
+
             <div className="bg-gray-100 p-6 rounded-xl border border-gray-300">
               <h3 className="text-xl font-semibold">
-                📎 File & Document Sharing
+                🎤 Voice & Audio Messaging
               </h3>
               <p className="mt-2 font-semibold">
-                Share work files or personal docs instantly.
+                Speak when typing isn’t enough.
               </p>
               <p className="text-sm">
-                From PDFs to spreadsheets, send and receive files seamlessly in
-                your conversations.
+                Record and send voice notes or audio files for clearer, more
+                expressive communication — perfect for when you’re on the move
+                or want a more personal touch.
               </p>
             </div>
-            <div className="bg-gray-100 p-6 rounded-xl border border-gray-300">
-              <h3 className="text-xl font-semibold">🖼️ Image Sharing</h3>
-              <p className="mt-2 font-semibold">
-                Bring your chats to life with visuals.
-              </p>
-              <p className="text-sm">
-                Send photos, screenshots, or memes directly into the chat — fast
-                and secure.
-              </p>
-            </div>
+
             <div className="lg:col-span-2 bg-gray-100 p-6 rounded-xl border border-gray-300">
-              <h3 className="text-xl font-semibold">🎤 Voice Messages</h3>
+              <h3 className="text-xl font-semibold">
+                🟢 Presence & Group Collaboration
+              </h3>
               <p className="mt-2 font-semibold">
-                Say it out loud when typing just won’t do.
+                Stay connected with everyone, in real-time.
               </p>
               <p className="text-sm">
-                Record and send voice messages with one tap for more personal,
-                expressive communication.
+                See who’s online, available, or away. Organize conversations in
+                groups with custom names, avatars, and member controls to make
+                collaboration easier.
+              </p>
+            </div>
+
+            <div className=" lg:col-span-2 bg-gray-100 p-6 rounded-xl border border-gray-300">
+              <h3 className="text-xl font-semibold">
+                🔔 Smart Notifications & Search
+              </h3>
+              <p className="mt-2 font-semibold">
+                Stay in the loop — without the noise.
+              </p>
+              <p className="text-sm">
+                Get customizable alerts for each chat, mute distractions, and
+                quickly find messages or files using powerful in-chat search
+                filters.
+              </p>
+            </div>
+
+            <div className=" bg-gray-100 p-6 rounded-xl border border-gray-300">
+              <h3 className="text-xl font-semibold">🔒 Privacy & Control</h3>
+              <p className="mt-2 font-semibold">Take control of your chat.</p>
+              <p className="text-sm">
+                Decide who can see your profile info, media, or last seen. Your
+                privacy settings give you full control over what’s visible — to
+                everyone or just your connections.
               </p>
             </div>
           </div>
@@ -136,11 +181,13 @@ const Home = () => {
                   } items-center gap-8`}
                 >
                   <div className="w-full md:w-1/2">
-                    <img
-                      src={useCase.image}
-                      alt={useCase.title}
-                      className="w-full min-h-[50vh] rounded-2xl shadow-md"
-                    />
+                    <div className="w-full min-h-[50vh] flex-center rounded-2xl bg-btn-primary/10">
+                      <img
+                        src={useCase.image}
+                        alt={useCase.title}
+                        className="w-full h-full object-contain bg-blend-multiply"
+                      />
+                    </div>
                   </div>
                   <div className="w-full md:w-1/2">
                     <h3 className="text-2xl font-semibold text-gray-800 mb-2">
@@ -186,6 +233,7 @@ const Home = () => {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 };
