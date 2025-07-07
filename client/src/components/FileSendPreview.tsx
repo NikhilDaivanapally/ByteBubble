@@ -28,9 +28,8 @@ const FileSendPreview = () => {
 
     if (type.startsWith("image/")) {
       return (
-        <div className="w-full flex-center flex-col">
+        <div key={index} className="w-full flex-center flex-col">
           <img
-            key={index}
             src={url}
             alt={`image-${index}`}
             className="w-full max-h-100 object-contain rounded-lg"
@@ -45,13 +44,8 @@ const FileSendPreview = () => {
 
     if (type.startsWith("audio/")) {
       return (
-        <div className="w-full flex-center flex-col">
-          <audio
-            key={index}
-            controls
-            src={url}
-            className="w-full max-w-sm rounded"
-          />
+        <div key={index} className="w-full flex-center flex-col">
+          <audio controls src={url} className="w-full max-w-sm rounded" />
           <div className="flex gap-2 mt-2">
             <p>{shortName}</p>
             <p>{size}</p>
@@ -73,9 +67,8 @@ const FileSendPreview = () => {
 
     if (type === "application/pdf") {
       return (
-        <div className="w-full h-full flex-center flex-col">
+        <div key={index} className="w-full h-full flex-center flex-col">
           <iframe
-            key={index}
             src={url}
             className="w-full h-200 rounded border"
             title={`pdf-${index}`}

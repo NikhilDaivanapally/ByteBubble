@@ -8,16 +8,19 @@ import TextInputForm from "./TextInputForm";
 const MessageInputBar = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const {
+    audioUrl,
+    currentTime,
+    isPlaying,
     isRecording,
     recordingState,
-    recordingTime,
-    isPlaying,
-    currentTime,
-    audioUrl,
     audioRef,
-    handleRecording,
-    handlePlayPauseAudio,
-    handleSendAudio,
+    duration,
+    startRecording,
+    stopRecording,
+    sendAudio,
+    playPauseAudio,
+    resetRecording,
+    formatTime,
   } = useRecording(canvasRef);
 
   const isChatActive = useSelector(
@@ -30,19 +33,23 @@ const MessageInputBar = () => {
     <footer>
       {isRecording ? (
         <AudioRecorderUI
+          isRecording={isRecording}
+          recordingState={recordingState}
           audioUrl={audioUrl}
-          recordingTime={recordingTime}
           currentTime={currentTime}
           isPlaying={isPlaying}
-          recordingState={recordingState}
           audioRef={audioRef}
           canvasRef={canvasRef}
-          handlePlayPauseAudio={handlePlayPauseAudio}
-          handleRecording={handleRecording}
-          handleSendAudio={handleSendAudio}
+          handleStartRecording={startRecording}
+          handleStopRecording={stopRecording}
+          handleSendAudio={sendAudio}
+          handlePlayPauseAudio={playPauseAudio}
+          handleReset={resetRecording}
+          duration={duration}
+          formatTime={formatTime}
         />
       ) : (
-        <TextInputForm handleRecording={handleRecording} />
+        <TextInputForm handleStartRecording={startRecording} />
       )}
     </footer>
   );

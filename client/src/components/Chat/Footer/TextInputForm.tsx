@@ -33,9 +33,9 @@ import { playSound } from "../../../utils/soundPlayer";
 const MAX_TEXTAREA_HEIGHT = 130;
 
 const TextInputForm = ({
-  handleRecording,
+  handleStartRecording,
 }: {
-  handleRecording: () => void;
+  handleStartRecording: () => void;
 }) => {
   const dispatch = useDispatch();
   const [message, setMessage] = useState("");
@@ -303,7 +303,7 @@ const TextInputForm = ({
       >
         <Icons.SmileIcon
           onClick={() => setEmojiPickerVisible(!isEmojiPickerVisible)}
-          className="text-xl select-none"
+          className="text-xl select-none cursor-pointer"
         />
         {isEmojiPickerVisible && (
           <div className="absolute bottom-[160%] right-0 translate-x-1/4 md:right-full z-60 bg-gray-300">
@@ -329,7 +329,7 @@ const TextInputForm = ({
         className="p-1 relative cursor-pointer rounded-lg text-black/60"
       >
         <Icons.AttachmentIcons
-          className="text-xl"
+          className="text-xl cursor-pointer"
           onClick={() => setAttachmentVisible(true)}
         />
         <AnimatePresence>
@@ -378,15 +378,15 @@ const TextInputForm = ({
       {/* Mic Button */}
       <div
         className="p-1 cursor-pointer rounded-lg text-black/60"
-        onClick={handleRecording}
+        onClick={handleStartRecording}
       >
-        <Icons.MicPrimary className="text-xl" />
+        <Icons.MicPrimary className="text-xl cursor-pointer" />
       </div>
 
       {/* Send Button */}
       <button
         type="submit"
-        className="p-3 bg-btn-primary text-white rounded-lg"
+        className="p-3 bg-btn-primary text-white rounded-lg cursor-pointer"
       >
         <Icons.SendIcon className="text-xl" />
       </button>
