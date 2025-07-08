@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { clearActiveSettingPage } from "../../store/slices/settingsSlice";
+import { clearActiveSettingPath } from "../../store/slices/settingsSlice";
 import { Icons } from "../../icons";
 import { useDispatch } from "react-redux";
 import { Button } from "../ui/Button";
@@ -11,7 +11,7 @@ const AccountSettings = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClearActiveSettingsPage = useCallback(() => {
-    dispatch(clearActiveSettingPage());
+    dispatch(clearActiveSettingPath());
   }, []);
 
   const SettingItem = ({ title, subtitle }: any) => (
@@ -42,8 +42,8 @@ const AccountSettings = () => {
         </h1>
       </header>
 
-      <main className="relative flex-1 flex flex-col py-5 px-4 overflow-y-auto">
-        <h3 className="text-[#111518] text-lg font-bold tracking-[-0.015em] px-4 pb-2 pt-4">
+      <main className="relative flex-1 flex flex-col md:py-5 md:px-4 overflow-y-auto">
+        <h3 className="text-[#111518] text-lg font-bold tracking-[-0.015em] px-4 pb-2 pt-2">
           Password
         </h3>
         <SettingItem title="Update password" subtitle="Change your password" />

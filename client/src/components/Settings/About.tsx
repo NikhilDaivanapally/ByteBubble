@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { clearActiveSettingPage } from "../../store/slices/settingsSlice";
+import { clearActiveSettingPath } from "../../store/slices/settingsSlice";
 import { Icons } from "../../icons";
 import { useDispatch } from "react-redux";
 
@@ -7,7 +7,7 @@ const About = () => {
   const dispatch = useDispatch();
 
   const handleClearActiveSettingsPage = useCallback(() => {
-    dispatch(clearActiveSettingPage());
+    dispatch(clearActiveSettingPath());
   }, []);
 
   return (

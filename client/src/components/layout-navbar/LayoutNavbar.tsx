@@ -7,7 +7,7 @@ import { Avatar } from "../ui/Avatar";
 import { direct } from "../../utils/conversation-types";
 import { Icons } from "../../icons";
 const LayoutNavbar = () => {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
   const { activeChatId, unreadCount } = useSelector(
     (state: RootState) => state.app
@@ -31,7 +31,11 @@ const LayoutNavbar = () => {
       </div>
       <ul className="list-none flex gap-2 sm:gap-5 lg:flex-col relative h-full lg:h-fit lg:w-full justify-center items-center">
         {navListData?.map((item, i) => {
-          const isActive = item.path.includes(pathname);
+          const isActive =
+            pathname.concat(search).startsWith(item.path) ||
+            pathname
+              .concat(search)
+              .includes(item.path.split("?")?.at(0) as string);
           const count =
             item.path == "/chat"
               ? unreadCount.directChats

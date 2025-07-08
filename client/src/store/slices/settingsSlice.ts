@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface SettingsState {
-  activeSettingPage: null | string;
+  activeSettingPath: null | string;
+
   data: {
     notifications: {
       messages: {
@@ -28,7 +29,7 @@ export interface SettingsState {
 }
 
 const initialState: SettingsState = {
-  activeSettingPage: null,
+  activeSettingPath: null,
   data: {
     notifications: {
       messages: {
@@ -58,11 +59,11 @@ const settingsSlice = createSlice({
   name: "settings",
   initialState,
   reducers: {
-    setActiveSettingPage: (state, action: PayloadAction<string | null>) => {
-      state.activeSettingPage = action.payload;
+    setActiveSettingPath: (state, action: PayloadAction<string | null>) => {
+      state.activeSettingPath = action.payload;
     },
-    clearActiveSettingPage: (state) => {
-      state.activeSettingPage = null;
+    clearActiveSettingPath: (state) => {
+      state.activeSettingPath = null;
     },
     setSettings: (state, action: PayloadAction<SettingsState["data"]>) => {
       state.data = action.payload;
@@ -82,8 +83,8 @@ const settingsSlice = createSlice({
 });
 
 export const {
-  setActiveSettingPage,
-  clearActiveSettingPage,
+  setActiveSettingPath,
+  clearActiveSettingPath,
   setSettings,
   updateSettingField,
 } = settingsSlice.actions;

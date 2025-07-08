@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import Input from "../ui/Input";
 import { Button } from "../ui/Button";
-import { clearActiveSettingPage } from "../../store/slices/settingsSlice";
+import { clearActiveSettingPath } from "../../store/slices/settingsSlice";
 import { Icons } from "../../icons";
 import { motion } from "motion/react";
 import toast from "react-hot-toast";
@@ -94,7 +94,7 @@ const EditProfile = () => {
   };
 
   const handleClearActiveSettingsPage = useCallback(() => {
-    dispatch(clearActiveSettingPage());
+    dispatch(clearActiveSettingPath());
     navigate("/settings");
   }, [dispatch, navigate]);
 
@@ -106,6 +106,7 @@ const EditProfile = () => {
 
   return (
     <div className="relative flex h-full flex-col bg-white overflow-x-hidden">
+      
       <header className="border-b border-gray-200 px-2 py-4 md:py-2 flex gap-3 md:block">
         <Icons.ArrowLeftIcon
           className="w-6 md:hidden cursor-pointer"
@@ -114,7 +115,7 @@ const EditProfile = () => {
         <h1 className="text-xl font-semibold text-[#121416]">Edit Profile</h1>
       </header>
 
-      <main className="flex-1 flex flex-col items-center py-10 px-4 overflow-y-auto">
+      <main className="flex-1 flex flex-col items-center md:py-5 md:px-4 overflow-y-auto">
         <section className="flex flex-col items-center gap-3">
           <motion.div
             className="relative"

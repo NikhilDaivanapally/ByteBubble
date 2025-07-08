@@ -5,7 +5,10 @@ import { settingsData } from "../../data/settings.data";
 import Section from "../../components/Settings/Section";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { setActiveSettingPage } from "../../store/slices/settingsSlice";
+import {
+  clearActiveSettingPath,
+  setActiveSettingPath,
+} from "../../store/slices/settingsSlice";
 import { Button } from "../../components/ui/Button";
 import { apiSlice, useLogoutMutation } from "../../store/slices/api";
 
@@ -14,36 +17,18 @@ const Settings = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const auth = useSelector((state: RootState) => state.auth.user);
-  const activeSettingPage = useSelector(
-    (state: RootState) => state.settings.activeSettingPage
+  const activeSettingPath = useSelector(
+    (state: RootState) => state.settings.activeSettingPath
   );
 
   const [logout, { isLoading, data }] = useLogoutMutation();
 
   useEffect(() => {
-    switch (pathname.split("/").at(-1)) {
-      case "edit-profile":
-        dispatch(setActiveSettingPage("Edit profile"));
-        break;
-      case "account-settings":
-        dispatch(setActiveSettingPage("Account settings"));
-        break;
-      case "notifications":
-        dispatch(setActiveSettingPage("Notifications"));
-        break;
-      case "privacy":
-        dispatch(setActiveSettingPage("Privacy"));
-        break;
-      case "help":
-        dispatch(setActiveSettingPage("Help"));
-        break;
-      case "about":
-        dispatch(setActiveSettingPage("About"));
-        break;
-      default:
-        break;
+    const path = pathname.split("/")?.filter(Boolean).at(1);
+    if (path) {
+      dispatch(setActiveSettingPath(pathname));
     }
-  }, [pathname]);
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -52,12 +37,17 @@ const Settings = () => {
       navigate("/signin");
     }
   }, [data]);
+  useEffect(() => {
+    if (activeSettingPath) {
+      dispatch(clearActiveSettingPath());
+    }
+  }, []);
 
   return (
     <div className="h-full relative flex">
       <div
-        className={`px-4 w-full md:w-2/5 xl:w-1/3 ${
-          activeSettingPage ? "hidden md:block" : ""
+        className={`px-2 sm:px-4 w-full md:w-2/5 xl:w-1/3 ${
+          activeSettingPath ? "hidden md:block" : ""
         } space-y-2 border-r border-gray-200 overflow-y-auto overflow-x-hidden scrollbar-custom`}
       >
         <h1 className="text-2xl font-semibold py-2">Settings</h1>
@@ -81,7 +71,7 @@ const Settings = () => {
       </div>
       <div
         className={`w-full px-2 md:w-3/5 xl:w-2/3 ${
-          activeSettingPage ? "block" : "hidden"
+          activeSettingPath ? "block" : "hidden"
         } md:block`}
       >
         <Outlet />

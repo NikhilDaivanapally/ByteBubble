@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  clearActiveSettingPage,
+  clearActiveSettingPath,
   SettingsState,
   updateSettingField,
 } from "../../store/slices/settingsSlice";
@@ -16,7 +16,7 @@ const Notifications = () => {
   const settings = useSelector((state: RootState) => state.settings.data);
 
   const handleClearActiveSettingsPage = useCallback(() => {
-    dispatch(clearActiveSettingPage());
+    dispatch(clearActiveSettingPath());
   }, [dispatch]);
 
   const handleToggle = async (path: string) => {
@@ -31,7 +31,7 @@ const Notifications = () => {
   return (
     <div className="relative flex h-full flex-col bg-white overflow-x-hidden">
       {/* Header */}
-      <header className="border-b border-gray-200 px-6 py-4 md:py-2 flex gap-3 md:block">
+      <header className="border-b border-gray-200 px-2 py-4 md:py-2 flex gap-3 md:block">
         <Icons.ArrowLeftIcon
           className="w-6 md:hidden cursor-pointer"
           onClick={handleClearActiveSettingsPage}
@@ -40,7 +40,7 @@ const Notifications = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col py-10 px-4 overflow-y-auto">
+      <main className="flex-1 flex flex-col md:py-5 md:px-4 overflow-y-auto">
         {Object.entries(notificationSections).map(
           ([sectionKey, sectionItems]) => {
             const section = sectionKey as NotificationSectionKey;
@@ -66,13 +66,6 @@ const Notifications = () => {
                       key in settings.notifications.groupChats
                         ? settings.notifications.groupChats[
                             key as keyof typeof settings.notifications.groupChats
-                          ]
-                        : false;
-                  } else if (section === "others") {
-                    isChecked =
-                      key in settings.notifications.others
-                        ? settings.notifications.others[
-                            key as keyof typeof settings.notifications.others
                           ]
                         : false;
                   }

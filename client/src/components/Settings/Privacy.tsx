@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { clearActiveSettingPage } from "../../store/slices/settingsSlice";
+import { clearActiveSettingPath } from "../../store/slices/settingsSlice";
 import { Icons } from "../../icons";
 import { SETTINGS_CONFIG } from "../../constants/settings-config";
 import { motion } from "motion/react";
@@ -10,7 +10,7 @@ const Privacy = () => {
   const dispatch = useDispatch();
 
   const handleClearActiveSettingsPage = () => {
-    dispatch(clearActiveSettingPage());
+    dispatch(clearActiveSettingPath());
   };
 
   const [readReceiptsEnabled, setReadReceiptsEnabled] = useState(true);
@@ -117,7 +117,7 @@ const Privacy = () => {
   return (
     <div className="relative flex h-full flex-col bg-white overflow-x-hidden">
       {/* Header */}
-      <header className="border-b border-gray-200 px-6 py-4 md:py-2 flex gap-3 md:block">
+      <header className="border-b border-gray-200 px-2 py-4 md:py-2 flex gap-3 md:block">
         <Icons.ArrowLeftIcon
           className="w-6 md:hidden cursor-pointer"
           onClick={handleClearActiveSettingsPage}
@@ -126,7 +126,7 @@ const Privacy = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col py-10 px-4 overflow-y-auto">
+      <main className="flex-1 flex flex-col md:py-5 md:px-4 overflow-y-auto">
         <Section title="Profile Information">
           {Object.entries(profileInfo).map(([key, item]) =>
             renderSelectItem(key, item)

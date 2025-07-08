@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { clearActiveSettingPage } from "../../store/slices/settingsSlice";
+import { clearActiveSettingPath } from "../../store/slices/settingsSlice";
 import { Icons } from "../../icons";
 import { useDispatch } from "react-redux";
 
@@ -7,13 +7,13 @@ const Help = () => {
   const dispatch = useDispatch();
 
   const handleClearActiveSettingsPage = useCallback(() => {
-    dispatch(clearActiveSettingPage());
+    dispatch(clearActiveSettingPath());
   }, []);
 
   return (
     <div className="relative flex h-full flex-col bg-white overflow-x-hidden">
       {/* Header */}
-      <header className="border-b border-gray-200 px-6 py-4 md:py-2 flex gap-3 md:block">
+      <header className="border-b border-gray-200 px-2 py-4 md:py-2 flex gap-3 md:block">
         <Icons.ArrowLeftIcon
           className="w-6 md:hidden cursor-pointer"
           onClick={handleClearActiveSettingsPage}
@@ -22,7 +22,7 @@ const Help = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col p-0 md:p-4 overflow-y-auto">
+      <main className="flex-1 flex flex-col  md:py-5 md:px-4 overflow-y-auto">
         <h2 className="text-[#121416] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
           Frequently Asked Questions
         </h2>
