@@ -8,6 +8,7 @@ import { DirectSystemMsg } from "./messages/SystemMsg";
 import DirectDocumentMsg from "./messages/documentMsg";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
+import { DirectLinkMsg } from "./messages/LinkMsg";
 
 interface DirectMessageListProps {
   sortedDates: string[];
@@ -73,6 +74,12 @@ const DirectMessageList = forwardRef<HTMLElement, DirectMessageListProps>(
                       return (
                         <li key={index}>
                           <DirectSystemMsg el={el} />
+                        </li>
+                      );
+                    case "link":
+                      return (
+                        <li key={index}>
+                          <DirectLinkMsg el={el} from={from} />
                         </li>
                       );
                     default:

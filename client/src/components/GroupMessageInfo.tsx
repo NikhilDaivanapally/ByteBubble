@@ -8,8 +8,9 @@ import { formatTo12HourTime, formatToReadableDate } from "../utils/dateUtils";
 import { Avatar } from "./ui/Avatar";
 import { GroupImageMsg } from "./Chat/GroupChat/messages/ImageMsg";
 import { GroupAudioMsg } from "./Chat/GroupChat/messages/AudioMsg";
-import { GroupSystemMsg } from "./Chat/GroupChat/messages/SystemMsg";
 import { GroupTextMsg } from "./Chat/GroupChat/messages/TextMsg";
+import { GroupLinkMsg } from "./Chat/GroupChat/messages/LinkMsg";
+import GroupDocumentMsg from "./Chat/GroupChat/messages/documentMsg";
 
 const GroupMessageInfo = () => {
   const dispatch = useDispatch();
@@ -17,7 +18,7 @@ const GroupMessageInfo = () => {
     (state: RootState) => state.conversation.group_chat
   );
   const { groupMessageInfo } = useSelector((state: RootState) => state.app);
-
+  const groupName = current_group_conversation?.name ?? "group";
   const message = useMemo(() => {
     switch (groupMessageInfo?.messageType) {
       case "image":
@@ -27,6 +28,7 @@ const GroupMessageInfo = () => {
             usersLength={
               (current_group_conversation?.users.length as number) - 1
             }
+            groupName={groupName}
             scrollToBottom={() => {}}
           />
         );
@@ -37,10 +39,20 @@ const GroupMessageInfo = () => {
             usersLength={
               (current_group_conversation?.users.length as number) - 1
             }
+            groupName={groupName}
           />
         );
-      case "system":
-        return <GroupSystemMsg el={groupMessageInfo} />;
+      case "document":
+        return (
+          <GroupDocumentMsg
+            el={groupMessageInfo}
+            usersLength={
+              (current_group_conversation?.users.length as number) - 1
+            }
+            scrollToBottom={() => {}}
+            groupName={groupName}
+          />
+        );
       case "text":
         return (
           <GroupTextMsg
@@ -48,6 +60,17 @@ const GroupMessageInfo = () => {
             usersLength={
               (current_group_conversation?.users.length as number) - 1
             }
+            groupName={groupName}
+          />
+        );
+      case "link":
+        return (
+          <GroupLinkMsg
+            el={groupMessageInfo}
+            usersLength={
+              (current_group_conversation?.users.length as number) - 1
+            }
+            groupName={groupName}
           />
         );
     }

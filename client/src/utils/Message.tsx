@@ -77,8 +77,14 @@ const getFormattedMessage = (
       );
       break;
     case "text":
-    case "link":
       message = msg?.message?.text || "";
+      break;
+
+    case "link":
+      message = (
+        <p className="text-btn-primary underline">{msg?.message?.url}</p>
+      );
+
       break;
 
     case "system":

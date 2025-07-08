@@ -6,6 +6,9 @@ import SortMessages from "../../../../utils/sort-messages";
 import { setfullImagePreview } from "../../../../store/slices/conversation";
 import { Icons } from "../../../../icons";
 import { DirectAudioMsg } from "../../DirectChat/messages/AudioMsg";
+import { DirectLinkMsg } from "../../DirectChat/messages/LinkMsg";
+import { DirectMessageProps } from "../../../../types";
+import DirectDocumentMsg from "../../DirectChat/messages/documentMsg";
 type ShowMediaProps = {
   showAllMedia: boolean;
   handleCloseAllMedia: () => void;
@@ -34,16 +37,18 @@ const Media = () => {
                 {date}
               </p>
               <div className="grid grid-cols-3 gap-4 items-center">
-                {MessagesObject[date].map((el: any, i: number) => (
-                  <div
-                    onClick={() =>
-                      dispatch(setfullImagePreview({ fullviewImg: el }))
-                    }
-                    key={i}
-                  >
-                    <img key={i} src={el?.message?.imageUrl} alt="" />
-                  </div>
-                ))}
+                {MessagesObject[date].map(
+                  (el: DirectMessageProps, i: number) => (
+                    <div
+                      onClick={() =>
+                        dispatch(setfullImagePreview({ fullviewImg: el }))
+                      }
+                      key={i}
+                    >
+                      <img key={i} src={el?.message?.imageUrl} alt="" />
+                    </div>
+                  )
+                )}
               </div>
             </div>
           );
@@ -55,7 +60,7 @@ const Media = () => {
   );
 };
 const Audio = () => {
-  const { current_direct_messages } = useSelector(
+  const { current_direct_messages, current_direct_conversation } = useSelector(
     (state: RootState) => state.conversation.direct_chat
   );
   const { DatesArray, MessagesObject } = useMemo(() => {
@@ -65,6 +70,8 @@ const Audio = () => {
       sort: "Desc",
     });
   }, [current_direct_messages]);
+  const from = current_direct_conversation?.name ?? "user";
+
   return (
     <>
       {DatesArray.length ? (
@@ -75,9 +82,11 @@ const Audio = () => {
                 {date}
               </p>
               <div className="grid  gap-4 items-center">
-                {MessagesObject[date].map((el: any, i: number) => (
-                  <DirectAudioMsg el={el} key={i} />
-                ))}
+                {MessagesObject[date].map(
+                  (el: DirectMessageProps, i: number) => (
+                    <DirectAudioMsg el={el} key={i} from={from} />
+                  )
+                )}
               </div>
             </div>
           );
@@ -89,7 +98,7 @@ const Audio = () => {
   );
 };
 const Links = () => {
-  const { current_direct_messages } = useSelector(
+  const { current_direct_messages, current_direct_conversation } = useSelector(
     (state: RootState) => state.conversation.direct_chat
   );
   const { DatesArray, MessagesObject } = useMemo(() => {
@@ -99,6 +108,7 @@ const Links = () => {
       sort: "Desc",
     });
   }, [current_direct_messages]);
+  const from = current_direct_conversation?.name ?? "user";
   return (
     <>
       {DatesArray.length ? (
@@ -107,9 +117,11 @@ const Links = () => {
             <div key={i} className="TimeWise_Media_Container">
               <p>{date}</p>
               <div className="Links_Gallery">
-                {/* {MessagesObject[date].map((el, i) => (
-                  <LinkMsg el={el} key={i} />
-                ))} */}
+                {MessagesObject[date].map(
+                  (el: DirectMessageProps, i: number) => (
+                    <DirectLinkMsg el={el} key={i} from={from} />
+                  )
+                )}
               </div>
             </div>
           );
@@ -121,7 +133,7 @@ const Links = () => {
   );
 };
 const Docs = () => {
-  const { current_direct_messages } = useSelector(
+  const { current_direct_messages, current_direct_conversation } = useSelector(
     (state: RootState) => state.conversation.direct_chat
   );
   const { DatesArray, MessagesObject } = useMemo(() => {
@@ -131,6 +143,7 @@ const Docs = () => {
       sort: "Desc",
     });
   }, [current_direct_messages]);
+  const from = current_direct_conversation?.name ?? "user";
   return (
     <>
       {DatesArray.length ? (
@@ -139,9 +152,16 @@ const Docs = () => {
             <div key={i} className="TimeWise_Media_Container">
               <p>{date}</p>
               <div className="Links_Gallery">
-                {/* {MessagesObject[date].map((el, i) => (
-                  <LinkMsg el={el} key={i} />
-                ))} */}
+                {MessagesObject[date].map(
+                  (el: DirectMessageProps, i: number) => (
+                    <DirectDocumentMsg
+                      el={el}
+                      key={i}
+                      from={from}
+                      scrollToBottom={() => {}}
+                    />
+                  )
+                )}
               </div>
             </div>
           );

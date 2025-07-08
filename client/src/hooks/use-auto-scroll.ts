@@ -1,4 +1,3 @@
-// hooks/use-auto-scroll.ts
 import { useEffect } from "react";
 
 const useAutoScroll = ({

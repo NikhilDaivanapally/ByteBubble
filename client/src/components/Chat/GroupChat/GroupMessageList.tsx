@@ -8,6 +8,7 @@ import { GroupSystemMsg } from "./messages/SystemMsg";
 import GroupDocumentMsg from "./messages/documentMsg";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
+import { GroupLinkMsg } from "./messages/LinkMsg";
 
 interface GroupMessageListProps {
   sortedDates: string[];
@@ -75,6 +76,16 @@ const GroupMessageList = forwardRef<HTMLElement, GroupMessageListProps>(
                             el={el}
                             groupName={groupName}
                             scrollToBottom={() => {}}
+                            usersLength={usersLength - 1}
+                          />
+                        </li>
+                      );
+                    case "link":
+                      return (
+                        <li key={index}>
+                          <GroupLinkMsg
+                            el={el}
+                            groupName={groupName}
                             usersLength={usersLength - 1}
                           />
                         </li>

@@ -106,7 +106,7 @@ const TextInputForm = ({
     const messagePayload = {
       _id: messageId,
       messageType,
-      message: { text: message },
+      message: messageType == "text" ? { text: message } : { url: message },
       conversationId: activeChatId,
       createdAt: timestamp,
       updatedAt: timestamp,

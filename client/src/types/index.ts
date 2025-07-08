@@ -1,5 +1,6 @@
 export type MessageContent = {
   text: string;
+  url: string;
   // audioId: string;
   imageUrl: string;
   description?: string;

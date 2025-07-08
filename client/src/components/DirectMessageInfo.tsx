@@ -7,27 +7,43 @@ import { RootState } from "../store/store";
 import { formatTo12HourTime, formatToDayLabel } from "../utils/dateUtils";
 import { DirectAudioMsg } from "./Chat/DirectChat/messages/AudioMsg";
 import { DirectImageMsg } from "./Chat/DirectChat/messages/ImageMsg";
-import { DirectSystemMsg } from "./Chat/DirectChat/messages/SystemMsg";
 import { DirectTextMsg } from "./Chat/DirectChat/messages/TextMsg";
+import DirectDocumentMsg from "./Chat/DirectChat/messages/documentMsg";
+import { DirectLinkMsg } from "./Chat/DirectChat/messages/LinkMsg";
 
 const DirectMessageInfo = () => {
   const dispatch = useDispatch();
+  const { current_direct_conversation } = useSelector(
+    (state: RootState) => state.conversation.direct_chat
+  );
   const directMessageInfo = useSelector(
     (state: RootState) => state.app.directMessageInfo
   );
-  console.log(directMessageInfo);
+  const from = current_direct_conversation?.name ?? "user";
   const message = useMemo(() => {
     switch (directMessageInfo?.messageType) {
+      case "text":
+        return <DirectTextMsg el={directMessageInfo} from={from} />;
       case "image":
         return (
-          <DirectImageMsg el={directMessageInfo} scrollToBottom={() => {}} />
+          <DirectImageMsg
+            el={directMessageInfo}
+            scrollToBottom={() => {}}
+            from={from}
+          />
         );
       case "audio":
-        return <DirectAudioMsg el={directMessageInfo} />;
-      case "system":
-        return <DirectSystemMsg el={directMessageInfo} />;
-      case "text":
-        return <DirectTextMsg el={directMessageInfo} />;
+        return <DirectAudioMsg el={directMessageInfo} from={from} />;
+      case "document":
+        return (
+          <DirectDocumentMsg
+            el={directMessageInfo}
+            from={from}
+            scrollToBottom={() => {}}
+          />
+        );
+      case "link":
+        return <DirectLinkMsg el={directMessageInfo} from={from} />;
     }
   }, [directMessageInfo]);
   const handleClose = () => dispatch(setDirectMessageInfo(null));

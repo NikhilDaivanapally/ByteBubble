@@ -6,6 +6,9 @@ import SortMessages from "../../../../utils/sort-messages";
 import { setfullImagePreview } from "../../../../store/slices/conversation";
 import { Icons } from "../../../../icons";
 import { GroupAudioMsg } from "../../GroupChat/messages/AudioMsg";
+import { GroupLinkMsg } from "../../GroupChat/messages/LinkMsg";
+import { GroupMessageProps } from "../../../../types";
+import GroupDocumentMsg from "../../GroupChat/messages/documentMsg";
 type ShowMediaProps = {
   showAllMedia: boolean;
   handleCloseAllMedia: () => void;
@@ -34,16 +37,18 @@ const Media = () => {
                 {date}
               </p>
               <div className="grid grid-cols-3 gap-4 items-center">
-                {MessagesObject[date].map((el: any, i: number) => (
-                  <div
-                    onClick={() =>
-                      dispatch(setfullImagePreview({ fullviewImg: el }))
-                    }
-                    key={i}
-                  >
-                    <img key={i} src={el?.message?.imageUrl} alt="" />
-                  </div>
-                ))}
+                {MessagesObject[date].map(
+                  (el: GroupMessageProps, i: number) => (
+                    <div
+                      onClick={() =>
+                        dispatch(setfullImagePreview({ fullviewImg: el }))
+                      }
+                      key={i}
+                    >
+                      <img key={i} src={el?.message?.imageUrl} alt="" />
+                    </div>
+                  )
+                )}
               </div>
             </div>
           );
@@ -66,6 +71,8 @@ const Audio = () => {
       sort: "Desc",
     });
   }, [current_group_messages]);
+  const groupName = current_group_conversation?.name ?? "group";
+
   return (
     <>
       {DatesArray.length ? (
@@ -76,13 +83,16 @@ const Audio = () => {
                 {date}
               </p>
               <div className="grid  gap-4 items-center">
-                {MessagesObject[date].map((el: any, i: number) => (
-                  <GroupAudioMsg
-                    el={el}
-                    key={i}
-                    usersLength={usersLength - 1}
-                  />
-                ))}
+                {MessagesObject[date].map(
+                  (el: GroupMessageProps, i: number) => (
+                    <GroupAudioMsg
+                      el={el}
+                      key={i}
+                      usersLength={usersLength - 1}
+                      groupName={groupName}
+                    />
+                  )
+                )}
               </div>
             </div>
           );
@@ -105,6 +115,7 @@ const Links = () => {
       sort: "Desc",
     });
   }, [current_group_messages]);
+  const groupName = current_group_conversation?.name ?? "group";
   return (
     <>
       {DatesArray.length ? (
@@ -113,9 +124,16 @@ const Links = () => {
             <div key={i} className="TimeWise_Media_Container">
               <p>{date}</p>
               <div className="Links_Gallery">
-                {/* {MessagesObject[date].map((el, i) => (
-                  <LinkMsg el={el} key={i} />
-                ))} */}
+                {MessagesObject[date].map(
+                  (el: GroupMessageProps, i: number) => (
+                    <GroupLinkMsg
+                      el={el}
+                      key={i}
+                      usersLength={usersLength}
+                      groupName={groupName}
+                    />
+                  )
+                )}
               </div>
             </div>
           );
@@ -138,6 +156,8 @@ const Docs = () => {
       sort: "Desc",
     });
   }, [current_group_messages]);
+  const groupName = current_group_conversation?.name ?? "group";
+
   return (
     <>
       {DatesArray.length ? (
@@ -146,9 +166,17 @@ const Docs = () => {
             <div key={i} className="TimeWise_Media_Container">
               <p>{date}</p>
               <div className="Links_Gallery">
-                {/* {MessagesObject[date].map((el, i) => (
-                  <LinkMsg el={el} key={i} />
-                ))} */}
+                {MessagesObject[date].map(
+                  (el: GroupMessageProps, i: number) => (
+                    <GroupDocumentMsg
+                      el={el}
+                      key={i}
+                      usersLength={usersLength}
+                      groupName={groupName}
+                      scrollToBottom={() => {}}
+                    />
+                  )
+                )}
               </div>
             </div>
           );
