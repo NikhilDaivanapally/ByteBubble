@@ -140,7 +140,7 @@ const IndividualChat = () => {
 
       {/*Active Chat Window */}
       <div
-        className={`flex-1 bg-gray-200 dark:bg-[#1E1E1E] rounded-2xl p-2 ${
+        className={`flex-1 bg-gray-200 mr-2 dark:bg-[#1E1E1E] rounded-2xl p-2 ${
           activeChatId ? "block" : "hidden"
         } md:block overflow-hidden`}
       >

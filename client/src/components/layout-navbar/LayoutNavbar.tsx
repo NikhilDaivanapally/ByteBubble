@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { Avatar } from "../ui/Avatar";
 import { direct } from "../../utils/conversation-types";
+import { Icons } from "../../icons";
 const LayoutNavbar = () => {
   const { pathname } = useLocation();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -25,7 +26,9 @@ const LayoutNavbar = () => {
         activeChatId ? "hidden md:flex" : ""
       } lg:flex-col justify-between items-center px-4 py-2 lg:px-0 lg:py-4`}
     >
-      <div>logo</div>
+      <div>
+        <Icons.RiChat1Fill className="text-3xl text-btn-primary" />
+      </div>
       <ul className="list-none flex gap-2 sm:gap-5 lg:flex-col relative h-full lg:h-fit lg:w-full justify-center items-center">
         {navListData?.map((item, i) => {
           const isActive = item.path.includes(pathname);

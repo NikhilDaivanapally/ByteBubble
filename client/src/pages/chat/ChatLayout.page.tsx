@@ -100,7 +100,7 @@ const ChatLayout = () => {
       {/* App Navigation */}
       <LayoutNavbar />
       {/* Chat List & Active Chat Window */}
-      <div className="flex-1 overflow-hidden bg-light border-b md:border-l border-gray-300 lg:py-3">
+      <div className="flex-1 overflow-hidden bg-light border-b md:border-l border-gray-300 lg:py-2">
         <Outlet />
       </div>
       <ImagePreview />
