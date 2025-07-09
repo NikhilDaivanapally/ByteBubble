@@ -9,7 +9,7 @@ const connectSocket = (auth_id: string): Promise<Socket> => {
       return resolve(socket); // Already connected
     }
 
-    socket = io("http://localhost:8000", {
+    socket = io("https://bytebubble.onrender.com", {
       query: { auth_id },
       transports: ["websocket"],
       parser: msgpackParser,

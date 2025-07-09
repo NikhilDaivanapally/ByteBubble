@@ -6,7 +6,7 @@ const GoogleAuth: React.FC = () => {
   const handleGoogleLogin = () => {
     try {
       // Open Google OAuth in a new window
-      window.open("http://localhost:8000/api/v1/auth/google/callback", "_self");
+      window.open("https://bytebubble.onrender.com/api/v1/auth/google/callback", "_self");
     } catch (error) {
       console.error("Error opening Google OAuth window:", error);
     }
