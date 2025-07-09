@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    /* Language and Environment */
     "target": "ES2016",
     "module": "CommonJS",
     "rootDir": "./src",
@@ -9,23 +8,13 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-
-    /* Type Support */
     "moduleResolution": "node",
     "typeRoots": ["./node_modules/@types"],
     "skipLibCheck": true,
-
-    /* Strict Type Checking */
     "strict": true,
     "noImplicitAny": false,
     "strictNullChecks": true,
     "strictFunctionTypes": true
-
-    /* Optional: Add these if needed */
-    // "declaration": true,         /* Generates .d.ts files */
-    // "sourceMap": true,           /* Enables source maps for debugging */
-    // "noUnusedLocals": true,      /* Warn for unused variables */
-    // "noUnusedParameters": true   /* Warn for unused function params */
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

@@ -496,8 +496,8 @@ const handleUpload = async (req: AuthenticatedRequest, res: Response) => {
   const mimeType = req?.file?.mimetype;
 
   try {
-    let previewUrl = null;
-    let fileUrl = null;
+    let previewUrl: string | null = null;
+    let fileUrl: string | null = null;
 
     if (mimeType?.startsWith("image/") && filePath) {
       const uploadResult = await v2.uploader.upload(filePath, {
