@@ -85,8 +85,8 @@ app.post(
     const mimeType = req?.file?.mimetype;
 
     try {
-      let previewUrl = null;
-      let fileUrl = null;
+      let previewUrl: string | null = null;
+      let fileUrl: string | null = null;
 
       if (mimeType?.startsWith("image/") && filePath) {
         const uploadResult = await v2.uploader.upload(filePath, {
@@ -94,7 +94,7 @@ app.post(
           resource_type: "image",
           use_filename: true,
         });
-        previewUrl = uploadResult.secure_url;
+        previewUrl = uploadResult?.secure_url;
         fileUrl = previewUrl;
         fs.unlinkSync(filePath);
         res.status(200).json({
