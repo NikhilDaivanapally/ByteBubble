@@ -18,7 +18,7 @@ const io = new Server(server, {
   transports: ["websocket"],
   parser: msgpackParser,
   cors: {
-    origin: "http://localhost:5173",
+    origin: "https://bytebubble.vercel.app",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   },
 });

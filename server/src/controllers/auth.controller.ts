@@ -391,16 +391,16 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
 const googleLogin = (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate("google", (err: Error, user: UserType) => {
     if (err || !user) {
-      return res.redirect("http://localhost:5173/signin");
+      return res.redirect("https://bytebubble.vercel.app/signin");
     }
 
     req.login(user, (err) => {
       if (err) {
-        return res.redirect("http://localhost:5173/signin");
+        return res.redirect("https://bytebubble.vercel.app/signin");
       }
 
       // Redirect to your frontend with a success query param
-      return res.redirect("http://localhost:5173/chat");
+      return res.redirect("https://bytebubble.vercel.app/chat");
     });
   })(req, res, next); // Call the passport function with req, res, and next
 };
