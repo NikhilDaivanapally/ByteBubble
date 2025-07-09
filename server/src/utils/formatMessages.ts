@@ -14,7 +14,7 @@ const formatDirectMessages = (
       isOutgoing: el?.sender.toString() == authUserId,
       status: "sent",
       isRead: el?.isRead,
-      readAt:el?.readAt,
+      readAt: el?.readAt,
       conversationId: el?.conversationId,
       deletedFor: el?.deletedFor,
       isDeletedForEveryone: el?.isDeletedForEveryone,
@@ -35,7 +35,6 @@ const formatGroupMessages = (
   authUserId: string
 ) => {
   return messages?.map((el: any) => {
-    console.log(el.sender,authUserId)
     return {
       _id: el?._id,
       messageType: el?.messageType,

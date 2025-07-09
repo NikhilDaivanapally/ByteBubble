@@ -3,8 +3,8 @@ import { uploadCloudinary } from "../utils/cloudinary";
 import User from "../models/user.model";
 import { NextFunction, Request, Response } from "express";
 import Friendship from "../models/friendship.model";
-import DirectConversation from "../models/directConversation.model";
-import GroupConversation from "../models/groupConversation.model";
+import DirectConversation from "../models/DirectConversation.model";
+import GroupConversation from "../models/GroupConversation.model";
 import {
   formatDirectConversations,
   formatGroupConversations,
@@ -256,7 +256,6 @@ const getDirectConversations = async (
     });
     return;
   } catch (error) {
-    console.log(error);
     res.status(400).json({
       status: "Error",
       data: null,
@@ -543,41 +542,10 @@ const handleUpload = async (req: AuthenticatedRequest, res: Response) => {
       });
     });
   } catch (error) {
-    console.log(error);
     fs.unlinkSync(filePath as string);
     res.status(500).json({ success: false, error: "Upload failed" });
   }
 };
-
-// const getAudio = async (req: AuthenticatedRequest, res: Response) => {
-//   const fileId = req.params.id;
-//   try {
-//     const objectId = new ObjectId(fileId);
-//     const downloadStream = gridFSBucket!.openDownloadStream(objectId);
-//     res.set("Content-Type", "audio/webm");
-//     downloadStream.pipe(res);
-//     downloadStream.on("error", (err: Error) => {
-//       res.status(404).send({ error: "Audio not found", details: err.message });
-//     });
-//   } catch (err: any) {
-//     res.status(400).send({ error: "Invalid audio ID", details: err.message });
-//   }
-// };
-
-// const getDocument = async (req: AuthenticatedRequest, res: Response) => {
-//   const fileId = req.params.id;
-//   try {
-//     const objectId = new ObjectId(fileId);
-//     const downloadStream = gridFSBucket!.openDownloadStream(objectId);
-//     res.set("Content-Type", "audio/webm");
-//     downloadStream.pipe(res);
-//     downloadStream.on("error", (err: Error) => {
-//       res.status(404).send({ error: "Audio not found", details: err.message });
-//     });
-//   } catch (err: any) {
-//     res.status(400).send({ error: "Invalid audio ID", details: err.message });
-//   }
-// };
 
 const getFile = async (req: AuthenticatedRequest, res: Response) => {
   const fileId = req.params.id;

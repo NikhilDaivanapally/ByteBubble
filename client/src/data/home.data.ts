@@ -30,7 +30,7 @@ export const testimonials = [
   {
     name: "Ayesha K.",
     quote:
-      "ChatApp makes planning with friends effortless. The UI is sleek and I love the voice notes feature!",
+      "ByteBubble makes planning with friends effortless. The UI is sleek and I love the voice notes feature!",
     avatar: "/avatars/ayesha.png",
   },
   {

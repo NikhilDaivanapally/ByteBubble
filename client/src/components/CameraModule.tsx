@@ -1,12 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { useCallback, useEffect, useRef } from "react";
-import {
-  updateMediaFiles,
-  updateMediaPreviewUrls,
-  updateOpenCamera,
-} from "../store/slices/appSlice";
-import { parseFiles } from "../utils/parse-files";
+import { updateMediaFiles, updateOpenCamera } from "../store/slices/appSlice";
 import { Icons } from "../icons";
 
 const CameraModule = () => {
@@ -24,7 +19,7 @@ const CameraModule = () => {
         streamRef.current = stream;
       }
     } catch (error) {
-      console.log("Error while accessing Camera", error);
+      console.error("Error while accessing Camera", error);
     }
   }, []);
 

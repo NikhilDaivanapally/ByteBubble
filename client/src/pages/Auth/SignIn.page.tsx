@@ -82,7 +82,7 @@ const SignIn = () => {
       <header className="mb-4">
         {/* App name for mobile */}
         <h1 className="lg:hidden absolute top-4 left-4 text-xl font-semibold">
-          Byte_Messenger
+          ByteBubble
         </h1>
         <h2 className="font-semibold text-2xl text-center">
           Sign In to Continue

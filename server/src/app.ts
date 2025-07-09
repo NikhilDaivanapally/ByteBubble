@@ -66,10 +66,6 @@ app.get("/api/audio/:id", ensureAuthenticated, (req, res) => {
     downloadStream.on("error", (err: Error) => {
       res.status(404).send({ error: "Audio not found", details: err.message });
     });
-
-    // res.on("finish", () => {
-    //   console.log("Audio served successfully.");
-    // });
   } catch (err: any) {
     res.status(400).send({ error: "Invalid audio ID", details: err.message });
   }
@@ -151,7 +147,6 @@ app.post(
         return;
       });
     } catch (error) {
-      console.log(error);
       fs.unlinkSync(filePath as string);
       res.status(500).json({ success: false, error: "Upload failed" });
     }

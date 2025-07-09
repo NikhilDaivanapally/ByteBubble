@@ -16,7 +16,6 @@ const MembersSelection = ({
   onChange,
   error,
 }: MembersSelectionProps) => {
-  console.log(error);
   const [searchQuery, setSearchQuery] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const toggleMember = (member: UserProps) => {

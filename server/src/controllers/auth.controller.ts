@@ -273,7 +273,6 @@ const forgotPassword = async (req: Request, res: Response) => {
     });
     return;
   }
-  console.log(email);
   const user = await User.findOne({ email: email });
 
   if (!user) {

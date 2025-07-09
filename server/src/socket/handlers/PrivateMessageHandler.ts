@@ -101,7 +101,6 @@ export async function handleAudioMessage(messagePayload: any, io: Server) {
 export async function handleMessage(messagePayload: any, io: Server) {
   const { senderId, recipientId } = messagePayload;
   await emitToPrivate({ senderId, recipientId, message: messagePayload, io });
-  console.log(buildMessage(messagePayload));
   await DirectMessage.create(buildMessage(messagePayload));
 }
 

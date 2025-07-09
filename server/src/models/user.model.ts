@@ -28,7 +28,7 @@ const userSchema = new Schema<User>(
     },
     about: {
       type: String,
-      default: "Hey! Iam using chatapp",
+      default: "Hey! Iam using ByteBubble",
     },
     avatar: {
       type: String,

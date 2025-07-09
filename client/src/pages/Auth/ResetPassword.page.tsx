@@ -51,7 +51,7 @@ const ResetPassword = () => {
     <div className="w-full backdrop-blur flex-center flex-col  px-6 sm:px-10 md:px-16 lg:px-20 xl:px-24 gap-4 py-10">
       {/* Show app name only on smaller screens */}
       <h1 className="lg:hidden absolute top-4 left-4 text-xl font-semibold">
-        Byte_Messenger
+        ByteBubble
       </h1>
 
       {!data ? (

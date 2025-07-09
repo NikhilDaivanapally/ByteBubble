@@ -40,7 +40,6 @@ export const useGroupEvents = (enabled: boolean) => {
   useEffect(() => {
     if (!conversationData?.data?.conversation) return;
     const { conversation } = conversationData.data;
-    console.log(conversation);
     dispatch(addGroupConversation(conversation));
   }, [conversationData, dispatch]);
 

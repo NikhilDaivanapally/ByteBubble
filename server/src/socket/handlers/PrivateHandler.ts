@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import DirectConversation from "../../models/directConversation.model";
+import DirectConversation from "../../models/DirectConversation.model";
 import mongoose from "mongoose";
 import { formatDirectConversations } from "../../utils/formatConversations";
 

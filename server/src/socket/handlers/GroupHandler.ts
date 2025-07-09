@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
-import GroupConversation from "../../models/groupConversation.model";
+import GroupConversation from "../../models/GroupConversation.model";
 import { Server } from "socket.io";
 import mongoose, { Types } from "mongoose";
 import User from "../../models/user.model";

@@ -23,16 +23,16 @@ const About = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center py-10 px-4 overflow-y-auto">
-        {/* About ChatApp */}
+        {/* About ByteBubble */}
         <div className="flex items-center gap-4 bg-white px-4 min-h-[72px] py-2">
           <div className="flex flex-col justify-center">
             <p className="text-[#121416] text-base font-medium leading-normal">
-              About ChatApp
+              About ByteBubble
             </p>
             <p className="text-[#6a7681] text-sm font-normal leading-normal line-clamp-3">
-              ChatApp is a modern, secure and real-time messaging platform built
+              ByteBubble is a modern, secure and real-time messaging platform built
               to connect people across the world. Whether you're chatting with
-              friends, managing communities, or collaborating at work, ChatApp
+              friends, managing communities, or collaborating at work, ByteBubble
               provides a clean and efficient interface.
             </p>
           </div>

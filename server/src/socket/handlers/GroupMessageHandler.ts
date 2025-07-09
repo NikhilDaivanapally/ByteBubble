@@ -162,7 +162,6 @@ export async function handleGroupMessageUnreadClear(data: any, io: Server) {
       user,
     });
   }
-  console.log("Running clear unread");
 
   const messages = await GroupMessage.find({
     conversationId,

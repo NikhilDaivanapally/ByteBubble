@@ -124,7 +124,7 @@ const OtpComponent: React.FC<OtpComponentProps> = ({ email, length }) => {
       <header>
         {/* App name for mobile */}
         <h1 className="lg:hidden absolute top-4 left-4 text-xl font-semibold">
-          Byte_Messenger
+          ByteBubble
         </h1>
         <h1 className="font-semibold text-2xl text-center">Verify OTP</h1>
         <p className="text-center text-sm text-gray-600">

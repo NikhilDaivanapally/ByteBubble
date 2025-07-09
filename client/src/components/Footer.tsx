@@ -5,7 +5,7 @@ const Footer = () => {
     <div className="w-full py-8 border-t-1 border-gray-200">
       <p className="font-semibold flex items-center gap-2">
         <Icons.RiChat1Fill className="text-xl text-btn-primary" />
-        Byte_Messenger
+        ByteBubble
       </p>
       <ul className="flex-center gap-5 mb-2">
         <li>
@@ -22,7 +22,7 @@ const Footer = () => {
         </li>
       </ul>
       <p className="text-sm text-gray-500 text-center">
-        @ 2025 Byte_Messenger. All rights reserved
+        @ 2025 ByteBubble. All rights reserved
       </p>
     </div>
   );

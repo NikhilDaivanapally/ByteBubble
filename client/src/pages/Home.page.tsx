@@ -38,7 +38,7 @@ const Home = () => {
           </h1>
           <p className="mt-4 text-black/60 w-4/5 md:w-2/5 mx-auto">
             Whether you're chatting with friends, collaborating with your team,
-            or building a community — ChatSpace makes it effortless
+            or building a community — ByteBubble makes it effortless
           </p>
 
           {/* Chat Preview Animation */}
@@ -167,8 +167,8 @@ const Home = () => {
           <div className="max-w-7xl mx-auto px-6">
             <h2 className="text-3xl font-bold text-center mb-4">Use Cases</h2>
             <p className="text-gray-500 text-center max-w-2xl mx-auto mb-12">
-              See how ChatApp fits into your daily life. Whether you're catching
-              up with friends or collaborating on work, ChatApp adapts to your
+              See how ByteBubble fits into your daily life. Whether you're catching
+              up with friends or collaborating on work, ByteBubble adapts to your
               world.
             </p>
 

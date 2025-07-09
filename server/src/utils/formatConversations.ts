@@ -16,7 +16,6 @@ const formatDirectConversations = (
         msg?.recipient?.toString() === authUserId?.toString() &&
         msg?.isRead === false
     );
-    console.log(lastMessage)
     return {
       _id: el._id,
       userId: el.user._id,
@@ -83,7 +82,6 @@ const formatGroupConversations = (
       return !hasRead;
     });
 
-    console.log(unreadMessages, authUserId);
 
     return {
       _id: el._id,
