@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import msgpackParser from "socket.io-msgpack-parser";
+import { BACKEND_URL } from "./config";
 
 let socket: Socket;
 
@@ -9,7 +10,7 @@ const connectSocket = (auth_id: string): Promise<Socket> => {
       return resolve(socket); // Already connected
     }
 
-    socket = io("https://bytebubble.onrender.com", {
+    socket = io(BACKEND_URL, {
       query: { auth_id },
       transports: ["websocket"],
       parser: msgpackParser,

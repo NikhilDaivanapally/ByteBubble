@@ -15,11 +15,12 @@ import { v2 } from "cloudinary";
 import { convertPdfFirstPageToImage } from "./utils/convertPdfFirstPageToImage";
 import fs from "fs";
 import { upload } from "./middlewares/multer.middleware";
+import { COOKIE_SECURE, FRONTEND_URL } from "./config";
 const app = express();
 
 app.use(
   cors({
-    origin: "https://bytebubble.vercel.app", // Frontend origin
+    origin: FRONTEND_URL, // Frontend origin
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Allowed HTTP methods
     credentials: true, // Allow cookies and Authorization headers
   })
@@ -37,8 +38,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Secure cookies in production
-      sameSite: "none", // Required for cross-origin cookies
+      secure: COOKIE_SECURE, // true in production, false locally  // Secure cookies in production
+      sameSite: COOKIE_SECURE ? "none" : "lax", // 'none' for cross-site cookies with HTTPS  // Required for cross-origin cookies
       maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
     },
   })

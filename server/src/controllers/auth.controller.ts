@@ -10,6 +10,7 @@ import passport from "passport";
 import { NextFunction, Request, Response } from "express";
 import { Error } from "mongoose";
 import { User as UserType } from "../types/model/user-model.type";
+import { FRONTEND_URL } from "../config";
 
 export interface AuthenticateRequest extends Request {
   userId?: string | undefined | unknown; // or a more specific type like ObjectId
@@ -147,8 +148,7 @@ const sendOtp = async (req: AuthenticateRequest, res: Response) => {
   } catch (error) {
     res.status(500).json({
       status: "error",
-      message:
-        "An error occurred while sending OTP. Please try again.",
+      message: "An error occurred while sending OTP. Please try again.",
     });
   }
 };
@@ -287,7 +287,7 @@ const forgotPassword = async (req: Request, res: Response) => {
     // Generate the random reset Token hash it and set it in the DB and also set the Reset token expiry time for 10 min
     const resetToken = await user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
-    const resetURL = `https://byte-messenger.vercel.app/reset-password?token=${resetToken}`;
+    const resetURL = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
     // send the resetURL to the email
     await sendMail({
       to: user.email!,
@@ -391,16 +391,16 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
 const googleLogin = (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate("google", (err: Error, user: UserType) => {
     if (err || !user) {
-      return res.redirect("https://bytebubble.vercel.app/signin");
+      return res.redirect(`${FRONTEND_URL}/signin`);
     }
 
     req.login(user, (err) => {
       if (err) {
-        return res.redirect("https://bytebubble.vercel.app/signin");
+        return res.redirect(`${FRONTEND_URL}/signin`);
       }
 
       // Redirect to your frontend with a success query param
-      return res.redirect("https://bytebubble.vercel.app/chat");
+      return res.redirect(`${FRONTEND_URL}/chat`);
     });
   })(req, res, next); // Call the passport function with req, res, and next
 };

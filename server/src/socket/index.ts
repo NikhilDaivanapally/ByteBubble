@@ -12,13 +12,14 @@ import registerTypingEvents from "./events/TypingEvents";
 import msgpackParser from "socket.io-msgpack-parser";
 import registerGroupSystemEvents from "./events/GroupSystemEvents";
 import registerPrivateSystemEvents from "./events/PrivateSystemEvents";
+import { FRONTEND_URL } from "../config";
 
 const server = http.createServer(app);
 const io = new Server(server, {
   transports: ["websocket"],
   parser: msgpackParser,
   cors: {
-    origin: "https://bytebubble.vercel.app",
+    origin: FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   },
 });
