@@ -21,7 +21,7 @@ export const DirectImageMsg = ({
 
   return (
     <div
-      className={`Media_msg relative w-fit max-w-[90%] md:max-w-[80%] lg:max-w-[60%] flex group items-start ${
+      className={`Media_msg relative w-fit max-w-[90%] sm:max-w-[80%] lg:max-w-[60%] flex group items-start ${
         isOutgoing ? "ml-auto" : ""
       }`}
     >

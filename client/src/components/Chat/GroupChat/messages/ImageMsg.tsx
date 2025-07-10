@@ -5,6 +5,7 @@ import Loader from "../../../ui/Loader";
 import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageActions";
 import { MessageStatus } from "../../../MessageStatus";
+import { Avatar } from "../../../ui/Avatar";
 
 export const GroupImageMsg = ({
   el,
@@ -25,21 +26,14 @@ export const GroupImageMsg = ({
   const seen = usersLength > 0 && readUsers >= usersLength;
   return (
     <div
-      className={`Media_msg relative w-fit max-w-[90%] md:max-w-[80%] lg:max-w-[60%] flex group items-start  ${
+      className={`Media_msg relative w-fit max-w-[90%] sm:max-w-[80%] lg:max-w-[60%] flex group items-start  ${
         isOutgoing ? "ml-auto" : ""
       }`}
     >
       {isOutgoing && <GroupMessageActions message={el} />}
 
-      {el.isIncoming && (
-        <div className="user_profile mr-2 w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
-          <img
-            className="w-full h-full object-cover"
-            src={el.from?.avatar}
-            alt=""
-          />
-        </div>
-      )}
+            {el.isIncoming && <Avatar size="sm" url={el.from.avatar} />}
+
 
       <section
         className={`p-1 rounded-xl space-y-1`}

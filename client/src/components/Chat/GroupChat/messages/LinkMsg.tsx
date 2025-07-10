@@ -2,6 +2,7 @@ import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import { MessageStatus } from "../../../MessageStatus";
 import { GroupMessageProps } from "../../../../types";
 import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageActions";
+import { Avatar } from "../../../ui/Avatar";
 
 export const GroupLinkMsg = ({
   el,
@@ -18,20 +19,13 @@ export const GroupLinkMsg = ({
   const time = formatTo12HourTime(el.createdAt);
   return (
     <div
-      className={`Text_msg relative w-fit max-w-[90%] md:max-w-[80%] lg:max-w-[60%] flex group items-start ${
+      className={`Text_msg relative w-fit max-w-[90%] sm:max-w-[80%] lg:max-w-[60%] flex group items-start ${
         isOutgoing ? "ml-auto" : ""
       }`}
     >
       {isOutgoing && <GroupMessageActions message={el} />}
-      {el.isIncoming && (
-        <div className="user_profile mr-2 w-8 h-8 rounded-full bg-gray-400 overflow-hidden">
-          <img
-            className="w-full h-full object-cover"
-            src={el.from?.avatar}
-            alt=""
-          />
-        </div>
-      )}
+            {el.isIncoming && <Avatar size="sm" url={el.from.avatar} />}
+
       <section
         className="space-y-1"
         aria-label={`Message in ${groupName} from ${el.from?.userName} at ${time}`}
