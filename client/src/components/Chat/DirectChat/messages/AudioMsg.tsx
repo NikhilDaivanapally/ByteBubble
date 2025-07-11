@@ -28,7 +28,7 @@ export const DirectAudioMsg = ({
   const isOutgoing = !el?.isIncoming;
   const fileId = el.message?.fileId;
   const fileName = el.message?.fileName;
-  const shortName = truncateFilename(fileName, 50); // you can adjust 50 to your need
+  const shortName = truncateFilename(fileName, 20); // you can adjust 20 to your need
   const fileSizeReadable = formatBytes(el?.message?.size || 0);
   const duration = el?.message?.duration || 0;
   const isUploadedAudio = el.message?.source === "uploaded";
@@ -156,7 +156,7 @@ export const DirectAudioMsg = ({
               )}
             </div>
             {isUploadedAudio && (
-              <div className="bg-btn-primary/30 p-1 flex gap-2 mt-2 items-center rounded-md">
+              <div className="bg-btn-primary/30 p-1 min-h-12 flex gap-2 mt-2 items-center rounded-md">
                 <Icons.MusicalNoteIcon className="size-4 shrink-0" />
                 <div className="flex flex-col gap-0.5 w-full wrap-anywhere whitespace-normal">
                   <p className="text-sm font-medium leading-tight">

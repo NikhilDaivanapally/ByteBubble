@@ -74,7 +74,7 @@ const DirectDocumentMsg = ({
                 : "bg-white rounded-bl-none border-gray-200"
             }`}
           >
-            <div className="cursor-pointer relative max-h-54 aspect-video">
+            <div className="cursor-pointer relative h-36 md:h-40 lg:h-50 aspect-video">
               {/* Only preview for PDF */}
               {isPdf && el?.message?.previewUrl && (
                 <div
@@ -154,8 +154,8 @@ const DirectDocumentMsg = ({
               : "bg-white rounded-bl-none border-gray-200"
           }`}
         >
-          <div className="cursor-pointer relative w-68 h-fit">
-            <div className="flex gap-2 items-center w-full">
+          <div className="cursor-pointer relative w-68 h-12">
+            <div className="flex gap-2 items-center w-full h-full">
               <img src={FileIcon} alt="icon" className="size-10 shrink-0" />
               <div className="flex flex-col gap-0.5 w-full wrap-anywhere whitespace-normal">
                 <p className="text-sm font-medium leading-tight">{shortName}</p>

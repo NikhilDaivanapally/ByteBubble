@@ -28,7 +28,7 @@ const DirectMessageList = forwardRef<HTMLElement, DirectMessageListProps>(
     return (
       <article
         aria-live="polite"
-        className="flex-1 overflow-x-hidden mt-1 scrollbar-custom px-2 sm:px-4"
+        className="flex-1 overflow-x-hidden mt-1 scrollbar-custom px-2"
         ref={ref}
       >
         <ul className="space-y-2">
