@@ -49,8 +49,8 @@ const DirectChatHeader = ({ handleOpenShowDetails = () => {} }) => {
       </div>
 
       <div className="ml-auto mr-2 md:mr-8 flex gap-2 sm:gap-10 items-center">
-        <Icons.PhoneIcon className="w-8 p-1 rounded-full hover:bg-gray-200 cursor-pointer" />
-        <Icons.VideoCameraIcon className="w-8 p-1 rounded-full hover:bg-gray-200 cursor-pointer" />
+        {/* <Icons.PhoneIcon className="w-8 p-1 rounded-full hover:bg-gray-200 cursor-pointer" />
+        <Icons.VideoCameraIcon className="w-8 p-1 rounded-full hover:bg-gray-200 cursor-pointer" /> */}
         <Icons.EllipsisVerticalIcon
           className="w-7 p-1 rounded-full hover:bg-gray-200 cursor-pointer"
           onClick={handleOpenShowDetails}

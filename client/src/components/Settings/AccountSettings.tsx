@@ -1,17 +1,25 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { clearActiveSettingPath } from "../../store/slices/settingsSlice";
 import { Icons } from "../../icons";
 import { useDispatch } from "react-redux";
 import { Button } from "../ui/Button";
 import { AnimatePresence } from "motion/react";
 import UpdatePassword from "./UpdatePassword";
+import { useNavigate } from "react-router-dom";
 
 const AccountSettings = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClearActiveSettingsPage = useCallback(() => {
-    dispatch(clearActiveSettingPath());
+    navigate("/settings");
+  }, [dispatch, navigate]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearActiveSettingPath());
+    };
   }, []);
 
   const SettingItem = ({ title, subtitle }: any) => (

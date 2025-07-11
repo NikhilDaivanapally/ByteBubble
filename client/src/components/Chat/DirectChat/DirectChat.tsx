@@ -1,4 +1,4 @@
-import { useRef, useMemo, useState } from "react";
+import { useRef, useMemo, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import SortMessages from "../../../utils/sort-messages";
@@ -49,6 +49,21 @@ const DirectChat = () => {
   const handleOpenShowDetails = () => setIsShowChatDetails(true);
   const handleCloseShowDetails = () => setIsShowChatDetails(false);
 
+  // const scrollToBottomSmooth = useCallback(() => {
+  //   if (messagesListRef.current) {
+  //     messagesListRef?.current.scrollTo({
+  //       top: messagesListRef.current.scrollHeight,
+  //       behavior: "smooth",
+  //     });
+  //   }
+  // }, [messagesListRef]);
+
+  const scrollToBottomQuick = useCallback(() => {
+    if (messagesListRef?.current) {
+      messagesListRef.current.scrollTop = messagesListRef.current.scrollHeight;
+    }
+  }, [messagesListRef]);
+
   if (isLoading) {
     return <PageLoader />;
   }
@@ -60,6 +75,7 @@ const DirectChat = () => {
         <DirectMessageList
           ref={messagesListRef}
           sortedDates={DatesArray}
+          scrollToBottom={scrollToBottomQuick}
           groupedMessages={MessagesObject}
         />
         <MessageInputBar />

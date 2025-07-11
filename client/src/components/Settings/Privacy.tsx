@@ -1,18 +1,25 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { clearActiveSettingPath } from "../../store/slices/settingsSlice";
 import { Icons } from "../../icons";
 import { SETTINGS_CONFIG } from "../../constants/settings-config";
 import { motion } from "motion/react";
+import { useNavigate } from "react-router-dom";
 const PRIVACY_OPTIONS = ["Everyone", "My Contacts", "Nobody"];
 
 const Privacy = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  
+  const handleClearActiveSettingsPage = useCallback(() => {
+    navigate("/settings");
+  }, [dispatch, navigate]);
 
-  const handleClearActiveSettingsPage = () => {
-    dispatch(clearActiveSettingPath());
-  };
-
+  useEffect(() => {
+    return () => {
+      dispatch(clearActiveSettingPath());
+    };
+  }, []);
   const [readReceiptsEnabled, setReadReceiptsEnabled] = useState(true);
   const [selectValues, setSelectValues] = useState<Record<string, string>>({
     profilePhotoVisibleTo: "Everyone",

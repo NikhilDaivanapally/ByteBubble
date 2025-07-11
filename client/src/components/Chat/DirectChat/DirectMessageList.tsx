@@ -15,10 +15,11 @@ interface DirectMessageListProps {
   groupedMessages: {
     [key: string]: DirectMessageProps[];
   };
+  scrollToBottom: () => void;
 }
 
 const DirectMessageList = forwardRef<HTMLElement, DirectMessageListProps>(
-  ({ sortedDates, groupedMessages }, ref) => {
+  ({ sortedDates, groupedMessages, scrollToBottom }, ref) => {
     const currentConversation = useSelector(
       (state: RootState) =>
         state.conversation.direct_chat.current_direct_conversation
@@ -49,7 +50,7 @@ const DirectMessageList = forwardRef<HTMLElement, DirectMessageListProps>(
                           <DirectImageMsg
                             el={el}
                             from={from}
-                            scrollToBottom={() => {}}
+                            scrollToBottom={scrollToBottom}
                           />
                         </li>
                       );
@@ -66,7 +67,7 @@ const DirectMessageList = forwardRef<HTMLElement, DirectMessageListProps>(
                           <DirectDocumentMsg
                             el={el}
                             from={from}
-                            scrollToBottom={() => {}}
+                            scrollToBottom={scrollToBottom}
                           />
                         </li>
                       );

@@ -53,7 +53,7 @@ const SendMediaMessage: React.FC = () => {
         setIsPdfJsLoading(false);
       });
   }, []);
- 
+
   // generate thumbanil for pdf
   const generatePdfThumbnailWrapper = useCallback(async () => {
     if (!file || file.type !== "application/pdf") return;
@@ -251,6 +251,11 @@ const SendMediaMessage: React.FC = () => {
     } else if (chatType === group) {
       const payload = {
         ...commonPayload,
+        from: {
+          _id: auth._id,
+          userName: auth.userName,
+          avatar: auth.avatar,
+        },
         isIncoming: false,
         readBy: [],
         deletedFor: [],

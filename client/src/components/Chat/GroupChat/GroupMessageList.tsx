@@ -16,10 +16,11 @@ interface GroupMessageListProps {
     [key: string]: GroupMessageProps[];
   };
   usersLength: number;
+  scrollToBottom: () => void;
 }
 
 const GroupMessageList = forwardRef<HTMLElement, GroupMessageListProps>(
-  ({ sortedDates, groupedMessages, usersLength }, ref) => {
+  ({ sortedDates, groupedMessages, usersLength, scrollToBottom }, ref) => {
     const currentConversation = useSelector(
       (state: RootState) =>
         state.conversation.group_chat.current_group_conversation
@@ -55,7 +56,7 @@ const GroupMessageList = forwardRef<HTMLElement, GroupMessageListProps>(
                             el={el}
                             groupName={groupName}
                             usersLength={usersLength - 1}
-                            scrollToBottom={() => {}}
+                            scrollToBottom={scrollToBottom}
                           />
                         </li>
                       );
@@ -75,7 +76,7 @@ const GroupMessageList = forwardRef<HTMLElement, GroupMessageListProps>(
                           <GroupDocumentMsg
                             el={el}
                             groupName={groupName}
-                            scrollToBottom={() => {}}
+                            scrollToBottom={scrollToBottom}
                             usersLength={usersLength - 1}
                           />
                         </li>

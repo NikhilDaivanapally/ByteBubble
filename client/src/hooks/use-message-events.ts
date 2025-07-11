@@ -243,6 +243,7 @@ export const useGroupMessageEvents = (enabled: boolean) => {
             isEdited: false,
           })
         );
+        // dispatch(updateGroupConversation(null));
         if (inAppSounds) {
           playSound("messageReceive");
         }

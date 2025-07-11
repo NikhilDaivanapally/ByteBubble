@@ -1,15 +1,22 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { clearActiveSettingPath } from "../../store/slices/settingsSlice";
 import { Icons } from "../../icons";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Help = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleClearActiveSettingsPage = useCallback(() => {
-    dispatch(clearActiveSettingPath());
-  }, []);
+    navigate("/settings");
+  }, [dispatch, navigate]);
 
+  useEffect(() => {
+    return () => {
+      dispatch(clearActiveSettingPath());
+    };
+  }, []);
   return (
     <div className="relative flex h-full flex-col bg-white overflow-x-hidden">
       {/* Header */}

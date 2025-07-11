@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearActiveSettingPath,
@@ -9,15 +9,23 @@ import { Icons } from "../../icons";
 import { motion } from "motion/react";
 import { SETTINGS_CONFIG } from "../../constants/settings-config";
 import { RootState } from "../../store/store";
+import { useNavigate } from "react-router-dom";
 
 const Notifications = () => {
   const notificationSections = SETTINGS_CONFIG.notifications;
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const settings = useSelector((state: RootState) => state.settings.data);
 
   const handleClearActiveSettingsPage = useCallback(() => {
-    dispatch(clearActiveSettingPath());
-  }, [dispatch]);
+    navigate("/settings");
+  }, [dispatch, navigate]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearActiveSettingPath());
+    };
+  }, []);
 
   const handleToggle = async (path: string) => {
     const keys = path.split(".");

@@ -123,7 +123,7 @@ const SignUp = () => {
     [avatarUrl, signupFormData]
   );
 
-  if (!data) {
+  if (data) {
     return (
       <section className="w-full h-full px-6 sm:px-10 md:px-16 lg:px-20 xl:px-24 select-none">
         <OtpComponent length={6} email={signupFormData.email} />

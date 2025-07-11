@@ -45,7 +45,7 @@ export const DirectImageMsg = ({
               onClick={() => dispatch(setfullImagePreview({ fullviewImg: el }))}
             >
               <img
-                className="max-h-70  w-auto rounded-lg"
+                className="min-h-40 max-h-70  w-auto rounded-lg"
                 src={el?.message?.imageUrl}
                 alt="Image Message"
                 onLoad={scrollToBottom}

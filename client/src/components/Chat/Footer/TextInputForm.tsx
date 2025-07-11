@@ -137,6 +137,11 @@ const TextInputForm = ({
       dispatch(
         addGroupMessage({
           ...messagePayload,
+          from: {
+            _id: auth?._id,
+            userName: auth?.userName,
+            avatar: auth?.avatar,
+          },
           isIncoming: false,
           isOutgoing: true,
           status: "pending",

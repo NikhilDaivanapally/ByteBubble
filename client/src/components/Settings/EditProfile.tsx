@@ -93,20 +93,24 @@ const EditProfile = () => {
     }
   };
 
-  const handleClearActiveSettingsPage = useCallback(() => {
-    dispatch(clearActiveSettingPath());
-    navigate("/settings");
-  }, [dispatch, navigate]);
-
   const handleRemoveAvatar = () => {
     fileInputRef.current!.value = "";
     setFormData((prev) => ({ ...prev, avatar: null }));
     setImageUrl(null);
   };
 
+  const handleClearActiveSettingsPage = useCallback(() => {
+    navigate("/settings");
+  }, [dispatch, navigate]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearActiveSettingPath());
+    };
+  }, []);
+
   return (
     <div className="relative flex h-full flex-col bg-white overflow-x-hidden">
-      
       <header className="border-b border-gray-200 px-2 py-4 md:py-2 flex gap-3 md:block">
         <Icons.ArrowLeftIcon
           className="w-6 md:hidden cursor-pointer"
@@ -115,7 +119,7 @@ const EditProfile = () => {
         <h1 className="text-xl font-semibold text-[#121416]">Edit Profile</h1>
       </header>
 
-      <main className="flex-1 flex flex-col items-center md:py-5 md:px-4 overflow-y-auto">
+      <main className="flex-1 flex flex-col items-center p-2 md:py-5 md:px-4 overflow-y-auto">
         <section className="flex flex-col items-center gap-3">
           <motion.div
             className="relative"

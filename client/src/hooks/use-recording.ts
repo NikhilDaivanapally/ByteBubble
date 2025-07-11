@@ -326,6 +326,11 @@ const useRecording = (
         } else if (chatType === group) {
           const payload = {
             ...commonPayload,
+            from: {
+              _id: auth?._id,
+              userName: auth?.userName,
+              avatar: auth?.avatar,
+            },
             isIncoming: false,
             readBy: [],
             deletedFor: [],
