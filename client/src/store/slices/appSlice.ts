@@ -15,6 +15,7 @@ const initialState: appSliceProps = {
   isTypingRoomId: null,
   directMessageInfo: null,
   groupMessageInfo: null,
+  isGroupInfoActive: false,
   unreadCount: {
     directChats: 0,
     groupChats: 0,
@@ -89,6 +90,9 @@ const slice = createSlice({
     setUnreadCount(state, action) {
       state.unreadCount = action.payload;
     },
+    setIsGroupInfoActive(state, action) {
+      state.isGroupInfoActive = action.payload;
+    },
   },
 });
 export const {
@@ -110,6 +114,7 @@ export const {
   setUnreadCount,
   setDirectMessageInfo,
   setGroupMessageInfo,
+  setIsGroupInfoActive,
 } = slice.actions;
 
 export default slice.reducer;

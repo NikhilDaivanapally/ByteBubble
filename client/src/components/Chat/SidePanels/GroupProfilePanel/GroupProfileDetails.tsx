@@ -11,16 +11,9 @@ import { GroupActions } from "../../../ui/Dropdowns/actions/GroupActions";
 import Dialog from "../../../ui/Dialog/Dialog";
 import AddMembersToGroup from "./AddMembersToGroup";
 import GroupMediaPreviewSlider from "../MediaPreviewSlider/GroupMediaPreviewSlider";
+import { setIsGroupInfoActive } from "../../../../store/slices/appSlice";
 
-type Props = {
-  showDetails: boolean;
-  handleCloseShowDetails: () => void;
-};
-
-const GroupProfileDetails = ({
-  showDetails,
-  handleCloseShowDetails,
-}: Props) => {
+const GroupProfileDetails = () => {
   const dispatch = useDispatch();
 
   const [isGroupAdmin, setIsGroupAdmin] = useState(false);
@@ -29,6 +22,7 @@ const GroupProfileDetails = ({
 
   const { group_chat } = useSelector((state: RootState) => state.conversation);
   const auth = useSelector((state: RootState) => state.auth.user);
+  const { isGroupInfoActive } = useSelector((state: RootState) => state.app);
 
   const currentConversation = group_chat.current_group_conversation;
   const messages = group_chat.current_group_messages;
@@ -71,9 +65,13 @@ const GroupProfileDetails = ({
     setIsAddMember(false);
   }, []);
 
+  const handleCloseProfile = useCallback(() => {
+    dispatch(setIsGroupInfoActive(false));
+  }, [dispatch]);
+
   return (
     <AnimatePresence>
-      {showDetails && (
+      {isGroupInfoActive && (
         <motion.div
           key="profile-panel"
           initial={{ x: "100%" }}
@@ -82,21 +80,33 @@ const GroupProfileDetails = ({
           transition={{ duration: 0.25, ease: "easeInOut" }}
           className="bg-white origin-right rounded-lg w-full xl:w-100 absolute top-0 right-0 z-10 md:relative h-full overflow-x-hidden scrollbar-custom flex-shrink-0 p-3.5"
         >
-          <button onClick={handleCloseShowDetails}>
+          <button onClick={handleCloseProfile}>
             <Icons.XMarkIcon className="w-8 p-1 rounded-full cursor-pointer hover:bg-gray-200 transition" />
           </button>
-
           <div className="space-y-4 divide-y divide-gray-300">
             <div className="flex flex-col items-center gap-4 py-2">
-              <Avatar size="xl" url={imageSrc} fallBackType={group} />
-              <div className="text-center">
+              <div className="relative group">
+                <Avatar size="xl" url={imageSrc} fallBackType={group} />
+                <label
+                  title="change icon"
+                  className="absolute inset-0 rounded-full backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                >
+                  <Icons.PhotoIcon className="w-6 text-gray-600" />
+                  <input type="file" className="hidden" />
+                </label>
+              </div>
+
+              <div className="text-center flex gap-3">
                 <p className="font-semibold">{name}</p>
-                <p className="text-black/60 text-sm">Example@gmail.com</p>
+                <Icons.PencilIcon className="w-5" />
               </div>
             </div>
 
             <div className="py-2">
-              <p className="text-sm text-black/60">About</p>
+              <div className="flex justify-between">
+                <p className="text-sm text-black/60">About</p>
+                <Icons.PencilIcon className="w-5" />
+              </div>
               <p>{about}</p>
             </div>
 

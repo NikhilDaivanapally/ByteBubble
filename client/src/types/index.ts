@@ -126,7 +126,6 @@ export type GroupSystemEventType =
   | "group_created"
   | "admin_assigned"
   | "admin_removed"
-  | "group_muted"
   | "group_icon_changed"
   | "group_description_updated"
   | "message_pinned";
@@ -221,6 +220,7 @@ export type appSliceProps = {
   activeChatId: string | null;
   chatType: "direct" | "group" | null;
   isCameraOpen: boolean;
+  isGroupInfoActive: boolean;
   mediaFiles: File[] | File | null;
   mediaFilePreviews: previewObj[];
   isTyping: string;

@@ -15,7 +15,6 @@ import FileSendPreview from "../../FileSendPreview";
 
 const GroupChat = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isShowChatDetails, setShowChatDetails] = useState(false);
   const messagesListRef = useRef<HTMLElement | null>(null);
   const { group_chat } = useSelector((state: RootState) => state.conversation);
   const { user } = useSelector((state: RootState) => state.auth);
@@ -46,9 +45,6 @@ const GroupChat = () => {
     [group_chat.current_group_messages]
   );
 
-  const handleOpenShowDetails = () => setShowChatDetails(true);
-  const handleCloseShowDetails = () => setShowChatDetails(false);
-
   // const scrollToBottomSmooth = useCallback(() => {
   //   if (messagesListRef.current) {
   //     messagesListRef?.current.scrollTo({
@@ -71,7 +67,7 @@ const GroupChat = () => {
   return (
     <section className="w-full h-full relative flex gap-2 overflow-hidden">
       <div className="flex flex-col flex-1 h-full relative overflow-hidden">
-        <GroupChatHeader handleOpenShowDetails={handleOpenShowDetails} />
+        <GroupChatHeader />
         <GroupMessageList
           ref={messagesListRef}
           scrollToBottom={scrollToBottomQuick}
@@ -83,10 +79,7 @@ const GroupChat = () => {
         />
         <MessageInputBar />
       </div>
-      <GroupProfileDetails
-        showDetails={isShowChatDetails}
-        handleCloseShowDetails={handleCloseShowDetails}
-      />
+      <GroupProfileDetails />
       {isCameraOpen && <CameraModule />}
       {mediaFiles && <FileSendPreview />}
       {groupMessageInfo && <GroupMessageInfo />}

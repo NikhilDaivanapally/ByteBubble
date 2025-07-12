@@ -3,9 +3,13 @@ import { RootState } from "../../../store/store";
 import { Avatar } from "../../ui/Avatar";
 import { Icons } from "../../../icons";
 import { ResetGroupChat } from "../../../store/slices/conversation";
-import { selectConversation } from "../../../store/slices/appSlice";
+import {
+  selectConversation,
+  setIsGroupInfoActive,
+} from "../../../store/slices/appSlice";
+import { useCallback } from "react";
 
-const GroupChatHeader = ({ handleOpenShowDetails = () => {} }) => {
+const GroupChatHeader = () => {
   const dispatch = useDispatch();
   const { isTyping, isTypingRoomId } = useSelector(
     (state: RootState) => state.app
@@ -19,6 +23,10 @@ const GroupChatHeader = ({ handleOpenShowDetails = () => {} }) => {
     dispatch(selectConversation(null));
     dispatch(ResetGroupChat());
   };
+
+  const handleOpenProfile = useCallback(() => {
+    dispatch(setIsGroupInfoActive(true));
+  }, [dispatch]);
 
   const participants = [...(current_group_conversation?.users || [])]
     .filter((user) => user?._id !== auth?._id)
@@ -37,7 +45,7 @@ const GroupChatHeader = ({ handleOpenShowDetails = () => {} }) => {
 
       <div
         className="flex gap-4 items-center cursor-pointer px-2 rounded-lg min-w-0"
-        onClick={handleOpenShowDetails}
+        onClick={handleOpenProfile}
       >
         <Avatar
           size="md"
@@ -65,7 +73,7 @@ const GroupChatHeader = ({ handleOpenShowDetails = () => {} }) => {
         <Icons.VideoCameraIcon className="w-8 p-1 rounded-full hover:bg-gray-200 cursor-pointer" /> */}
         <Icons.EllipsisVerticalIcon
           className="w-7 p-1 rounded-full hover:bg-gray-200 cursor-pointer"
-          onClick={handleOpenShowDetails}
+          onClick={handleOpenProfile}
         />
       </div>
     </nav>

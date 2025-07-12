@@ -19,9 +19,8 @@ export const GroupSystemEventType = {
   GROUP_CREATED: "group_created",
   ADMIN_ASSIGNED: "admin_assigned",
   ADIM_REMOVED: "admin_removed",
-  GROUP_MUTED: "group_muted",
   GROUP_ICON_CHANGED: "group_icon_changed",
-  GROU_DESCRIPTION_UPDATED: "group_description_updated",
+  GROUP_DESCRIPTION_UPDATED: "group_description_updated",
   MESSAGE_PINNED: "message_pinned",
 } as const;
 

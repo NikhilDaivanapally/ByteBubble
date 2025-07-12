@@ -1,5 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
-import getFormattedMessage from "../utils/Message";
+import {
+  getFormattedDirectMessage,
+  getFormattedGroupMessage,
+} from "../utils/Message";
 import { RootState } from "../store/store";
 import React, { useCallback, useMemo } from "react";
 import { selectConversation } from "../store/slices/appSlice";
@@ -35,7 +38,7 @@ export const DirectConversation = React.memo(
       [time]
     );
     const message = useMemo(
-      () => (msg ? getFormattedMessage(msg) : null),
+      () => (msg ? getFormattedDirectMessage(msg) : null),
       [msg]
     );
     const dispatch = useDispatch();
@@ -154,19 +157,22 @@ export const GroupConversation = React.memo(
       time,
       unreadMessagesCount,
     } = conversation;
+    console.log(conversation);
     const Time = useMemo(
       () => (time ? getConversationTime(time.toString()) : null),
       [time]
     );
+    const auth = useSelector((state: RootState) => state.auth.user);
+
     const message = useMemo(
-      () => (msg ? getFormattedMessage(msg) : null),
+      () => (msg ? getFormattedGroupMessage(msg, from, auth, name) : null),
       [msg]
     );
+
     const dispatch = useDispatch();
     const { GroupConversations } = useSelector(
       (state: RootState) => state.conversation.group_chat
     );
-    const auth = useSelector((state: RootState) => state.auth.user);
 
     const { activeChatId, isTyping, isTypingRoomId } = useSelector(
       (state: RootState) => state.app
@@ -244,7 +250,8 @@ export const GroupConversation = React.memo(
             from &&
             message?.message && (
               <div className="text-black/60 text-sm flex items-center gap-1 truncate">
-                {isOutgoing ? "You " : `${from?.userName}`} <span>-</span>
+                {isOutgoing ? "You " : `${from?.userName}`}
+                {msg.messageType !== "system" && <span>-</span>}
                 <span className="block truncate">{message.message}</span>
               </div>
             )

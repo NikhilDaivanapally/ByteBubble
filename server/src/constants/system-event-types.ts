@@ -18,7 +18,6 @@ export const groupEventTypes = [
   "group_created",
   "admin_assigned",
   "admin_removed",
-  "group_muted",
   "group_icon_changed",
   "group_description_updated",
   "message_pinned",

@@ -41,7 +41,11 @@ const CreateGroup = ({ onClose, availableMembers }: CreateGroupProps) => {
       name: groupName,
       image: groupImage,
       participants: [...selectedMembers.map((el) => el._id), user?._id],
-      createdBy: user?._id,
+      createdBy: {
+        _id: user?._id,
+        userName: user?.userName,
+        avatar: user?.avatar,
+      },
     });
 
     // Reset form
