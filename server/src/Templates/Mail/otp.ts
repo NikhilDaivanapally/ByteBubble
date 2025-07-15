@@ -134,8 +134,8 @@ export const OTP = (name: string, otp: string) => {
                               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
-                                    <a href="https://sateeq.com" target="_blank">
-                                      <img align="center" border="0" src="https://t3.ftcdn.net/jpg/05/22/42/06/360_F_522420661_5kiI2AiF3pOCgUwl4hveh88dAZDaD9Ol.jpg" alt="Sateeq Logo" title="Sateeq Logo" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 30%;max-width: 200px;"
+                                    <a href="https://bytebubble.vercel.app" target="_blank">
+                                      <img align="center" border="0" src="https://t3.ftcdn.net/jpg/05/22/42/06/360_F_522420661_5kiI2AiF3pOCgUwl4hveh88dAZDaD9Ol.jpg" alt="OTP Verify" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 30%;max-width: 200px;"
                                         width="200" />
                                     </a>
                                   </td>
@@ -181,7 +181,7 @@ export const OTP = (name: string, otp: string) => {
                                 <p style="font-size: 14px; line-height: 140%;"><span style="color: #000000; line-height: 19.6px;">Hello ${name},</span></p>
                                 <p style="font-size: 14px; line-height: 140%;"> </p>
                                 <p style="font-size: 14px; line-height: 140%;"><span style="color: #000000; line-height: 19.6px;">OTP for verification is ${otp}.</span><br /><br /><span style="color: #000000; line-height: 19.6px;">Note: This OTP is valid for next 10 mins.</span></p>
-                                <p style="font-size: 14px; line-height: 140%;"><br /><br /><span style="color: #000000; line-height: 19.6px;">Thanks &amp; Regards</span><br /><span style="color: #000000; line-height: 19.6px;">Messenger Team</span></p>
+                                <p style="font-size: 14px; line-height: 140%;"><br /><br /><span style="color: #000000; line-height: 19.6px;">Thanks &amp; Regards</span><br /><span style="color: #000000; line-height: 19.6px;">ByteBubble</span></p>
                               </div>
 
                             </td>
@@ -220,8 +220,8 @@ export const OTP = (name: string, otp: string) => {
                             <td style="overflow-wrap:break-word;word-break:break-word;padding:48px;font-family:'Cabin',sans-serif;" align="left">
 
                               <div style="color: #958d8d; line-height: 170%; text-align: center; word-wrap: break-word;">
-                                <p style="font-size: 14px; line-height: 170%;">Love 💙 Messenger Team</p>
-                                <p style="font-size: 14px; line-height: 170%;">For any assistance and queries write to us at <a rel="noopener" href="mailto:nikhildaivanapally@gmail.com?" target="_blank">nikhildaivanapally@gmail.com</a><br /><br /></p>
+                                <p style="font-size: 14px; line-height: 170%;">Love 💙 ByteBubble</p>
+                                <p style="font-size: 14px; line-height: 170%;">For any assistance and queries write to us at <a rel="noopener" href="mailto:nikhil.projectsdev@gmail.com?" target="_blank">nikhil.projectsdev@gmail.com</a><br /><br /></p>
                               </div>
 
                             </td>

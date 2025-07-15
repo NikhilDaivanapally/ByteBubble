@@ -134,7 +134,7 @@ export const ResetPassord = (name: string, link: string) => {
                                     <tr>
                                       <td style="padding-right: 0px;padding-left: 0px;" align="center">
     
-                                        <img align="center" border="0" src="https://assets.unlayer.com/projects/47137/1675000768671-logo.ico" alt="Sateeq Logo" title="Sateeq Logo" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 19%;max-width: 106.4px;"
+                                        <img align="center" border="0" src="https://cdn3d.iconscout.com/3d/premium/thumb/reset-password-3d-icon-download-in-png-blend-fbx-gltf-file-formats--change-restore-cyber-security-recovery-forgot-pack-crime-icons-7825724.png" alt="Reset Password" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 19%;max-width: 106.4px;"
                                           width="106.4" />
     
                                       </td>
@@ -180,7 +180,7 @@ export const ResetPassord = (name: string, link: string) => {
                                     <p style="font-size: 14px; line-height: 140%;"><span style="color: #000000; line-height: 19.6px;">Hello ${name},</span></p>
                                     <p style="font-size: 14px; line-height: 140%;"> </p>
                                     <p style="font-size: 14px; line-height: 140%;"><span style="color: #000000; line-height: 19.6px;">Please click on the given button to reset your password</span><br /><br /><span style="color: #000000; line-height: 19.6px;">Note: This link is valid for only 10 mins.</span></p>
-                                    <p style="font-size: 14px; line-height: 140%;"><br /><br /><span style="color: #000000; line-height: 19.6px;">Thanks &amp; Regards</span><br /><span style="color: #000000; line-height: 19.6px;">Messenger Team</span></p>
+                                    <p style="font-size: 14px; line-height: 140%;"><br /><br /><span style="color: #000000; line-height: 19.6px;">Thanks &amp; Regards</span><br /><span style="color: #000000; line-height: 19.6px;">ByteBubble</span></p>
                                   </div>
     
                                 </td>
@@ -263,8 +263,8 @@ export const ResetPassord = (name: string, link: string) => {
                                 <td style="overflow-wrap:break-word;word-break:break-word;padding:48px;font-family:'Cabin',sans-serif;" align="left">
     
                                   <div style="color: #958d8d; line-height: 170%; text-align: center; word-wrap: break-word;">
-                                    <p style="font-size: 14px; line-height: 170%;">Love 💙 Messenger Team</p>
-                                    <p style="font-size: 14px; line-height: 170%;">For any assistance and queries write to us at <a rel="noopener" href="mailto:nikhildaivanapally@gamail.com?" target="_blank">nikhildaivanapally@gamail.com</a><br /><br /></p>
+                                    <p style="font-size: 14px; line-height: 170%;">Love 💙 ByteBubble</p>
+                                    <p style="font-size: 14px; line-height: 170%;">For any assistance and queries write to us at <a rel="noopener" href="mailto:nikhil.projectsdev@gmail.com?" target="_blank">nikhil.projectsdev@gmail.com</a><br /><br /></p>
                                   </div>
     
                                 </td>

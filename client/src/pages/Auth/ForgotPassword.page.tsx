@@ -21,7 +21,7 @@ const ForgotPassword = () => {
   useEffect(() => {
     if (data) {
       toast.success(data.message);
-      setEmail("");
+      // setEmail("");
     } else if (error) {
       toast.error((error as Error)?.data.message);
     }
@@ -98,7 +98,7 @@ const ForgotPassword = () => {
           </form>
         ) : (
           <p className="text-black/60 text-center">
-            We have sent you an email at{" "}
+            We have sent you an email at {email}
             <span className="text-black">{email}</span> Check your inbox and
             follow the instructions to reset your account password
           </p>

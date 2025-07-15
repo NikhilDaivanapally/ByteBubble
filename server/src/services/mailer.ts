@@ -37,7 +37,7 @@ const sendMail = ({
 }: sendMailProps) => {
   const mailOptions: mailOptionsProps = {
     from: {
-      name: "Messenger Team", // Sender's name
+      name: "ByteBubble", // Sender's name
       address: process.env.SENDER_EMAIL, // Sender's email address
     },
     to: to,
