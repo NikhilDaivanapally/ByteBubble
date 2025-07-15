@@ -11,7 +11,6 @@ import { GroupAudioMsg } from "./Chat/GroupChat/messages/AudioMsg";
 import { GroupTextMsg } from "./Chat/GroupChat/messages/TextMsg";
 import { GroupLinkMsg } from "./Chat/GroupChat/messages/LinkMsg";
 import GroupDocumentMsg from "./Chat/GroupChat/messages/documentMsg";
-import { direct } from "../utils/conversation-types";
 import ReadIndicator from "./ui/ReadIndicator";
 
 const GroupMessageInfo = () => {
