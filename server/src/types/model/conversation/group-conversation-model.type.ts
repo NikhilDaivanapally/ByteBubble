@@ -11,6 +11,7 @@ export interface GroupConversationDoc extends Document {
   avatar?: String;
   about: string;
   createdBy?: Types.ObjectId;
+  admins: [Types.ObjectId, Types.ObjectId]; // one or above
   participants: [Types.ObjectId, Types.ObjectId]; // two or above two
   meta?: Map<string, GroupParticipantMeta>; // key = userId (as string), value = meta for that user
   createdAt: Date;

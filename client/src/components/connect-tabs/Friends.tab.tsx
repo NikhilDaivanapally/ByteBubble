@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import PageLoader from "../Loaders/PageLoader";
 import { Avatar } from "../ui/Avatar";
 import { useGetConnectionsQuery } from "../../store/slices/api";
+
 const Friends = () => {
   const Navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();

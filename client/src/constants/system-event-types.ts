@@ -18,7 +18,7 @@ export const GroupSystemEventType = {
   GROUP_RENAMED: "group_renamed",
   GROUP_CREATED: "group_created",
   ADMIN_ASSIGNED: "admin_assigned",
-  ADIM_REMOVED: "admin_removed",
+  ADMIN_REMOVED: "admin_removed",
   GROUP_ICON_CHANGED: "group_icon_changed",
   GROUP_DESCRIPTION_UPDATED: "group_description_updated",
   MESSAGE_PINNED: "message_pinned",

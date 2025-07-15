@@ -3,7 +3,11 @@ import { socket } from "../socket";
 import { useDispatch, useSelector } from "react-redux";
 import { selectConversation } from "../store/slices/appSlice";
 import { GroupConversationProps, UserProps } from "../types";
-import { addGroupConversation } from "../store/slices/conversation";
+import {
+  addGroupConversation,
+  setCurrentGroupConversation,
+  updateGroupConversation,
+} from "../store/slices/conversation";
 import { RootState } from "../store/store";
 import { group } from "../utils/conversation-types";
 import { useGetGroupConversationMutation } from "../store/slices/api";
@@ -17,7 +21,7 @@ type NewMembersProps = {
 export const useGroupEvents = (enabled: boolean) => {
   const dispatch = useDispatch();
 
-  const { GroupConversations } = useSelector(
+  const { GroupConversations, current_group_conversation } = useSelector(
     (state: RootState) => state.conversation.group_chat
   );
 
@@ -76,18 +80,153 @@ export const useGroupEvents = (enabled: boolean) => {
     [dispatch]
   );
 
+  const handleAddAdmin = useCallback(
+    ({
+      memberId,
+      conversationId,
+    }: {
+      memberId: string;
+      conversationId: string;
+    }) => {
+      const conversation = GroupConversations?.find(
+        (conv) => conv?._id === conversationId
+      );
+      if (!conversation) return;
+      dispatch(
+        updateGroupConversation({
+          ...conversation,
+          admins: [...conversation.admins, memberId],
+        })
+      );
+      if (current_group_conversation?._id == conversation?._id) {
+        dispatch(
+          setCurrentGroupConversation({
+            ...conversation,
+            admins: [...conversation.admins, memberId],
+          })
+        );
+      }
+    },
+    [GroupConversations, current_group_conversation]
+  );
+
+  const handleRemoveAdmin = useCallback(
+    ({
+      memberId,
+      conversationId,
+    }: {
+      memberId: string;
+      conversationId: string;
+    }) => {
+      const conversation = GroupConversations?.find(
+        (conv) => conv?._id === conversationId
+      );
+      if (!conversation) return;
+      dispatch(
+        updateGroupConversation({
+          ...conversation,
+          admins: conversation.admins.filter((id) => id !== memberId),
+        })
+      );
+      if (current_group_conversation?._id == conversation?._id) {
+        dispatch(
+          setCurrentGroupConversation({
+            ...conversation,
+            admins: conversation.admins.filter((id) => id !== memberId),
+          })
+        );
+      }
+    },
+    [GroupConversations, current_group_conversation]
+  );
+
+  const handleRemoveUser = useCallback(
+    ({
+      memberId,
+      conversationId,
+    }: {
+      memberId: string;
+      conversationId: string;
+    }) => {
+      const conversation = GroupConversations?.find(
+        (conv) => conv?._id === conversationId
+      );
+      if (!conversation) return;
+      dispatch(
+        updateGroupConversation({
+          ...conversation,
+          admins: conversation.admins.filter((id) => id !== memberId),
+          users: conversation.users.filter((user) => user?._id !== memberId),
+        })
+      );
+      if (current_group_conversation?._id == conversation?._id) {
+        dispatch(
+          setCurrentGroupConversation({
+            ...conversation,
+            admins: conversation.admins.filter((id) => id !== memberId),
+            users: conversation.users.filter((user) => user?._id !== memberId),
+          })
+        );
+      }
+    },
+    [GroupConversations, current_group_conversation]
+  );
+
+  const handleAddUsers = useCallback(
+    ({
+      members,
+      conversationId,
+    }: {
+      members: UserProps[];
+      conversationId: string;
+    }) => {
+      const conversation = GroupConversations?.find(
+        (conv) => conv?._id === conversationId
+      );
+      if (!conversation) return;
+      dispatch(
+        updateGroupConversation({
+          ...conversation,
+          users: [...conversation?.users, ...members],
+        })
+      );
+      if (current_group_conversation?._id == conversation?._id) {
+        dispatch(
+          setCurrentGroupConversation({
+            ...conversation,
+            users: [...conversation?.users, ...members],
+          })
+        );
+      }
+    },
+    [GroupConversations, current_group_conversation]
+  );
   // Attach/detach socket event listeners
   useEffect(() => {
     if (!enabled) return;
 
     socket.on("group:new", handleAddGroupConversation);
-    socket.on("group:new:admin", handleAddGroupConversation);
+    socket.on("group:admin:assign:success", handleAddAdmin);
+    socket.on("group:admin:dismiss:success", handleRemoveAdmin);
+    socket.on("group:add:members:success", handleAddUsers);
+    socket.on("group:remove:member:success", handleRemoveUser);
     socket.on("group:new:members", handleNewGroupMembers);
 
     return () => {
       socket.off("group:new", handleAddGroupConversation);
-      socket.off("group:new:admin", handleAddGroupConversation);
+      socket.off("group:admin:assign:success", handleAddAdmin);
+      socket.off("group:admin:dismiss:success", handleRemoveAdmin);
+      socket.off("group:add:members:success", handleAddUsers);
+      socket.off("group:remove:member:success", handleRemoveUser);
       socket.off("group:new:members", handleNewGroupMembers);
     };
-  }, [enabled, handleAddGroupConversation, handleNewGroupMembers]);
+  }, [
+    enabled,
+    handleAddGroupConversation,
+    handleNewGroupMembers,
+    handleAddAdmin,
+    handleRemoveAdmin,
+    handleAddUsers,
+    handleRemoveUser,
+  ]);
 };

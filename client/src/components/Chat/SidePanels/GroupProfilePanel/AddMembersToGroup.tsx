@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../../../../store/store";
 import { useCallback, useMemo, useState } from "react";
 import { UserProps } from "../../../../types";
@@ -7,29 +7,35 @@ import Input from "../../../ui/Input";
 import { Button } from "../../../ui/Button";
 import { Avatar } from "../../../ui/Avatar";
 import { socket } from "../../../../socket";
-import {
-  setCurrentGroupConversation,
-  updateGroupConversation,
-} from "../../../../store/slices/conversation";
+import { ObjectId } from "bson";
 
 type AddMembersToGroupProps = {
   onClose: () => void;
 };
 const AddMembersToGroup = ({ onClose }: AddMembersToGroupProps) => {
-  const dispatch = useDispatch();
   const [selectedMembers, setSelectedMembers] = useState<UserProps[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [errors, setErrors] = useState<{ members?: string }>({});
-  const { friends } = useSelector((state: RootState) => state.app);
-  const user = useSelector((state: RootState) => state.auth.user);
+  const { friends, activeChatId } = useSelector(
+    (state: RootState) => state.app
+  );
+  const auth = useSelector((state: RootState) => state.auth.user);
   const { current_group_conversation } = useSelector(
     (state: RootState) => state.conversation.group_chat
   );
   const filteredMembers = useMemo(() => {
-    return friends?.filter((member) =>
-      member.userName.toLowerCase().includes(searchQuery.toLowerCase())
+    const groupMemberIds = new Set(
+      current_group_conversation?.users
+        .filter((user) => user?._id !== auth?._id)
+        .map((user) => user._id)
     );
-  }, [friends, searchQuery]);
+
+    return friends
+      .filter((friend) => !groupMemberIds.has(friend._id))
+      .filter((member) =>
+        member.userName.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+  }, [friends, searchQuery, current_group_conversation, auth]);
 
   const toggleMember = useCallback(
     (member: UserProps) => {
@@ -57,19 +63,41 @@ const AddMembersToGroup = ({ onClose }: AddMembersToGroupProps) => {
       setErrors(newErrors);
       return;
     }
+    const messageId = new ObjectId().toHexString();
+    const messageCreatedAt = new Date().toISOString();
+    let userList = [...(current_group_conversation?.users || [])]
+      .filter((el: UserProps | undefined) => el?._id !== auth?._id)
+      .map((el) => el?._id);
 
     socket.emit("group:add:members", {
-      _id: current_group_conversation?._id,
-      senderId: user?._id,
+      conversationId: current_group_conversation?._id,
       members: selectedMembers,
+      broadCastTo: current_group_conversation?.users?.map((user) => user?._id),
     });
-    
-    const updatedConversation = {
-      ...current_group_conversation,
-      users: [...(current_group_conversation?.users as []), ...selectedMembers],
-    };
-    dispatch(updateGroupConversation(updatedConversation));
-    dispatch(setCurrentGroupConversation(updatedConversation));
+
+    socket.emit("system:group:users:added", {
+      _id: messageId,
+      sender: auth?._id,
+      recipients: userList,
+      messageType: "system",
+      systemEventType: "user_added",
+      metadata: "user",
+      eventUserSnapshot: {
+        _id: messageId,
+        userName: "user",
+        avatar: "user",
+      },
+      conversationId: activeChatId,
+      createdAt: messageCreatedAt,
+      updatedAt: messageCreatedAt,
+    });
+
+    // const updatedConversation = {
+    //   ...current_group_conversation,
+    //   users: [...(current_group_conversation?.users as []), ...selectedMembers],
+    // };
+    // dispatch(updateGroupConversation(updatedConversation));
+    // dispatch(setCurrentGroupConversation(updatedConversation));
     onClose();
   };
 
@@ -164,12 +192,6 @@ const AddMembersToGroup = ({ onClose }: AddMembersToGroupProps) => {
                     </div>
 
                     <span className="flex-1">{member.userName}</span>
-
-                    {/* {isSelected ? (
-                          <Icons.CheckIcon className="text-indigo-600 w-5" />
-                        ) : (
-                          <Icons.UserPlusIcon className="text-gray-400 w-5" />
-                        )} */}
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                         isSelected

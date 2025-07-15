@@ -84,7 +84,6 @@ io.on("connection", async (socket) => {
       });
 
       const EmmitStatusTo = await Promise.all(socketIds);
-
       EmmitStatusTo.forEach((socketId) => {
         if (socketId) {
           const socketExists = io.sockets.sockets.get(socketId);
@@ -133,11 +132,7 @@ io.on("connection", async (socket) => {
           io.to(socketId).emit("user:offline", {
             id: user_id,
           });
-        } else {
-          console.error(`Socket ID not connected: ${socketId}`);
         }
-      } else {
-        console.error("Encountered a null or undefined socket ID.");
       }
     });
 

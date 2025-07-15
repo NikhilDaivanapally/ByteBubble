@@ -16,6 +16,7 @@ const groupConversationSchema = new Schema<GroupConversationDoc>(
       ref: "User",
       required: true,
     },
+    admins: [{ type: Schema.Types.ObjectId, ref: "User", required: true }],
     participants: [
       { type: Schema.Types.ObjectId, ref: "User", required: true },
     ],

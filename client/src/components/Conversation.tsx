@@ -1,24 +1,25 @@
+import React, { useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getFormattedDirectMessage,
-  getFormattedGroupMessage,
-} from "../utils/Message";
-import { RootState } from "../store/store";
-import React, { useCallback, useMemo } from "react";
-import { selectConversation } from "../store/slices/appSlice";
-import { socket } from "../socket";
 import {
   setCurrentDirectMessages,
   setCurrentGroupMessages,
   updateDirectConversation,
   updateGroupConversation,
 } from "../store/slices/conversation";
-import { Icons } from "../icons";
-import { motion } from "motion/react";
-import { DirectConversationProps, GroupConversationProps } from "../types";
+import { selectConversation } from "../store/slices/appSlice";
+import {
+  getFormattedDirectMessage,
+  getFormattedGroupMessage,
+} from "../utils/Message";
 import { getConversationTime } from "../utils/dateUtils";
 import { Avatar } from "./ui/Avatar";
+import { socket } from "../socket";
+import { RootState } from "../store/store";
+import { DirectConversationProps, GroupConversationProps } from "../types";
+import { group } from "../utils/conversation-types";
+import ReadIndicator from "./ui/ReadIndicator";
 
+//  Direct Conversation
 export const DirectConversation = React.memo(
   ({ conversation }: { conversation: DirectConversationProps }) => {
     const {
@@ -33,35 +34,44 @@ export const DirectConversation = React.memo(
       time,
       unreadMessagesCount,
     } = conversation;
+    const { activeChatId, isTypingRoomId } = useSelector(
+      (state: RootState) => state.app
+    );
+    const auth = useSelector((state: RootState) => state.auth.user);
+    const { DirectConversations } = useSelector(
+      (state: RootState) => state.conversation.direct_chat
+    );
+
+    const dispatch = useDispatch();
+    const isActive = activeChatId === _id;
+    const isTyping = isTypingRoomId === _id;
+
+    const updateConversation = useMemo(
+      () => DirectConversations?.find((c) => c._id === _id),
+      [DirectConversations, _id]
+    );
+
     const Time = useMemo(
       () => (time ? getConversationTime(time.toString()) : null),
       [time]
     );
     const message = useMemo(
-      () => (msg ? getFormattedDirectMessage(msg) : null),
+      () => (msg ? getFormattedDirectMessage(msg,isOutgoing,name) : null),
       [msg]
     );
-    const dispatch = useDispatch();
-    const auth = useSelector((state: RootState) => state.auth.user);
-    const { DirectConversations } = useSelector(
-      (state: RootState) => state.conversation.direct_chat
-    );
-    const { activeChatId, isTypingRoomId } = useSelector(
-      (state: RootState) => state.app
-    );
+
     const handleSelectConversation = useCallback(() => {
-      if (activeChatId !== _id) {
+      if (!isActive) {
         dispatch(setCurrentDirectMessages([]));
         dispatch(selectConversation({ chatId: _id }));
-        const updateConversation = DirectConversations?.find(
-          (el) => el._id == _id
-        );
+
         if (updateConversation?.unreadMessagesCount) {
           socket.emit("messages:unread:clear", {
             conversationId: _id,
             recipient: auth?._id,
             sender: userId,
           });
+
           dispatch(
             updateDirectConversation({
               ...updateConversation,
@@ -70,71 +80,42 @@ export const DirectConversation = React.memo(
           );
         }
       }
-    }, [DirectConversations, activeChatId, dispatch, _id]);
-    const isActive = activeChatId === _id;
-    const istyping = isTypingRoomId === _id;
+    }, [isActive, dispatch, _id, auth?._id, userId, updateConversation]);
+
     return (
       <div
         role="button"
         tabIndex={0}
-        className={`w-full flex gap-x-4 py-2 rounded-lg px-2 relative overflow-hidden ${
-          isActive ? "bg-btn-primary/30" : ""
-        } hover:bg-btn-primary/20 cursor-pointer`}
+        className={`w-full flex gap-x-4 py-2 px-2 rounded-lg relative overflow-hidden ${
+          isActive ? "bg-btn-primary/30" : "hover:bg-btn-primary/20 "
+        } cursor-pointer`}
         onClick={handleSelectConversation}
         onKeyDown={(e) => e.key === "Enter" && handleSelectConversation()}
       >
-        {/* Animated background highlight for active */}
-        {isActive && (
-          <motion.div
-            layoutId="conversation-highlight"
-            className="absolute inset-0 bg-btn-primary/20 rounded-lg z-0"
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          />
-        )}
-
-        {/* Avatar */}
-
         <Avatar size="md" url={avatar} online={isOnline} />
 
-        {/* Name and message */}
         <div className="info flex-1 min-w-0 z-10">
           <p className="friend_name">{name}</p>
-          {istyping ? (
+          {isTyping ? (
             <p className="text-sm text-green-500">Typing ...</p>
           ) : (
-            <div className="text-black/60 text-sm flex items-center gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
-              {isOutgoing ? "You - " : ""}
-              <span className="overflow-hidden text-ellipsis whitespace-nowrap block">
-                {message?.message}
-              </span>
+            <div className="text-black/60 text-sm flex items-center gap-1 truncate">
+              {msg.messageType !== "system" && (isOutgoing ? "You - " : "")}
+              <span className="block truncate">{message?.message}</span>
             </div>
           )}
         </div>
 
-        {/* Time and unread */}
         <div className="ml-auto shrink-0 flex flex-col items-end justify-between z-10">
           <div className="seen_time text-sm text-black/60 flex gap-1">
-            {isOutgoing && (
-              <div className="flex-center gap-1">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    isRead ? "bg-green-600" : "bg-gray-300"
-                  }`}
-                ></div>
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    isRead ? "bg-green-600" : "bg-gray-300"
-                  }`}
-                ></div>
-              </div>
+            {msg.messageType !== "system" && isOutgoing && (
+              <ReadIndicator read={isRead} />
             )}
-            <span className="lasttime_msg text-nowrap">{Time}</span>
+            {Time && <span className="lasttime_msg text-nowrap">{Time}</span>}
           </div>
           {unreadMessagesCount ? (
             <span className="text-xs inline-block px-2 py-1 rounded-full bg-btn-primary/20">
-              {unreadMessagesCount > 99
-                ? `${unreadMessagesCount}+`
-                : unreadMessagesCount}
+              {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
             </span>
           ) : null}
         </div>
@@ -143,6 +124,7 @@ export const DirectConversation = React.memo(
   }
 );
 
+//  Group Conversation
 export const GroupConversation = React.memo(
   ({ conversation }: { conversation: GroupConversationProps }) => {
     const {
@@ -157,34 +139,39 @@ export const GroupConversation = React.memo(
       time,
       unreadMessagesCount,
     } = conversation;
-    console.log(conversation);
+
+    const { activeChatId, isTyping, isTypingRoomId } = useSelector(
+      (state: RootState) => state.app
+    );
+    const auth = useSelector((state: RootState) => state.auth.user);
+    const { GroupConversations } = useSelector(
+      (state: RootState) => state.conversation.group_chat
+    );
+
+    const dispatch = useDispatch();
+    const isActive = activeChatId === _id;
+    const isTypingHere = isTypingRoomId === _id;
+    const allRead = readBy?.length === users?.length - 1;
+
+    const updateConversation = useMemo(
+      () => GroupConversations?.find((c) => c._id === _id),
+      [GroupConversations, _id]
+    );
+
     const Time = useMemo(
       () => (time ? getConversationTime(time.toString()) : null),
       [time]
     );
-    const auth = useSelector((state: RootState) => state.auth.user);
-
     const message = useMemo(
       () => (msg ? getFormattedGroupMessage(msg, from, auth, name) : null),
       [msg]
     );
 
-    const dispatch = useDispatch();
-    const { GroupConversations } = useSelector(
-      (state: RootState) => state.conversation.group_chat
-    );
-
-    const { activeChatId, isTyping, isTypingRoomId } = useSelector(
-      (state: RootState) => state.app
-    );
-
     const handleSelectConversation = useCallback(() => {
-      if (activeChatId !== _id) {
+      if (!isActive) {
         dispatch(setCurrentGroupMessages([]));
         dispatch(selectConversation({ chatId: _id }));
-        const updateConversation = GroupConversations?.find(
-          (el) => el._id == _id
-        );
+
         if (updateConversation?.unreadMessagesCount) {
           socket.emit("group:messages:unread:clear", {
             conversationId: _id,
@@ -196,6 +183,7 @@ export const GroupConversation = React.memo(
               seenAt: new Date().toISOString(),
             },
           });
+
           dispatch(
             updateGroupConversation({
               ...updateConversation,
@@ -204,45 +192,22 @@ export const GroupConversation = React.memo(
           );
         }
       }
-    }, [activeChatId, dispatch, GroupConversations, _id]);
-    const isActive = activeChatId === _id;
-    const isSomeOneTyping = isTypingRoomId === _id;
+    }, [isActive, dispatch, _id, auth?._id, from?._id, updateConversation]);
 
     return (
       <div
         role="button"
         tabIndex={0}
-        className={`w-full flex gap-x-4 py-2 rounded-lg px-2 relative overflow-hidden ${
-          isActive ? "bg-btn-primary/30" : ""
-        } hover:bg-btn-primary/20 cursor-pointer`}
+        className={`w-full flex gap-x-4 py-2 px-2 rounded-lg relative transition-colors duration-200 overflow-hidden ${
+          isActive ? "bg-btn-primary/40" : "hover:bg-btn-primary/20 "
+        } cursor-pointer`}
         onClick={handleSelectConversation}
         onKeyDown={(e) => e.key === "Enter" && handleSelectConversation()}
       >
-        {/* Animated background highlight for active */}
-        {isActive && (
-          <motion.div
-            layoutId="conversation-highlight"
-            className="absolute inset-0 bg-btn-primary/20 rounded-lg z-0"
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          />
-        )}
-        {/* Avatar */}
-        <div className="w-10 h-10 relative flex-center shrink-0">
-          {avatar ? (
-            <img
-              src={avatar}
-              className="w-full h-full rounded-full object-cover"
-              alt=""
-            />
-          ) : (
-            <Icons.UsersIcon className="w-8" />
-          )}
-        </div>
-
-        {/* Group Name and getFormattedMessage */}
+        <Avatar url={avatar} size="md" fallBackType={group} />
         <div className="info flex-1 min-w-0">
           <p className="friend_name">{name}</p>
-          {isSomeOneTyping ? (
+          {isTypingHere ? (
             <p className="text-sm text-green-500 truncate">
               {isTyping} is typing ...
             </p>
@@ -250,7 +215,8 @@ export const GroupConversation = React.memo(
             from &&
             message?.message && (
               <div className="text-black/60 text-sm flex items-center gap-1 truncate">
-                {isOutgoing ? "You " : `${from?.userName}`}
+                {msg.messageType !== "system" &&
+                  (isOutgoing ? "You" : from?.userName)}
                 {msg.messageType !== "system" && <span>-</span>}
                 <span className="block truncate">{message.message}</span>
               </div>
@@ -258,36 +224,16 @@ export const GroupConversation = React.memo(
           )}
         </div>
 
-        {/* Time and Unread */}
         <div className="ml-auto shrink-0 flex flex-col items-end justify-between">
           <div className="seen_time text-sm text-black/60 flex gap-1">
-            {isOutgoing ? (
-              <div className="flex-center gap-1">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    readBy?.length == users?.length - 1
-                      ? "bg-green-600"
-                      : "bg-gray-300"
-                  }`}
-                ></div>
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    readBy?.length == users?.length - 1
-                      ? "bg-green-600"
-                      : "bg-gray-300"
-                  }`}
-                ></div>
-              </div>
-            ) : null}
-            {time ? (
-              <span className="lasttime_msg text-nowrap">{Time}</span>
-            ) : null}
+            {msg.messageType !== "system" && isOutgoing && (
+              <ReadIndicator read={allRead} />
+            )}
+            {Time && <span className="lasttime_msg text-nowrap">{Time}</span>}
           </div>
           {!isOutgoing && unreadMessagesCount ? (
             <span className="text-xs inline-block px-2 py-1 rounded-full bg-btn-primary/20">
-              {unreadMessagesCount > 99
-                ? `${unreadMessagesCount}+`
-                : unreadMessagesCount}
+              {unreadMessagesCount > 99 ? "99+" : unreadMessagesCount}
             </span>
           ) : null}
         </div>

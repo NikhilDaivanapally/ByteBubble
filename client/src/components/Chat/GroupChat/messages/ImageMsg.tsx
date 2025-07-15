@@ -6,8 +6,6 @@ import { formatTo12HourTime } from "../../../../utils/dateUtils";
 import { GroupMessageActions } from "../../../ui/Dropdowns/actions/GroupMessageActions";
 import { MessageStatus } from "../../../MessageStatus";
 import { Avatar } from "../../../ui/Avatar";
-import { useEffect, useState } from "react";
-import { Icons } from "../../../../icons";
 
 export const GroupImageMsg = ({
   el,
@@ -22,24 +20,14 @@ export const GroupImageMsg = ({
   scrollToBottom: () => void;
 }) => {
   const dispatch = useDispatch();
-  const [aspectRatio, setAspectRatio] = useState<null | number>(null);
 
   const isOutgoing = !el?.isIncoming;
   const time = formatTo12HourTime(el?.createdAt);
   const readUsers = el.readBy?.length ?? 0;
   const seen = usersLength > 0 && readUsers >= usersLength;
-
-  useEffect(() => {
-    const img = new Image();
-    img.src = el?.message?.imageUrl;
-    img.onload = () => {
-      const ratio = img.width / img.height;
-      setAspectRatio(ratio);
-    };
-  }, [el?.message?.imageUrl]);
   return (
     <div
-      className={`Media_msg relative w-fit max-w-[90%] sm:max-w-[80%] lg:max-w-[60%] flex group items-start  ${
+      className={`Media_msg relative w-fit max-w-[90%] sm:max-w-[80%] lg:max-w-[60%] flex gap-1.5 group items-start  ${
         isOutgoing ? "ml-auto" : ""
       }`}
     >
@@ -69,41 +57,30 @@ export const GroupImageMsg = ({
           </header>
 
           {/* Message content */}
-
-          {!aspectRatio ? (
-            <div className="h-40 lg:h-50 aspect-square rounded-lg bg-gray-300 flex-center">
-              <Icons.PhotoIcon className="text-gray-400 w-20 animate-pulse" />
+          <figure>
+            <div
+              className="relative cursor-pointer min-h-40 lg:min-h-50 min-w-50 rounded-lg overflow-hidden"
+              onClick={() => dispatch(setfullImagePreview({ fullviewImg: el }))}
+            >
+              <img
+                src={el?.message?.imageUrl}
+                alt="Image Message"
+                onLoad={scrollToBottom}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-contain select-none"
+              />
+              {el.status === "pending" && (
+                <div className="absolute inset-0 flex-center">
+                  <Loader />
+                </div>
+              )}
             </div>
-          ) : (
-            <figure>
-              <div
-                className="relative cursor-pointer min-h-40 lg:min-h-50 min-w-40 rounded-lg overflow-hidden"
-                onClick={() =>
-                  dispatch(setfullImagePreview({ fullviewImg: el }))
-                }
-              >
-                <img
-                  src={el?.message?.imageUrl}
-                  alt="Image Message"
-                  onLoad={scrollToBottom}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover select-none"
-                />
-                {el.status === "pending" && (
-                  <div className="absolute inset-0 flex-center">
-                    <Loader />
-                  </div>
-                )}
-              </div>
-              <figcaption>
-                {el?.message?.description && (
-                  <p className="text-sm px-2 py-1">
-                    {el?.message?.description}
-                  </p>
-                )}
-              </figcaption>
-            </figure>
-          )}
+            <figcaption>
+              {el?.message?.description && (
+                <p className="text-sm px-2 py-1">{el?.message?.description}</p>
+              )}
+            </figcaption>
+          </figure>
         </div>
 
         {/* footer */}

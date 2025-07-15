@@ -148,6 +148,10 @@ export const useMessageEvents = (enabled: boolean) => {
               messageType: message?.messageType,
               message: message?.message,
               createdAt: message?.createdAt,
+              isEdited: message.isEdited,
+              systemEventType: message.systemEventType,
+              metadata: message.metadata,
+              eventUserSnapshot: message.eventUserSnapshot,
             },
             isOutgoing: message?.senderId === user?._id,
             time: message?.createdAt,
@@ -217,6 +221,7 @@ export const useGroupMessageEvents = (enabled: boolean) => {
 
   const handleNewGroupMessage = useCallback(
     (message: any) => {
+      console.log(message, "new group message");
       const isIncoming = message?.recipientsIds?.includes(user?._id);
       const isOutgoing = message?.senderId === user?._id;
 

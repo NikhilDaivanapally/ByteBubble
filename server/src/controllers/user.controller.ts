@@ -61,6 +61,46 @@ const updateUserProfile = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
+const handleUpdateGroupDetails = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { name, about, conversationId } = req.body;
+    if (!conversationId) {
+      res.status(500).json({
+        status: "failed",
+        data: null,
+        message: "conversationId is missing",
+      });
+      return;
+    }
+
+    const updates: any = {};
+    if (name !== undefined) updates.name = name;
+    if (about !== undefined) updates.about = about;
+    const avatarLocalpath = req.file?.path;
+    if (avatarLocalpath) {
+      const image = await uploadCloudinary(avatarLocalpath);
+      updates.avatar = image?.secure_url;
+    }
+    const conversation = await GroupConversation.findByIdAndUpdate(
+      conversationId,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+    res.status(200).json({
+      status: "success",
+      data: conversation,
+      message: "Group Details Updated successfully",
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ status: "failed", data: null, message: "Internal Server Error" });
+  }
+};
+
 const updateUserPassword = async (req: AuthenticatedRequest, res: Response) => {
   const { currentPassword, newPassword } = req.body;
 
@@ -395,10 +435,12 @@ const getUnreadMessagesCount = async (
         await DirectMessage.find({
           recipient: userId,
           isRead: false,
+          messageType: { $ne: "system" },
         }).countDocuments(),
         await GroupMessage.find({
           recipients: userId,
           readBy: { $ne: userId },
+          messageType: { $ne: "system" },
         }).countDocuments(),
       ]);
     res.status(200).json({
@@ -592,4 +634,5 @@ export {
   updateUserPassword,
   handleUpload,
   getFile,
+  handleUpdateGroupDetails,
 };

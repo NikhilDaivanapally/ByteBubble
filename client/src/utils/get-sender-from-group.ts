@@ -18,7 +18,7 @@ function getSenderFromGroup(
   if (chatType !== direct && !el.isOutgoing) {
     groupConversations?.forEach((conv) => {
       if (conv._id === el?.conversationId || conv._id === el?._id) {
-        const foundUser = [...conv.users, conv.admin].find(
+        const foundUser = [...conv.users].find(
           (user) => el.from?._id === user?._id
         );
         if (foundUser) {

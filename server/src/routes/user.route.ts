@@ -16,6 +16,7 @@ import {
   handleUpload,
   updateUserPassword,
   updateUserProfile,
+  handleUpdateGroupDetails,
 } from "../controllers/user.controller";
 
 const router = Router();
@@ -80,6 +81,12 @@ router.post(
 );
 
 router.get("/file/:id", ensureAuthenticated, getFile as RequestHandler);
+router.put(
+  "/group-details",
+  ensureAuthenticated,
+  upload.single("avatar"),
+  handleUpdateGroupDetails as RequestHandler
+);
 
 router.post("/addrequest", async (req, res) => {
   const { sender, recipient } = req.body;

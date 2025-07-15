@@ -35,7 +35,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   size = "md",
   online = false,
   className = "",
-  fallBackType = { direct },
+  fallBackType = direct,
 }) => {
   const FallbackIcon =
     fallBackType == direct ? Icons.UserIcon : Icons.UsersIcon;
@@ -58,6 +58,7 @@ export const Avatar: React.FC<AvatarProps> = ({
           className="rounded-full object-cover w-full h-full border border-gray-300"
         />
       ) : (
+        // <Icons.UserIcon className=""/>
         <FallbackIcon className={fallBackStyle[size]} />
       )}
       {fallBackType == direct && online && (

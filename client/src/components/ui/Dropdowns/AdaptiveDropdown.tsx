@@ -57,7 +57,7 @@ export const AdaptiveDropdown = ({
     <div className={`relative inline-block ${className}`} ref={triggerRef}>
       <div
         onClick={toggleDropdown}
-        className="mr-2 opacity-0 group-hover:opacity-100 transition hover:bg-gray-100 rounded-full cursor-pointer"
+        className="opacity-0 group-hover:opacity-100 transition hover:bg-gray-100 rounded-full cursor-pointer"
       >
         {children}
       </div>

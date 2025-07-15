@@ -56,7 +56,7 @@ const DirectDocumentMsg = ({
   if (isPdf) {
     return (
       <div
-        className={`Media_msg relative w-fit max-w-[90%] sm:max-w-[80%] lg:max-w-[60%] flex group items-start ${
+        className={`Media_msg relative w-fit max-w-[90%] sm:max-w-[80%] lg:max-w-[60%]  flex gap-1.5 group items-start ${
           isOutgoing ? "ml-auto" : ""
         }`}
       >
@@ -139,7 +139,7 @@ const DirectDocumentMsg = ({
 
   return (
     <div
-      className={`Media_msg relative w-fit flex group items-start ${
+      className={`Media_msg relative w-fit flex gap-1.5 group items-start ${
         isOutgoing ? "ml-auto" : ""
       }`}
     >

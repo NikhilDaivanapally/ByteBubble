@@ -79,7 +79,7 @@ const CameraModule = () => {
   return (
     <div className="absolute inset-0 flex-center flex-col gap-10 backdrop-blur z-50">
       <Icons.XMarkIcon
-        className="w-8 absolute top-0 right-0 ml-auto cursor-pointer"
+        className="w-8 absolute top-4 right-4 ml-auto cursor-pointer"
         onClick={handleOffCamera}
       />
       <video ref={cameraRef} autoPlay></video>

@@ -9,6 +9,8 @@ import { AggregatedGroupConversation } from "../../types/aggregated-response/con
 import { GroupConversationResponse } from "../../types/response/conversation/group-conversation-response.type";
 import { GroupMessage } from "../../models/groupMessage.model";
 import { ObjectId } from "bson";
+import { formatGroupMessages } from "../../utils/formatMessages";
+import { GroupMessageResponse } from "../../types/response/message/group-message-response.type";
 export async function handleCreateGroup(data: any, io: Server) {
   const { name, image, participants, createdBy } = data;
 
@@ -16,6 +18,7 @@ export async function handleCreateGroup(data: any, io: Server) {
     name,
     participants,
     createdBy: createdBy?._id,
+    admins: [createdBy?._id],
   };
 
   if (image) {
@@ -53,19 +56,7 @@ export async function handleCreateGroup(data: any, io: Server) {
       createdBy?._id as string
     );
 
-  const participantsIds = participants.filter(
-    (id: string) => id !== createdBy?._id
-  );
-
-  const sender = await User.findById(createdBy?._id).select("socketId -_id");
-  if (sender?.socketId) {
-    io.to(sender.socketId).emit(
-      "group:new:admin",
-      formattedGroupConversation[0]
-    );
-  }
-
-  const socketPromises = participantsIds.map((id: Types.ObjectId) =>
+  const socketPromises = participants.map((id: Types.ObjectId) =>
     User.findById(id)
       .select("socketId -_id")
       .then((user) => user?.socketId)
@@ -79,8 +70,96 @@ export async function handleCreateGroup(data: any, io: Server) {
   });
 }
 
-export async function handleAddMembersToGroup(data: any, io: Server) {
-  const { _id, senderId, members } = data;
+export async function handleAdminAssign(data: any, io: Server) {
+  try {
+    const { memberId, conversationId, broadCastTo } = data;
+    await GroupConversation.findByIdAndUpdate(
+      conversationId,
+      { $addToSet: { admins: memberId } },
+      { new: true }
+    );
+    const socketPromises = broadCastTo.map((id: any) =>
+      User.findById(id)
+        .select("socketId -_id")
+        .then((user) => user?.socketId)
+    );
+
+    const socketIds = await Promise.all(socketPromises);
+    socketIds.forEach((socketId) => {
+      if (socketId) {
+        io.to(socketId).emit("group:admin:assign:success", {
+          memberId,
+          conversationId,
+        });
+      }
+    });
+  } catch (error) {}
+}
+
+export async function handleAdminDismiss(data: any, io: Server) {
+  // try {
+  //   const { _id, conversationId, messagePayload } = data;
+  //   const { sender, recipients } = messagePayload;
+
+  //   // removed _id in admins array
+  //   const conversation = await GroupConversation.findByIdAndUpdate(
+  //     conversationId,
+  //     { $pull: { admins: _id } },
+  //     { new: true }
+  //   );
+
+  //   // generate the system message
+  //   const groupMessage = await GroupMessage.create(messagePayload);
+  //   const messages = await GroupMessage.find({
+  //     _id: groupMessage?._id,
+  //   }).populate({ path: "sender", select: "_id userName avatar" });
+  //   let formatted: GroupMessageResponse[] = formatGroupMessages(
+  //     messages,
+  //     sender
+  //   );
+  //   const socketPromises = [sender, ...recipients].map((id: any) =>
+  //     User.findById(id)
+  //       .select("socketId -_id")
+  //       .then((user) => user?.socketId)
+  //   );
+
+  //   const socketIds = await Promise.all(socketPromises);
+  //   socketIds.forEach((socketId) => {
+  //     if (socketId) {
+  //       io.to(socketId).emit("group:message:new", formatted[0]);
+  //     }
+  //   });
+  // } catch (err) {
+  //   console.log("error", err);
+  // }
+
+  try {
+    const { memberId, conversationId, broadCastTo } = data;
+    await GroupConversation.findByIdAndUpdate(
+      conversationId,
+      { $pull: { admins: memberId } },
+      { new: true }
+    );
+    const socketPromises = broadCastTo.map((id: any) =>
+      User.findById(id)
+        .select("socketId -_id")
+        .then((user) => user?.socketId)
+    );
+
+    const socketIds = await Promise.all(socketPromises);
+    socketIds.forEach((socketId) => {
+      if (socketId) {
+        io.to(socketId).emit("group:admin:dismiss:success", {
+          memberId,
+          conversationId,
+        });
+      }
+    });
+  } catch (error) {}
+}
+
+export async function handleAddMembers(data: any, io: Server) {
+  const { conversationId, senderId, members, broadCastTo } = data;
 
   const newMembers = members
     ?.map(({ _id }: { _id: string }) => {
@@ -89,24 +168,16 @@ export async function handleAddMembersToGroup(data: any, io: Server) {
       }
     })
     .filter((el: any) => el);
-  await GroupConversation.updateOne(
-    { _id },
-    {
-      $addToSet: {
-        participants: {
-          $each: newMembers,
-        },
+  await GroupConversation.findByIdAndUpdate(conversationId, {
+    $addToSet: {
+      participants: {
+        $each: newMembers,
       },
-    }
-  );
+    },
+  });
 
-  const sender = await User.findById(senderId).select("socketId -_id");
-  if (sender?.socketId) {
-    io.to(sender.socketId).emit("group:new:members", {});
-  }
-
-  const socketPromises = members.map((member: any) =>
-    User.findById(member?._id)
+  const socketPromises = broadCastTo.map((id: any) =>
+    User.findById(id)
       .select("socketId -_id")
       .then((user) => user?.socketId)
   );
@@ -114,7 +185,36 @@ export async function handleAddMembersToGroup(data: any, io: Server) {
   const socketIds = await Promise.all(socketPromises);
   socketIds.forEach((socketId) => {
     if (socketId) {
-      io.to(socketId).emit("group:new:members", data);
+      io.to(socketId).emit("group:remove:member:success", {
+        members,
+        conversationId,
+      });
     }
   });
+}
+
+export async function handleRemoveMember(data: any, io: Server) {
+  try {
+    const { memberId, conversationId, broadCastTo } = data;
+    await GroupConversation.findByIdAndUpdate(
+      conversationId,
+      { $pull: { participants: memberId, admins: memberId } },
+      { new: true }
+    );
+    const socketPromises = broadCastTo.map((id: any) =>
+      User.findById(id)
+        .select("socketId -_id")
+        .then((user) => user?.socketId)
+    );
+
+    const socketIds = await Promise.all(socketPromises);
+    socketIds.forEach((socketId) => {
+      if (socketId) {
+        io.to(socketId).emit("group:remove:member:success", {
+          memberId,
+          conversationId,
+        });
+      }
+    });
+  } catch (error) {}
 }

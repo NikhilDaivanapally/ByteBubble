@@ -7,7 +7,8 @@ export type AggregatedGroupConversation = {
   name: string;
   avatar: string;
   about: string;
-  admin: User;
+  createdBy: User;
+  admins: string[];
   participants: User[];
   messages: AggregatedGroupMessage[];
   createdAt: string;

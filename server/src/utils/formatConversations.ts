@@ -82,14 +82,14 @@ const formatGroupConversations = (
       return !hasRead;
     });
 
-
     return {
       _id: el._id,
       name: el.name,
       avatar: el?.avatar,
       about: el.about,
       users: el.participants,
-      admin: el.admin,
+      createdBy: el.createdBy,
+      admins: el.admins,
       meta: el.meta,
       message: {
         messageType: lastMessage?.messageType,

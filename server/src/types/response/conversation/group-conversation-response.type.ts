@@ -10,7 +10,8 @@ export type GroupConversationResponse = {
   name: string;
   avatar: string | undefined;
   about: string;
-  admin: User;
+  createdBy: User;
+  admins: string[];
   users: User[];
   message: {
     messageType: MessageType | undefined;

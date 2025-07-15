@@ -10,6 +10,7 @@ import { DirectImageMsg } from "./Chat/DirectChat/messages/ImageMsg";
 import { DirectTextMsg } from "./Chat/DirectChat/messages/TextMsg";
 import DirectDocumentMsg from "./Chat/DirectChat/messages/documentMsg";
 import { DirectLinkMsg } from "./Chat/DirectChat/messages/LinkMsg";
+import ReadIndicator from "./ui/ReadIndicator";
 
 const DirectMessageInfo = () => {
   const dispatch = useDispatch();
@@ -66,10 +67,7 @@ const DirectMessageInfo = () => {
 
           <div>
             <div className="mb-2 flex items-center gap-2">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 rounded-full bg-green-600" />
-                <div className="w-2 h-2 rounded-full bg-green-600" />
-              </div>
+              <ReadIndicator read={true} />
               <p>Read</p>
             </div>
             {directMessageInfo?.readAt && (
@@ -82,10 +80,7 @@ const DirectMessageInfo = () => {
 
           <div>
             <div className="mb-2 flex items-center gap-2">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 rounded-full bg-gray-300" />
-                <div className="w-2 h-2 rounded-full bg-gray-300" />
-              </div>
+              <ReadIndicator read={false} />
               <p>Delivered</p>
             </div>
             <span className="text-black/60 text-sm">

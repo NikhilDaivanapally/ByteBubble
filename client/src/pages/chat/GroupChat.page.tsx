@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GroupConversation } from "../../components/Conversation";
 import {
   ResetGroupChat,
@@ -12,6 +12,7 @@ import SearchInput from "../../components/ui/SearchInput";
 import { motion } from "motion/react";
 import {
   selectConversation,
+  setIsAddMembersActive,
   updateMediaFilePreviews,
 } from "../../store/slices/appSlice";
 import { GroupConversationProps } from "../../types";
@@ -23,12 +24,17 @@ import NoChat from "../../components/ui/NoChat";
 import Dialog from "../../components/ui/Dialog/Dialog";
 import Chat from "../../components/Chat/GroupChat/GroupChat";
 import { useLazyGetGroupConversationsQuery } from "../../store/slices/api";
+import AddMembersToGroup from "../../components/Chat/SidePanels/GroupProfilePanel/AddMembersToGroup";
 const GroupChat = () => {
   const dispatch = useDispatch();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { activeChatId, friends, mediaFiles, mediaFilePreviews } = useSelector(
-    (state: RootState) => state.app
-  );
+  const {
+    activeChatId,
+    friends,
+    mediaFiles,
+    mediaFilePreviews,
+    isAddMembersActive,
+  } = useSelector((state: RootState) => state.app);
 
   const {
     GroupConversations,
@@ -37,7 +43,7 @@ const GroupChat = () => {
   } = useSelector((state: RootState) => state.conversation.group_chat);
   const [filteredConversations, setFilteredConversations] = useState<
     GroupConversationProps[]
-  >(GroupConversations || []);
+  >([]);
 
   const [fetchGroupConversations, { data }] = useLazyGetGroupConversationsQuery(
     {}
@@ -58,16 +64,17 @@ const GroupChat = () => {
     fetchGroupConversations({});
   }, [GroupConversations]);
 
+  const handleClose = useCallback(() => {
+    dispatch(setIsAddMembersActive(false));
+  }, [dispatch]);
+
   // Update conversation preview when new message arrives
   useEffect(() => {
     if (!current_group_messages?.length || !current_group_conversation) return;
-
     const lastMsg = current_group_messages[current_group_messages.length - 1];
-
-    const foundUser = [
-      ...current_group_conversation?.users,
-      current_group_conversation?.admin,
-    ].find((user) => user?._id === lastMsg.from?._id);
+    const foundUser = [...current_group_conversation?.users].find(
+      (user) => user?._id === lastMsg.from?._id
+    );
 
     dispatch(
       updateGroupConversation({
@@ -197,6 +204,11 @@ const GroupChat = () => {
           availableMembers={friends}
           onClose={() => setIsDialogOpen(false)}
         />
+      </Dialog>
+
+      {/* Add Members to Group Dialog */}
+      <Dialog isOpen={isAddMembersActive} onClose={handleClose}>
+        <AddMembersToGroup onClose={handleClose} />
       </Dialog>
     </div>
   );

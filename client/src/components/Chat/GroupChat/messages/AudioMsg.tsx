@@ -111,7 +111,7 @@ export const GroupAudioMsg = ({
 
   return (
     <div
-      className={`Audio_msg relative w-fit flex group items-start ${
+      className={`Audio_msg relative w-fit flex gap-1.5 group items-start ${
         isOutgoing ? "ml-auto" : ""
       }`}
     >

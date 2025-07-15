@@ -14,7 +14,7 @@ export const DirectLinkMsg = ({
   const time = formatTo12HourTime(el.createdAt);
   return (
     <div
-      className={`Text_msg relative w-fit max-w-[90%] sm:max-w-[80%] lg:max-w-[60%] flex group items-start ${
+      className={`Text_msg relative w-fit max-w-[90%] sm:max-w-[80%] lg:max-w-[60%] flex gap-1.5 group items-start ${
         isOutgoing ? "ml-auto" : ""
       }`}
     >
@@ -31,7 +31,10 @@ export const DirectLinkMsg = ({
               : "bg-white rounded-bl-none"
           }`}
         >
-          <a href={el.message.url} className="tracking-normal text-btn-primary underline">
+          <a
+            href={el.message.url}
+            className="tracking-normal text-btn-primary underline"
+          >
             {el.message?.url}
           </a>
         </div>

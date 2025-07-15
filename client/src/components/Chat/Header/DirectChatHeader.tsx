@@ -31,7 +31,6 @@ const DirectChatHeader = ({ handleOpenShowDetails = () => {} }) => {
         <Avatar
           size="md"
           url={current_direct_conversation?.avatar}
-          fallBackType="direct"
           online={current_direct_conversation?.isOnline}
         />
         <div className="min-w-0">

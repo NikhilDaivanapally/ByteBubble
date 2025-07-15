@@ -16,6 +16,7 @@ const initialState: appSliceProps = {
   directMessageInfo: null,
   groupMessageInfo: null,
   isGroupInfoActive: false,
+  isAddMembersActive: false,
   unreadCount: {
     directChats: 0,
     groupChats: 0,
@@ -93,6 +94,9 @@ const slice = createSlice({
     setIsGroupInfoActive(state, action) {
       state.isGroupInfoActive = action.payload;
     },
+    setIsAddMembersActive(state, action) {
+      state.isAddMembersActive = action.payload;
+    },
   },
 });
 export const {
@@ -115,6 +119,7 @@ export const {
   setDirectMessageInfo,
   setGroupMessageInfo,
   setIsGroupInfoActive,
+  setIsAddMembersActive,
 } = slice.actions;
 
 export default slice.reducer;

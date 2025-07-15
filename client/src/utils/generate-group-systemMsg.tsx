@@ -4,8 +4,12 @@ import { Icons } from "../icons";
 import { RootState } from "../store/store";
 import { Button } from "../components/ui/Button";
 import { useCallback } from "react";
-import { setIsGroupInfoActive } from "../store/slices/appSlice";
+import {
+  setIsAddMembersActive,
+  setIsGroupInfoActive,
+} from "../store/slices/appSlice";
 import { Avatar } from "../components/ui/Avatar";
+import { group } from "./conversation-types";
 
 type User = { _id: string; userName: string };
 
@@ -32,12 +36,16 @@ export const generateGroupSystemMessage = ({
     dispatch(setIsGroupInfoActive(true));
   }, [dispatch]);
 
+  const handleOpenAddMembers = useCallback(() => {
+    dispatch(setIsAddMembersActive(true));
+  }, [dispatch]);
+
   switch (eventType) {
     case GroupSystemEventType.GROUP_CREATED:
       return from?._id === currentUserId ? (
         <div className="flex-center flex-col gap-1 bg-gray-300 p-4 px-8 rounded-2xl">
           <div className="rounded-full bg-gray-400/20">
-            <Avatar size="xl" url={currentConversation?.avatar} />
+            <Avatar size="xl" url={currentConversation?.avatar} fallBackType={group} />
           </div>
           <p className="font-semibold">You created this Group</p>
           <span className="text-sm">
@@ -62,13 +70,14 @@ export const generateGroupSystemMessage = ({
               shape="pill"
               iconPosition="left"
               icon={<Icons.UserPlusIcon className="w-4 text-btn-primary" />}
+              onClick={handleOpenAddMembers}
             >
               Add Members
             </Button>
           </div>
         </div>
       ) : (
-        <div className="flex-center flex-col gap-1 bg-gray-300 p-4 px-8 rounded-2xl">
+        <div className="flex-center w-85 flex-col gap-1 bg-gray-300 p-4 px-8 rounded-2xl">
           <div className="rounded-full bg-gray-400/20">
             <Avatar size="xl" url={currentConversation?.avatar} />
           </div>
@@ -89,22 +98,25 @@ export const generateGroupSystemMessage = ({
             >
               Group Info
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              shape="pill"
-              iconPosition="left"
-              icon={<Icons.UserPlusIcon className="w-4 text-btn-primary" />}
-            >
-              Add Members
-            </Button>
+            {currentConversation?.admins.includes(currentUserId) && (
+              <Button
+                variant="outline"
+                size="sm"
+                shape="pill"
+                iconPosition="left"
+                icon={<Icons.UserPlusIcon className="w-4 text-btn-primary" />}
+                onClick={handleOpenAddMembers}
+              >
+                Add Members
+              </Button>
+            )}
           </div>
         </div>
       );
     case GroupSystemEventType.GROUP_RENAMED:
       return (
         <p className="text-xs text-black/60 px-2 py-1 z-2 bg-gray-300 rounded-md">
-          {fromName} changed the group name to "{currentConversation?.name}";
+          {fromName} changed the group name to "{currentConversation?.name}"
         </p>
       );
     case GroupSystemEventType.GROUP_ICON_CHANGED:
@@ -117,41 +129,46 @@ export const generateGroupSystemMessage = ({
       return (
         <p className="text-xs text-black/60 px-2 py-1 z-2 bg-gray-300 rounded-md">
           {fromName} changed the group description{" "}
-          <span onClick={handleOpenProfile}>Click to view</span>
+          <span
+            className="underline cursor-pointer"
+            onClick={handleOpenProfile}
+          >
+            Click to view
+          </span>
         </p>
       );
     case GroupSystemEventType.ADMIN_ASSIGNED:
       return (
         <p className="text-xs text-black/60 px-2 py-1 z-2 bg-gray-300 rounded-md">
           {from?._id == currentUserId
-            ? `you're now an admin`
-            : `${fromName} assigned ${toName} as admin`}
+            ? `${fromName} assigned ${toName} as admin`
+            : `you're now an admin`}
         </p>
       );
-    case GroupSystemEventType.ADIM_REMOVED:
+    case GroupSystemEventType.ADMIN_REMOVED:
       return (
         <p className="text-xs text-black/60 px-2 py-1 z-2 bg-gray-300 rounded-md">
           {from?._id == currentUserId
-            ? `you're no longer an admin`
-            : `${fromName} removed ${toName} from admin`}
+            ? `${fromName} removed ${toName} from admin`
+            : `you're no longer an admin`}
         </p>
       );
     case GroupSystemEventType.USER_ADDED:
       return (
         <p className="text-xs text-black/60 px-2 py-1 z-2 bg-gray-300 rounded-md">
-          {fromName} added {toName};
+          {fromName} added {toName}
         </p>
       );
     case GroupSystemEventType.USER_REMOVED:
       return (
         <p className="text-xs text-black/60 px-2 py-1 z-2 bg-gray-300 rounded-md">
-          {fromName} removed {toName};
+          {fromName} removed {toName}
         </p>
       );
     case GroupSystemEventType.USER_LEFT:
       return (
         <p className="text-xs text-black/60 px-2 py-1 z-2 bg-gray-300 rounded-md">
-          {fromName} left;
+          {fromName} left
         </p>
       );
     default:

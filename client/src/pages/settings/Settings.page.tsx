@@ -11,6 +11,7 @@ import {
 } from "../../store/slices/settingsSlice";
 import { Button } from "../../components/ui/Button";
 import { apiSlice, useLogoutMutation } from "../../store/slices/api";
+import { socket } from "../../socket";
 
 const Settings = () => {
   const dispatch = useDispatch();
@@ -20,6 +21,7 @@ const Settings = () => {
   const activeSettingPath = useSelector(
     (state: RootState) => state.settings.activeSettingPath
   );
+  const { friends } = useSelector((state: RootState) => state.app);
 
   const [logout, { isLoading, data }] = useLogoutMutation();
 
@@ -32,6 +34,7 @@ const Settings = () => {
 
   useEffect(() => {
     if (data) {
+      socket.emit("exit", { user_id: auth?._id, friends });
       dispatch(apiSlice.util.resetApiState());
       dispatch({ type: "RESET_STORE" });
       navigate("/signin");

@@ -19,12 +19,12 @@ export const GroupLinkMsg = ({
   const time = formatTo12HourTime(el.createdAt);
   return (
     <div
-      className={`Text_msg relative w-fit max-w-[90%] sm:max-w-[80%] lg:max-w-[60%] flex group items-start ${
+      className={`Text_msg relative w-fit max-w-[90%] sm:max-w-[80%] lg:max-w-[60%] flex gap-1.5 group items-start ${
         isOutgoing ? "ml-auto" : ""
       }`}
     >
       {isOutgoing && <GroupMessageActions message={el} />}
-            {el.isIncoming && <Avatar size="sm" url={el.from.avatar} />}
+      {el.isIncoming && <Avatar size="sm" url={el.from.avatar} />}
 
       <section
         className="space-y-1"

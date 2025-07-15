@@ -32,6 +32,7 @@ import {
   useGetUnreadMessagesCountQuery,
 } from "../../store/slices/api";
 
+// register & listen for socket events
 const useRegisterSocketEvents = (isConnected: boolean) => {
   useFriendRequestEvents(isConnected);
   useTypingEvents(isConnected);
@@ -48,23 +49,30 @@ const ChatLayout = () => {
   const dispatch = useDispatch();
   const { pathname } = useLocation();
 
+  // current Authenticated user
   const user = useSelector((state: RootState) => state.auth.user);
+  // connections
   const { friends } = useSelector((state: RootState) => state.app);
-
+  // get unread messages count
   const { data: unreadCountdata } = useGetUnreadMessagesCountQuery({});
+  // get direct conversations
   const { data: directConversationData } = useGetDirectConversationsQuery({});
+  // get connections
   const { data: friendsData } = useGetConnectionsQuery({});
 
+  // update store with unread messages count
   useEffect(() => {
     if (!unreadCountdata?.data) return;
     dispatch(setUnreadCount(unreadCountdata?.data));
   }, [unreadCountdata?.data]);
 
+  // update store with directConversations
   useEffect(() => {
     if (!directConversationData?.data) return;
     dispatch(setDirectConversations(directConversationData.data));
   }, [directConversationData?.data, dispatch]);
 
+  // update store with connections
   useEffect(() => {
     if (!friendsData?.data) return;
     dispatch(updateFriends(friendsData.data));

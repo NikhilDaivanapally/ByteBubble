@@ -11,6 +11,8 @@ import { GroupAudioMsg } from "./Chat/GroupChat/messages/AudioMsg";
 import { GroupTextMsg } from "./Chat/GroupChat/messages/TextMsg";
 import { GroupLinkMsg } from "./Chat/GroupChat/messages/LinkMsg";
 import GroupDocumentMsg from "./Chat/GroupChat/messages/documentMsg";
+import { direct } from "../utils/conversation-types";
+import ReadIndicator from "./ui/ReadIndicator";
 
 const GroupMessageInfo = () => {
   const dispatch = useDispatch();
@@ -140,10 +142,7 @@ const GroupMessageInfo = () => {
           {seenBy.length > 0 && (
             <div>
               <div className="mb-2 flex items-center gap-2">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-green-600" />
-                  <div className="w-2 h-2 rounded-full bg-green-600" />
-                </div>
+                <ReadIndicator read={true} />
                 <p>Read by</p>
               </div>
               <ul>
@@ -167,10 +166,7 @@ const GroupMessageInfo = () => {
           {deliveredTo.length > 0 && (
             <div>
               <div className="mb-2 flex items-center gap-2">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-gray-300" />
-                  <div className="w-2 h-2 rounded-full bg-gray-300" />
-                </div>
+                <ReadIndicator read={false} />
                 <p>Delivered to</p>
               </div>
               <ul>

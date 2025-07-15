@@ -8,6 +8,7 @@ import {
   setIsGroupInfoActive,
 } from "../../../store/slices/appSlice";
 import { useCallback } from "react";
+import { group } from "../../../utils/conversation-types";
 
 const GroupChatHeader = () => {
   const dispatch = useDispatch();
@@ -50,7 +51,7 @@ const GroupChatHeader = () => {
         <Avatar
           size="md"
           url={current_group_conversation?.avatar}
-          fallBackType="group"
+          fallBackType={group}
         />
         <div className="min-w-0">
           <p className="text-base font-medium text-gray-900 truncate">

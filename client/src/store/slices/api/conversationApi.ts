@@ -35,6 +35,13 @@ export const conversationApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    updateGroupInfo: builder.mutation({
+      query: (data) => ({
+        url: `/user/group-details`,
+        method: "PUT",
+        body: data,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -46,4 +53,5 @@ export const {
   useLazyGetGroupConversationsQuery,
   useGetUnreadMessagesCountQuery,
   useCreateGroupMutation,
+  useUpdateGroupInfoMutation,
 } = conversationApi;

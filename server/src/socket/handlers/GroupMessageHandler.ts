@@ -95,7 +95,7 @@ export async function handleGroupAudioMessage(messagePayload: any, io: Server) {
 
   // Convert the Blob to a readable stream
   const readableStream = new Readable();
-  readableStream.push(Buffer.from(messagePayload.message));
+  readableStream.push(Buffer.from(messagePayload?.message));
   readableStream.push(null);
 
   // Upload to GridFS
@@ -136,7 +136,7 @@ export async function handleGroupMessageUnreadUpdate(
   messagePayload: any,
   io: Server
 ) {
-  const recipientsSocketIds = messagePayload.recipientsIds.map(
+  const recipientsSocketIds = messagePayload?.recipientsIds?.map(
     async (id: string) => {
       const { socketId }: any = await User.findById(id).select("socketId -_id");
       return socketId;

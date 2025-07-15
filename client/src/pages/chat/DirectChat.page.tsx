@@ -31,7 +31,7 @@ const IndividualChat = () => {
 
   const [filteredConversations, setFilteredConversations] = useState<
     DirectConversationProps[]
-  >(DirectConversations || []);
+  >([]);
 
   // Keep filtered conversations in sync
   useEffect(() => {
@@ -52,6 +52,7 @@ const IndividualChat = () => {
           messageType: lastMsg.messageType,
           message: lastMsg.message,
           createdAt: lastMsg.createdAt,
+          isEdited: lastMsg.isEdited,
           systemEventType: lastMsg?.systemEventType,
           metadata: lastMsg?.metadata,
           eventUserSnapshot: lastMsg?.eventUserSnapshot,

@@ -8,7 +8,6 @@ import {
 } from "../../../../store/slices/conversation";
 import { Icons } from "../../../../icons";
 import { Avatar } from "../../../ui/Avatar";
-import { direct } from "../../../../utils/conversation-types";
 import DirectMediaPreviewSlider from "../MediaPreviewSlider/DirectMediaPreviewSlider";
 import {
   blockUser,
@@ -178,12 +177,7 @@ const DirectProfileDetails = ({
 
           <div className="space-y-4 divide-y divide-gray-300">
             <div className="flex flex-col items-center gap-4 py-2">
-              <Avatar
-                size="xl"
-                url={imageSrc}
-                online={isOnline}
-                fallBackType={direct}
-              />
+              <Avatar size="xl" url={imageSrc} online={isOnline} />
               <div className="text-center">
                 <p className="font-semibold">{name}</p>
                 <p className="text-black/60 text-sm">example@gmail.com</p>

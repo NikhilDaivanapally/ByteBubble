@@ -391,7 +391,8 @@ const TextInputForm = ({
       {/* Send Button */}
       <button
         type="submit"
-        className="p-3 bg-btn-primary text-white rounded-lg cursor-pointer"
+        disabled={!Boolean(message)}
+        className="p-3 bg-btn-primary text-white rounded-lg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Icons.SendIcon className="text-xl" />
       </button>

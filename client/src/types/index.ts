@@ -190,7 +190,8 @@ export type GroupConversationProps = {
   name: string;
   avatar: string | undefined;
   about: string;
-  admin: UserProps;
+  createdBy: UserProps;
+  admins: string[];
   users: UserProps[];
   message: GroupMessage;
   from: {
@@ -227,6 +228,7 @@ export type appSliceProps = {
   isTypingRoomId: string | null;
   directMessageInfo: DirectMessageProps | null;
   groupMessageInfo: GroupMessageProps | null;
+  isAddMembersActive:boolean;
   unreadCount: {
     directChats: number;
     groupChats: number;
