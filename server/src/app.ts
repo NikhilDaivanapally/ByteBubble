@@ -149,7 +149,9 @@ app.post(
       });
     } catch (error) {
       fs.unlinkSync(filePath as string);
-      res.status(500).json({ success: false, error: "Upload failed" });
+      res
+        .status(500)
+        .json({ success: false, error: "Upload failed", message: error });
     }
   }
 );
