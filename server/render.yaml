@@ -1,8 +1,10 @@
 services:
   - type: web
-    name: my-ts-server
+    name: my-express-app
     env: node
-    buildCommand: echo "Build skipped - using prebuilt dist"
+    buildCommand: |
+      apt-get update && apt-get install -y poppler-utils
+      echo "Build skipped - using prebuilt dist"
     startCommand: npm start
     plan: free
     autoDeploy: true
