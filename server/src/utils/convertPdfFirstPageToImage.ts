@@ -1,29 +1,38 @@
-import fs from "fs";
-import { v2 as cloudinary } from "cloudinary";
-import puppeteer from "puppeteer";
+import { v2 } from "cloudinary";
 import path from "path";
+import pdf from "pdf-poppler";
+import fs from "fs";
 
 export async function convertPdfFirstPageToImage(
   filePath: string
 ): Promise<string> {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox"],
-  });
-  const page = await browser.newPage();
-  await page.setViewport({ width: 1024, height: 768 });
-  await page.goto(`file://${path.resolve(filePath)}#page=1`, {
-    waitUntil: "networkidle0",
-  });
-  const screenshotPath = `${filePath.replace(/\.[^/.]+$/, "")}-preview.png`;
-  await page.screenshot({ path: screenshotPath as `${string}.png` });
-  await browser.close();
+  const outputDir = path.dirname(filePath);
+  const outputPrefix = path.basename(filePath, path.extname(filePath));
 
-  const previewUpload = await cloudinary.uploader.upload(screenshotPath, {
-    folder: "pdf-previews",
-    resource_type: "image",
-  });
+  const options = {
+    format: "png",
+    out_dir: outputDir,
+    out_prefix: outputPrefix,
+    page: 1,
+  };
 
-  fs.unlinkSync(screenshotPath);
-  return previewUpload.secure_url;
+  try {
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File does not exist at path: ${filePath}`);
+    }
+    await pdf.convert(filePath, options);
+    const expectedImagePath = path.join(outputDir, `${outputPrefix}-1.png`);
+    if (!fs.existsSync(expectedImagePath)) {
+      throw new Error(`Expected image not found: ${expectedImagePath}`);
+    }
+    const previewUpload = await v2.uploader.upload(expectedImagePath, {
+      folder: "pdf-previews",
+      resource_type: "image",
+    });
+    fs.unlinkSync(expectedImagePath);
+    return previewUpload.secure_url;
+  } catch (error: any) {
+    console.error("PDF conversion error:", error);
+    throw new Error(`PDF conversion failed: ${error.message}`);
+  }
 }

@@ -82,16 +82,10 @@ const DirectDocumentMsg = ({
                   onClick={() => dispatch(setPdfPreview(el))}
                 >
                   <img
-                    className="h-full w-[150%] object-cover rounded-lg"
+                    className="h-full w-full object-contain origin-top scale-250 rounded-lg"
                     src={el?.message?.previewUrl}
                     alt={fileName}
                     onLoad={scrollToBottom}
-                    style={{
-                      userSelect: "none",
-                      transform: "translateX(-47%) scale(1.5)",
-                      transformOrigin: "top left",
-                      transition: "transform 0.3s ease",
-                    }}
                   />
                 </div>
               )}
