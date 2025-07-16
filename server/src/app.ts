@@ -78,26 +78,40 @@ app.use("/api/v1/user", userRoute);
 
 app.post(
   "/api/v1/upload",
-  upload.single("file"),
+  upload.fields([
+    { name: "file", maxCount: 1 },
+    { name: "previewFile", maxCount: 1 },
+  ]),
   ensureAuthenticated,
   async (req: Request, res: Response) => {
-    const filePath = req?.file?.path;
-    const originalName = req?.file?.originalname as string;
-    const mimeType = req?.file?.mimetype;
+    const file = req.files?.["file"]?.[0];
+    const previewFile = req.files?.["previewFile"]?.[0];
+    const filePath = file?.path;
+    const previewFilePath = previewFile?.path;
+    const originalName = file?.originalname as string;
+    const mimeType = file?.mimetype;
+
+    if (!filePath || !mimeType) {
+      res.status(400).json({ success: false, error: "File missing" });
+      return;
+    }
 
     try {
       let previewUrl: string | null = null;
       let fileUrl: string | null = null;
 
-      if (mimeType?.startsWith("image/") && filePath) {
+      // 🖼️ IMAGE upload (to Cloudinary)
+      if (mimeType.startsWith("image/")) {
         const uploadResult = await v2.uploader.upload(filePath, {
           folder: "chat-media",
           resource_type: "image",
           use_filename: true,
         });
-        previewUrl = uploadResult?.secure_url;
+
+        previewUrl = uploadResult.secure_url;
         fileUrl = previewUrl;
         fs.unlinkSync(filePath);
+
         res.status(200).json({
           success: true,
           message: {
@@ -106,22 +120,32 @@ app.post(
           },
         });
         return;
-      } else if (mimeType == "application/pdf" && filePath) {
-        previewUrl = await convertPdfFirstPageToImage(filePath);
       }
-      //  All other files (DOCX, MP3, ZIP,MP3, MP4, etc.)
-      // GridFS storage
+
+      // 📄 PDF upload: Preview is sent by client as previewFile
+      if (mimeType === "application/pdf" && previewFilePath) {
+        const previewUploadResult = await v2.uploader.upload(previewFilePath, {
+          folder: "chat-media/previews",
+          resource_type: "image",
+          use_filename: true,
+        });
+
+        previewUrl = previewUploadResult.secure_url;
+        fs.unlinkSync(previewFilePath);
+      }
+
+      // 📦 Other file types (ZIP, MP3, DOCX, etc.) → GridFS
       const uploadStream = gridFSBucket.openUploadStream(originalName, {
         contentType: mimeType,
       });
-      if (!filePath) return;
 
       fs.createReadStream(filePath).pipe(uploadStream);
 
       uploadStream.on("finish", () => {
         fs.unlinkSync(filePath);
 
-        if (mimeType?.startsWith("audio/")) {
+        // 🎵 AUDIO file metadata response
+        if (mimeType.startsWith("audio/")) {
           res.json({
             success: true,
             message: {
@@ -135,6 +159,8 @@ app.post(
           });
           return;
         }
+
+        // 🧾 Other file response (PDF, DOCX, etc.)
         res.json({
           success: true,
           message: {
@@ -148,16 +174,22 @@ app.post(
         return;
       });
     } catch (error) {
-      fs.unlinkSync(filePath as string);
-      res
-        .status(500)
-        .json({ success: false, error: "Upload failed", message: error });
+      if (filePath) fs.unlinkSync(filePath);
+      if (previewFilePath) fs.unlinkSync(previewFilePath);
+
+      res.status(500).json({
+        success: false,
+        error: "Upload failed",
+        message: (error as Error).message,
+      });
+      return;
     }
   }
 );
+
 app.get(
   "/api/v1/upload/:id",
-  // ensureAuthenticated,
+  ensureAuthenticated,
   async (req: Request, res: Response) => {
     try {
       const objectId = new ObjectId(req.params.id);

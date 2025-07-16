@@ -34,6 +34,7 @@ const SendMediaMessage: React.FC = () => {
   const [firstPagePreviewUrl, setFirstPagePreviewUrl] = useState<string | null>(
     null
   );
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [isPdfJsLoading, setIsPdfJsLoading] = useState<boolean>(true);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -58,9 +59,10 @@ const SendMediaMessage: React.FC = () => {
   const generatePdfThumbnailWrapper = useCallback(async () => {
     if (!file || file.type !== "application/pdf") return;
     try {
-      const imageUrl = await generatePdfThumbnail(file);
-      if (imageUrl) {
-        setFirstPagePreviewUrl(imageUrl);
+      const preview = await generatePdfThumbnail(file);
+      if (preview?.imageUrl) {
+        setFirstPagePreviewUrl(preview?.imageUrl);
+        setPreviewFile(preview?.file); // previewFile only for pdf
       } else {
         throw new Error(
           "Failed to generate thumbnail. Please ensure it is a valid PDF file."
@@ -209,6 +211,9 @@ const SendMediaMessage: React.FC = () => {
     if (lastMedia.file.type.startsWith("audio")) {
       formData.append("duration", msgData?.message.duration);
       formData.append("source", "uploaded");
+    }
+    if (lastMedia.file.type.startsWith("application/pdf")) {
+      formData.append("previewFile", previewFile as File);
     }
 
     setMessage("");

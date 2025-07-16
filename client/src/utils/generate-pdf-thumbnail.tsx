@@ -71,64 +71,56 @@ export const ensurePdfJsLoaded = (): Promise<PdfJsLib> => {
 
 export const generatePdfThumbnail = async (
   file: File
-): Promise<string | null> => {
-  // Validate file type
+): Promise<{ file: File; imageUrl: string } | null> => {
   if (file.type !== "application/pdf") {
     console.error("generatePdfThumbnail: Provided file is not a PDF.");
     return null;
   }
 
   try {
-    // Ensure PDF.js is loaded before proceeding
     const pdfjsLib = await ensurePdfJsLoaded();
 
-    // Read the file as an ArrayBuffer
-    const reader = new FileReader();
     const arrayBuffer: ArrayBuffer = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
       reader.onload = (e) => resolve(e.target?.result as ArrayBuffer);
       reader.onerror = (err) => reject(err);
       reader.readAsArrayBuffer(file);
     });
 
-    // Load the PDF document
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
-    // Get the first page of the PDF
     const page = await pdf.getPage(1);
 
-    // Define the scale for rendering the page
-    const scale = 1.5; // Adjust for higher/lower resolution
-    const viewport = page.getViewport({ scale: scale });
+    const scale = 1.5;
+    const viewport = page.getViewport({ scale });
 
-    // Create a temporary canvas element to render the PDF page
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
 
     if (!context) {
-      throw new Error(
-        "generatePdfThumbnail: Could not get 2D rendering context for canvas."
-      );
+      throw new Error("generatePdfThumbnail: Could not get canvas context.");
     }
 
-    // Set canvas dimensions to match the viewport
-    canvas.height = viewport.height;
     canvas.width = viewport.width;
+    canvas.height = viewport.height;
 
-    // Render the PDF page onto the canvas
-    const renderContext: PdfRenderContext = {
-      canvasContext: context,
-      viewport: viewport,
-    };
-    await page.render(renderContext).promise;
+    await page.render({ canvasContext: context, viewport }).promise;
 
-    // Convert the canvas content to a PNG image data URL
-    const imageDataUrl = canvas.toDataURL("image/png");
-    return imageDataUrl;
-  } catch (error: any) {
-    console.error(
-      "generatePdfThumbnail: Error generating PDF thumbnail:",
-      error
+    const imageUrl = canvas.toDataURL("image/webp");
+
+    // Convert Data URL to Blob
+    const blob = await (await fetch(imageUrl)).blob();
+
+    const previewFile = new File(
+      [blob],
+      `${file.name.split(".")[0]}_preview.webp`,
+      {
+        type: "image/webp",
+      }
     );
+
+    return { file: previewFile, imageUrl };
+  } catch (error) {
+    console.error("generatePdfThumbnail: Error generating thumbnail", error);
     return null;
   }
 };
